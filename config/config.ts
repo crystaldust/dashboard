@@ -5,6 +5,7 @@ import { join } from 'path';
 import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
+import { memo } from 'react';
 
 const { REACT_APP_ENV } = process.env;
 
@@ -68,5 +69,17 @@ export default defineConfig({
   nodeModulesTransform: { type: 'none' },
   mfsu: {},
   webpack5: {},
+  // webpack5: false,
   exportStatic: {},
+  chainWebpack: (memo, { env, webpack, createCSSRule }) => {
+    memo.resolve.alias.set('foo', '/tmp/a/b/foo');
+    memo.resolve.set('fallback', {
+      request: require.resolve('browser-request'),
+      stream: require.resolve('stream-browserify'),
+      zlib: require.resolve('browserify-zlib'),
+      util: require.resolve('util'),
+      http: require.resolve('stream-http'),
+    });
+    // memo.resolve.alias.set('stream', require.resolve('stream-browserify'));
+  },
 });
