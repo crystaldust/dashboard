@@ -19,14 +19,22 @@
     ],
   },
   {
+    path: '/sql_platform',
+    name: 'lowcode', // TODO Add the name in i18n locales
+    icon: 'table',
+    component: './SQLTableList',
+  },
+
+  {
+    name: 'Welcome',
     path: '/welcome',
-    name: 'welcome',
     icon: 'smile',
     component: './Welcome',
   },
+
   {
     path: '/admin',
-    name: 'admin',
+    name: 'Admin',
     icon: 'crown',
     access: 'canAdmin',
     component: './Admin',
@@ -55,4 +63,11 @@
   {
     component: './404',
   },
+  // TODO Confirm why route after 404 can't be rendered and always driect to 404
+  // {
+  //   path: '/testc',
+  //   name: 'TestC',
+  //   icon: 'smile',
+  //   component: './JustTest',
+  // },
 ];

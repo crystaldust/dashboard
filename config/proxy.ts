@@ -16,6 +16,11 @@ export default {
       // 依赖 origin 的功能可能需要这个，比如 cookie
       changeOrigin: true,
     },
+    '/sql/transfer': {
+      target: 'http://192.168.8.20:8008', // A specific IP will work, but 'localhost' won't
+      secure: false,
+      logLevel: 'debug',
+    },
   },
   test: {
     '/api/': {
