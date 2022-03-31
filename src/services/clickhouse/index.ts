@@ -1,6 +1,20 @@
 import { request } from 'umi';
 import { extend } from 'umi-request';
 
+export async function runSql(sql: string) {
+  const result = await request('/clickhouse/sql', {
+    method: 'POST',
+    params: {
+      sql,
+    },
+  });
+
+  return {
+    data: result[0],
+    columns: result[1],
+  };
+}
+
 export async function getAllOwners() {
   const result = await request('/clickhouse/sql', {
     method: 'POST',
