@@ -5,25 +5,33 @@ import { Col, Collapse, Row } from 'antd';
 
 import DynamicDataTable, { parseTableData } from '@/pages/LowCodePlatform/DynamicDataTable';
 import SQLEditor from '@/pages/LowCodePlatform/SQLEditor';
+import { message } from 'antd';
 
 const { Panel } = Collapse;
 
 export default class Index extends React.Component<any, any> {
   constructor(props: any) {
     super(props);
+
+    // Table related state
     this.state = {
       tableColumns: [],
       tableData: [],
     };
 
-    this.sqlUpdate = this.sqlUpdate.bind(this);
+    // SQL Editor related callbacks
+    this.runSql = this.runSql.bind(this);
   }
 
-  sqlUpdate(newSql: string) {
-    runSql(newSql).then((result) => {
-      const tableResult = parseTableData(result);
-      this.setState({ ...tableResult });
-    });
+  runSql(sql: string) {
+    runSql(sql)
+      .then((result) => {
+        const tableResult = parseTableData(result);
+        this.setState({ ...tableResult });
+      })
+      .catch(() => {
+        message.error('Failed to execute SQL');
+      });
   }
 
   render() {
@@ -33,7 +41,7 @@ export default class Index extends React.Component<any, any> {
           <Col span={24}>
             <Collapse>
               <Panel header="SQL Editor" key="1">
-                <SQLEditor onSqlUpdate={this.sqlUpdate} />
+                <SQLEditor runSql={this.runSql} />
               </Panel>
             </Collapse>
           </Col>
