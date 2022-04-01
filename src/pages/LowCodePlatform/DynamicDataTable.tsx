@@ -43,7 +43,9 @@ export default class DynamicDataTable extends React.Component<any, any> {
   }
 
   handleRowClick(row: any) {
-    console.log('row clicked:', row);
+    if (this.props.rowClick) {
+      this.props.rowClick(row);
+    }
   }
 
   render() {

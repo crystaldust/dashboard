@@ -37,6 +37,32 @@ export async function getRepos(owner: string): Promise<string[]> {
   return result.map((item: string[]) => item[0]);
 }
 
+export async function getDeveloperActivities(
+  owner: string,
+  repo: string,
+  githubLogin: string,
+): Promise<CKData.Activity> {
+  const result = await request('/clickhouse/sql', {
+    method: 'POST',
+    params: {
+      sql: `SELECT * FROM activities WHERE owner = '${owner}' AND repo ='${repo}' AND github_login = '${githubLogin}'`,
+    },
+  });
+  const act = result[0][0]; // TODO Boundary checks
+  return {
+    owner: act[0],
+    repo: act[1],
+    githubId: act[2],
+    githubLogin: act[3],
+    knowledgeSharing: parseFloat(act[4].toFixed(2)),
+    codeContribution: parseFloat(act[5].toFixed(2)),
+    issueCoordination: parseFloat(act[6].toFixed(2)),
+    progressControl: parseFloat(act[7].toFixed(2)),
+    codeTweaking: parseFloat(act[8].toFixed(2)),
+    issueReporting: parseFloat(act[9].toFixed(2)),
+  };
+}
+
 export async function getActivities(owner: string, repo: string): Promise<CKData.Activity[]> {
   const result = await request('/clickhouse/sql', {
     method: 'POST',
