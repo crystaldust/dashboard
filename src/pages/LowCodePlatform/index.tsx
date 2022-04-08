@@ -12,6 +12,9 @@ const { Panel } = Collapse;
 
 import { Radar } from '@ant-design/plots';
 
+const DEFAULT_SQL =
+  "SELECT * FROM activities WHERE owner='kubernetes' AND repo='kubernetes' ORDER BY code_contribution DESC LIMIT 1000";
+
 export default class Index extends React.Component<any, any> {
   constructor(props: any) {
     super(props);
@@ -24,8 +27,11 @@ export default class Index extends React.Component<any, any> {
 
     // SQL Editor related callbacks
     this.runSql = this.runSql.bind(this);
-
+    // Table related callbacks
     this.tableRowClick = this.tableRowClick.bind(this);
+
+    // Run default SQL
+    this.runSql(DEFAULT_SQL);
   }
 
   runSql(sql: string) {
@@ -52,7 +58,7 @@ export default class Index extends React.Component<any, any> {
           <Col span={24}>
             <Collapse>
               <Panel header="SQL Editor" key="1">
-                <SQLEditor defaultCode={'SELECT * FROM activities LIMIT 10'} runSql={this.runSql} />
+                <SQLEditor defaultCode={DEFAULT_SQL} runSql={this.runSql} />
               </Panel>
             </Collapse>
           </Col>
