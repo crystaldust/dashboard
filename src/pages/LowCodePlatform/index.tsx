@@ -9,11 +9,11 @@ import Charts from '@/pages/LowCodePlatform/Charts';
 import { message } from 'antd';
 
 const { Panel } = Collapse;
-
+import { parseActivities } from '@/pages/LowCodePlatform/Charts';
 import { Radar } from '@ant-design/plots';
 
 const DEFAULT_SQL =
-  "SELECT * FROM activities WHERE owner='kubernetes' AND repo='kubernetes' ORDER BY code_contribution DESC LIMIT 1000";
+  "SELECT * FROM activities WHERE owner='kubernetes' AND repo='kubernetes' ORDER BY code_contribution DESC LIMIT 2";
 
 export default class Index extends React.Component<any, any> {
   constructor(props: any) {
@@ -38,17 +38,21 @@ export default class Index extends React.Component<any, any> {
     runSql(sql)
       .then((result) => {
         const tableResult = parseTableData(result);
+        // tableResult.tableData = parseActivities(tableResult.tableData);
         this.setState({ ...tableResult });
       })
-      .catch(() => {
+      .catch((e) => {
+        // TODO If there is more code logics after fetching sql, then the error might not be caused by running sql
         message.error('Failed to execute SQL');
       });
   }
 
   tableRowClick(row: object) {
-    getDeveloperActivities(row.owner, row.repo, row.github_login).then((activity) => {
-      this.setState({ chartData: activity });
-    });
+    if (row.owner && row.repo && row.github_login) {
+      getDeveloperActivities(row.owner, row.repo, row.github_login).then((activity) => {
+        this.setState({ chartData: activity });
+      });
+    }
   }
 
   render() {
