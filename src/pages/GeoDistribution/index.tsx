@@ -4,6 +4,7 @@ import { runSql } from '@/services/clickhouse';
 import OwnerRepoSelector from '@/pages/GeoDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Col, Collapse, Row } from 'antd';
+import { Pie } from '@ant-design/plots';
 
 const FETCH_DATA_SQL = `
 SELECT search_key__owner,search_key__repo,
@@ -40,6 +41,7 @@ export default class GeoDistribution extends React.Component<any, any> {
       repo: 'dpdk',
       dirData: [],
       ownerRepoMap: {},
+      emailDomainDist: [],
     };
 
     // this.fetchData = this.fetchData.bind(this);
@@ -184,6 +186,15 @@ group by search_key__owner, search_key__repo,
     `;
     runSql(getAlteredFileCountByEmailDomainSql).then((result) => {
       console.log('getAlteredFileCountByEmailDomainSql.data:', result.data);
+      const piechartData = result.data.map((item) => {
+        const emailDomain = item[3];
+        const fileCount = item[4];
+        return {
+          emailDomain: emailDomain,
+          value: fileCount,
+        };
+      });
+      this.setState({ emailDomainDist: piechartData });
     });
 
     const getAlterFileCountByGeoDist = `
@@ -230,7 +241,29 @@ order by alter_file_count desc
           </Col>
         </Row>
         <Row>
-          <SecondaryDir dirData={this.state.dirData} onDirSelect={this.onDirSelect} />
+          <Col span={12}>
+            <SecondaryDir dirData={this.state.dirData} onDirSelect={this.onDirSelect} />
+          </Col>
+          <Col span={12}>
+            <Pie
+              angleField={'value'}
+              colorField={'emailDomain'}
+              radius={0.9}
+              label={{
+                type: 'inner',
+                offset: '-30%',
+                content: ({ percent }) => `${(percent * 100).toFixed(0)}%`,
+                style: {
+                  fontSize: 14,
+                  textAlign: 'center',
+                },
+              }}
+              interactions={{
+                type: 'element-active',
+              }}
+              data={this.state.emailDomainDist}
+            />
+          </Col>
         </Row>
       </PageContainer>
     );
