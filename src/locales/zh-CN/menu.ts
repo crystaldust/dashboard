@@ -49,4 +49,7 @@ export default {
   'menu.editor.flow': '流程编辑器',
   'menu.editor.mind': '脑图编辑器',
   'menu.editor.koni': '拓扑编辑器',
+  'menu.lowCodePlatform': '低代码平台',
+  'menu.geoDist': '地理分布',
+  'menu.[removing]Low Code Viz(activity)': '[待删除]低代码平台（Activities）',
 };

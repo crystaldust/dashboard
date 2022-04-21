@@ -26,13 +26,13 @@
   },
   {
     path: '/low_code_platform',
-    name: 'Low Code Platform',
+    name: 'lowCodePlatform',
     icon: 'rocket',
     component: './LowCodePlatform',
   },
   {
     path: '/geo_distribution',
-    name: 'Geographic Distribution',
+    name: 'geoDist',
     icon: 'global',
     component: './GeoDistribution',
   },

@@ -49,4 +49,7 @@ export default {
   'menu.editor.flow': 'Flow Editor',
   'menu.editor.mind': 'Mind Editor',
   'menu.editor.koni': 'Koni Editor',
+  'menu.lowCodePlatform': 'Low Code Platform',
+  'menu.geoDist': 'Geographic Distribution',
+  'menu.[removing]Low Code Viz(activity)': '[Removing]Low Code Viz(Activities)',
 };

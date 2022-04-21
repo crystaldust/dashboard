@@ -3,28 +3,13 @@ import { Tree } from 'antd';
 
 const { DirectoryTree } = Tree;
 
-const treeData = [
-  {
-    title: 'parent 0',
-    key: '0-0',
-    children: [
-      { title: 'leaf 0-0', key: '0-0-0', isLeaf: false },
-      { title: 'leaf 0-1', key: '0-0-1', isLeaf: false },
-    ],
-  },
-  {
-    title: 'parent 1',
-    key: '0-1',
-    children: [
-      { title: 'leaf 1-0', key: '0-1-0', isLeaf: false },
-      { title: 'leaf 1-1', key: '0-1-1', isLeaf: false },
-    ],
-  },
-];
-
 export default class SecondaryDir extends React.Component<any, any> {
+  constructor(props) {
+    super(props);
+    this.onSelect = this.onSelect.bind(this);
+  }
+
   onSelect(keys: React.Key[], info: any) {
-    // console.log(keys, info);
     const selectedDirs = {};
     info.selectedNodes.forEach((node: object) => {
       if (node.hasOwnProperty('children')) {
@@ -36,7 +21,9 @@ export default class SecondaryDir extends React.Component<any, any> {
         selectedDirs[node.title] = true;
       }
     });
-    console.log('on select', keys, selectedDirs);
+    if (this.props.onDirSelect) {
+      this.props.onDirSelect(keys, selectedDirs);
+    }
   }
 
   onExpand() {
