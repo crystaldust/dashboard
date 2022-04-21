@@ -13,7 +13,8 @@ import { parseActivities } from '@/pages/LowCodePlatform/Charts';
 import { Radar } from '@ant-design/plots';
 
 const DEFAULT_SQL =
-  "SELECT * FROM activities WHERE owner='kubernetes' AND repo='kubernetes' ORDER BY code_contribution DESC LIMIT 2";
+  "SELECT * FROM activities WHERE owner='mysql' AND repo='mysql-server' ORDER BY code_contribution DESC LIMIT 100"
+  // "SELECT * FROM activities WHERE owner='kubernetes' AND repo='kubernetes' ORDER BY code_contribution DESC LIMIT 2";
 
 export default class Index extends React.Component<any, any> {
   constructor(props: any) {

@@ -12,6 +12,8 @@ if (process.env.CK_TRANS_SERVER) {
   DEV_CK_TRANS_SERVER = process.env.CK_TRANS_SERVER;
 }
 
+console.log('DEV_CK_TRANS_SERVER:', DEV_CK_TRANS_SERVER)
+
 export default {
   dev: {
     // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
@@ -24,6 +26,7 @@ export default {
     },
     '/clickhouse/sql': {
       target: DEV_CK_TRANS_SERVER,
+      pathRewrite: { '^/clickhouse/sql': '' },
     },
   },
   test: {

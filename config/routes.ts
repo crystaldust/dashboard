@@ -31,6 +31,12 @@
     component: './LowCodePlatform',
   },
   {
+    path: '/geo_distribution',
+    name: 'Geographic Distribution',
+    icon: 'global',
+    component: './GeoDistribution',
+  },
+  {
     path: '/backup_low_code_viz',
     name: '[removing]Low Code Viz(activity)',
     icon: 'warning',
