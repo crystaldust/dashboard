@@ -1,6 +1,6 @@
 import React, { createRef } from 'react';
 
-import { AutoComplete } from 'antd';
+import { Select } from 'antd';
 import { runSql } from '@/services/clickhouse';
 
 const UNIQ_OWNER_REPO_SQL = 'SELECT DISTINCT(search_key__owner , search_key__repo) FROM gits';
@@ -59,7 +59,8 @@ export default class OwnerRepoSelector extends React.Component<any, any> {
   render() {
     return (
       <span>
-        <AutoComplete
+        <Select
+          showSearch
           style={{ width: '200px' }}
           options={this.state.owners}
           placeholder={'Owner'}
@@ -67,8 +68,8 @@ export default class OwnerRepoSelector extends React.Component<any, any> {
           onSelect={this.onOwnerSelect}
           filterOption={this.autoCompleteFilter}
         />
-        <AutoComplete
-          ref={this.repoRef}
+        <Select
+          showSearch
           style={{ width: '200px' }}
           options={this.state.repos}
           placeholder={'Repo'}

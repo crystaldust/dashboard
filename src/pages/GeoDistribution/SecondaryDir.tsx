@@ -33,6 +33,7 @@ export default class SecondaryDir extends React.Component<any, any> {
   render() {
     return (
       <DirectoryTree
+        height={400}
         multiple
         defaultExpandAll
         onSelect={this.onSelect}

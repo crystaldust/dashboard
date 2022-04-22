@@ -5,34 +5,30 @@ import OwnerRepoSelector from '@/pages/GeoDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Col, Collapse, Row } from 'antd';
 import { Pie } from '@ant-design/plots';
+import EventProxy from '@dking/event-proxy';
 
-const FETCH_DATA_SQL = `
-SELECT search_key__owner,search_key__repo,
-                dir_level2
-                FROM (
-                    SELECT search_key__owner,
-                        search_key__repo,
-                        splitByChar('/', \`files.file_name\`)                as dir_list,
-                        arrayStringConcat(arraySlice(dir_list, 1, 2), '/') as dir_level2
-                     FROM gits
-                         array join \`files.file_name\`
-                        , \`files.insertions\`
-                        , \`files.deletions\`
-                        , \`files.lines\`
-                     WHERE if_merged = 0
-                       AND files.file_name not like '%=>%'
-                       AND length(dir_list) >= 3
-                       AND search_key__owner = '{0}'
-                       AND search_key__repo = '{1}'
+import {
+  alteredFileCountByRegionSql,
+  alteredFileCountDomainDistInSecondaryDirSql,
+  alteredFileCountRegionDistInSecondaryDirSql,
+  alteredFileCountSql,
+  alteredFileEmailDomainSql,
+  alteredFileTZSql,
+  commitsEmailDomainDistSql,
+  commitsRegionDistSql,
+  developerCountByRegionSql,
+  developerCountDomainDistInSecondaryDirSql,
+  developerCountRegionDistInSecondaryDirSql,
+  secondaryDirSql,
+} from './data';
 
-                )
-    GROUP BY search_key__owner, search_key__repo, dir_level2
-    ORDER BY dir_level2
-`;
+import { getIntl } from 'umi';
 
 export default class GeoDistribution extends React.Component<any, any> {
+  private intl: any;
   constructor(props) {
     super(props);
+    this.intl = getIntl();
     // TODO Steps:
     // 1. Get owner, repo list and construct the drop down list
     // 2. Given owner, repo, fetch secondary dirs and statistics
@@ -41,8 +37,12 @@ export default class GeoDistribution extends React.Component<any, any> {
       repo: 'dpdk',
       dirData: [],
       ownerRepoMap: {},
-      emailDomainDist: [],
-      timezoneDist: [],
+
+      regionCommitsDist: [],
+      emailDomainCommitsDist: [],
+
+      selectedDirsFileDeveloperData: [],
+      selectedDirDeveloperContributionData: [],
     };
 
     // this.fetchData = this.fetchData.bind(this);
@@ -88,6 +88,21 @@ export default class GeoDistribution extends React.Component<any, any> {
       }
       this.setState({ dirData: stateDirData });
     });
+    runSql(commitsRegionDistSql(owner, repo)).then((result) => {
+      console.log('commitsRegionDistSql', result.data);
+      const regionCommitsDist = result.data.map((item) => ({
+        region: item[2],
+        value: item[3],
+      }));
+      this.setState({ regionCommitsDist });
+    });
+    runSql(commitsEmailDomainDistSql(owner, repo)).then((result) => {
+      const emailDomainCommitsDist = result.data.map((item) => ({
+        domain: item[2],
+        value: item[3],
+      }));
+      this.setState({ emailDomainCommitsDist });
+    });
   }
 
   onDirSelect(keys, selectedDirs) {
@@ -102,32 +117,148 @@ export default class GeoDistribution extends React.Component<any, any> {
     const primaryDir = this.state.dirData[primaryIndex].title;
     const secondaryDir = this.state.dirData[primaryIndex].children[secondaryIndex].title;
     const fullDir = `${primaryDir}/${secondaryDir}`;
-
-    runSql(alteredFileCountSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
-      console.log('alter file count data:', result.data);
+    const owner = this.state.owner;
+    const repo = this.state.repo;
+    const ep = EventProxy.create();
+    ep.on(
+      ['regionFileCountStr', 'regionDeveloperStr', 'domainFileCountStr', 'domainDeveloperStr'],
+      (regionFileCountStr, regionDeveloperStr, domainFileCountStr, domainDeveloperStr) => {
+        console.log('all finished!');
+        console.log(regionFileCountStr);
+        console.log('------------------');
+        console.log(regionDeveloperStr);
+        console.log('------------------');
+        console.log(domainFileCountStr);
+        console.log('------------------');
+        console.log(domainDeveloperStr);
+        console.log('------------------');
+      },
+    );
+    runSql(alteredFileCountRegionDistInSecondaryDirSql(owner, repo, fullDir)).then((result) => {
+      let sortedFileCountStr = '';
+      result.data
+        .sort((a, b) => {
+          // a and b look like this:
+          // [
+          //     "envoyproxy",
+          //     "envoy",
+          //     "api/bazel",
+          //     "日韩",
+          //     8
+          // ]
+          return b[4] - a[4];
+        })
+        .forEach((fileCountObj) => {
+          sortedFileCountStr += `${fileCountObj[3]} : ${fileCountObj[4]}\n`;
+        });
+      ep.emit('regionFileCountStr', sortedFileCountStr);
     });
-
-    runSql(alteredFileEmailDomainSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
-      const piechartData = result.data.map((item) => {
-        const emailDomain = item[3];
-        const fileCount = item[4];
-        return {
-          emailDomain: emailDomain,
-          value: fileCount,
-        };
-      });
-      this.setState({ emailDomainDist: piechartData });
+    runSql(developerCountRegionDistInSecondaryDirSql(owner, repo, fullDir)).then((result) => {
+      let sortedDeveloperRegionStr = '';
+      result.data
+        .sort((a, b) => {
+          // a and b look like this:
+          // [
+          //     "envoyproxy",
+          //     "envoy",
+          //     "api/bazel",
+          //     "日韩",
+          //     8
+          // ]
+          return b[4] - a[4];
+        })
+        .forEach((developerCountObj) => {
+          sortedDeveloperRegionStr += `${developerCountObj[3]} : ${developerCountObj[4]}\n`;
+        });
+      ep.emit('regionDeveloperStr', sortedDeveloperRegionStr);
     });
-
-    runSql(alteredFileTZSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
-      const timezoneDist = result.data.map((item) => {
-        return {
-          timezone: item[3],
-          value: item[4],
-        };
-      });
-      this.setState({ timezoneDist });
+    runSql(alteredFileCountDomainDistInSecondaryDirSql(owner, repo, fullDir)).then((result) => {
+      let sortedFileCountStr = '';
+      result.data
+        .sort((a, b) => {
+          // a and b look like this:
+          // [
+          //     "envoyproxy",
+          //     "envoy",
+          //     "api/bazel",
+          //     "gmail.com",
+          //     8
+          // ]
+          return b[4] - a[4];
+        })
+        .forEach((fileCountObj) => {
+          sortedFileCountStr += `${fileCountObj[3]} : ${fileCountObj[4]}\n`;
+        });
+      ep.emit('domainFileCountStr', sortedFileCountStr);
     });
+    runSql(developerCountDomainDistInSecondaryDirSql(owner, repo, fullDir)).then((result) => {
+      let sortedDeveloperCountStr = '';
+      result.data
+        .sort((a, b) => {
+          // a and b look like this:
+          // [
+          //     "envoyproxy",
+          //     "envoy",
+          //     "api/bazel",
+          //     "gmail.com",
+          //     8
+          // ]
+          return b[4] - a[4];
+        })
+        .forEach((developerCountObj) => {
+          sortedDeveloperCountStr += `${developerCountObj[3]} : ${developerCountObj[4]}\n`;
+        });
+      ep.emit('domainDeveloperStr', sortedDeveloperCountStr);
+    });
+    // runSql(alteredFileCountSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
+    //   console.log('alter file count data:', result.data);
+    // });
+
+    // runSql(alteredFileEmailDomainSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
+    //   const piechartData = result.data.map((item) => {
+    //     const emailDomain = item[3];
+    //     const fileCount = item[4];
+    //     return {
+    //       emailDomain: emailDomain,
+    //       value: fileCount,
+    //     };
+    //   });
+    //   this.setState({ emailDomainDist: piechartData });
+    // });
+
+    // runSql(alteredFileTZSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
+    //   const timezoneDist = result.data.map((item) => {
+    //     return {
+    //       timezone: item[3],
+    //       value: item[4],
+    //     };
+    //   });
+    //   this.setState({ timezoneDist });
+    // });
+
+    // runSql(alteredFileCountByRegionSql(this.state.owner, this.state.repo, fullDir)).then(
+    //   (result) => {
+    //     console.log(result.data);
+    //     console.log(result.columns);
+    //     const regionFileCountDist = result.data.map((item) => {
+    //       return {
+    //         region: item[3],
+    //         value: item[4],
+    //       };
+    //     });
+    //     this.setState({ regionFileCountDist });
+    //   },
+    // );
+    //
+    // runSql(developerCountByRegionSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
+    //   console.log('developerCountByRegion:', result.data);
+    //   const regionDeveloperCountDist = result.data.map((item) => ({
+    //     region: item[3],
+    //     value: item[4],
+    //   }));
+    //
+    //   this.setState({ regionDeveloperCountDist });
+    // });
   }
 
   render() {
@@ -139,49 +270,40 @@ export default class GeoDistribution extends React.Component<any, any> {
           </Col>
         </Row>
         <Row>
-          <Col span={8}>
+          <Col span={6}>
             <SecondaryDir dirData={this.state.dirData} onDirSelect={this.onDirSelect} />
           </Col>
-          <Col span={8}>
-            <div>{this.state.emailDomainDist.length ? 'Email Domain Distribution' : ''}</div>
+          <Col span={6}>
+            <div>
+              {this.state.regionCommitsDist.length
+                ? this.intl.formatMessage({ id: 'geodist.commitsRegionDist' })
+                : ''}
+            </div>
             <Pie
               angleField={'value'}
-              colorField={'emailDomain'}
-              radius={0.9}
+              colorField={'region'}
+              data={this.state.regionCommitsDist}
               label={{
                 type: 'inner',
-                offset: '-30%',
-                content: ({ percent }) => `${(percent * 100).toFixed(0)}%`,
-                style: {
-                  fontSize: 14,
-                  textAlign: 'center',
-                },
               }}
-              interactions={{
-                type: 'element-active',
-              }}
-              data={this.state.emailDomainDist}
+              radius={0.9}
             />
           </Col>
-          <Col span={8}>
-            <div>{this.state.timezoneDist.length ? 'Timezone Distribution' : ''}</div>
+
+          <Col span={6}>
+            <div>
+              {this.state.emailDomainCommitsDist.length
+                ? this.intl.formatMessage({ id: 'geodist.commitsEmailDomainDist' })
+                : ''}
+            </div>
             <Pie
               angleField={'value'}
-              colorField={'timezone'}
-              radius={0.9}
+              colorField={'domain'}
+              data={this.state.emailDomainCommitsDist}
               label={{
-                type: 'outer',
-                // offset: '-30%',
-                // content: ({ percent }) => `${(percent * 100).toFixed(0)}%`,
-                // style: {
-                //   fontSize: 14,
-                //   textAlign: 'center',
-                // },
+                type: 'inner',
               }}
-              interactions={{
-                type: 'element-active',
-              }}
-              data={this.state.timezoneDist}
+              radius={0.9}
             />
           </Col>
         </Row>
