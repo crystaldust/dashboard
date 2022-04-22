@@ -42,6 +42,7 @@ export default class GeoDistribution extends React.Component<any, any> {
       dirData: [],
       ownerRepoMap: {},
       emailDomainDist: [],
+      timezoneDist: [],
     };
 
     // this.fetchData = this.fetchData.bind(this);
@@ -52,30 +53,8 @@ export default class GeoDistribution extends React.Component<any, any> {
 
   ownerRepoSelected(owner: string, repo: string) {
     this.setState({ owner, repo });
-    const getSecondaryDirsSql = `
-      SELECT search_key__owner,search_key__repo, dir_level2
-      FROM (
-          SELECT search_key__owner,
-              search_key__repo,
-              splitByChar('/', \`files.file_name\`)                as dir_list,
-              arrayStringConcat(arraySlice(dir_list, 1, 2), '/') as dir_level2
-           FROM gits
-               array join \`files.file_name\`
-              , \`files.insertions\`
-              , \`files.deletions\`
-              , \`files.lines\`
-           WHERE if_merged = 0
-             AND files.file_name not like '%=>%'
-             AND length(dir_list) >= 3
-             AND search_key__owner = '${owner}'
-             AND search_key__repo = '${repo}'
 
-      )
-      GROUP BY search_key__owner, search_key__repo, dir_level2
-      ORDER BY dir_level2
-    `;
-
-    runSql(getSecondaryDirsSql).then((data: { columns: any; data: any }) => {
+    runSql(secondaryDirSql(owner, repo)).then((data: { columns: any; data: any }) => {
       const allDirPaths = data.data.map((item: string[]) => item[2]);
       const dirData: object = {};
       allDirPaths.forEach((path: string) => {
@@ -124,68 +103,11 @@ export default class GeoDistribution extends React.Component<any, any> {
     const secondaryDir = this.state.dirData[primaryIndex].children[secondaryIndex].title;
     const fullDir = `${primaryDir}/${secondaryDir}`;
 
-    const getAlteredFileCountSql = `
-    SELECT search_key__owner,
-       search_key__repo,
-       dir_level2,
-       COUNT() alter_file_count
-FROM (
-         SELECT search_key__owner,
-                search_key__repo,
-                author_email,
-                author_tz,
-                \`files.file_name\`,
-                \`files.insertions\`,
-                \`files.deletions\`,
-                \`files.lines\`,
-                splitByChar('/', \`files.file_name\`)                as dir_list,
-                arrayStringConcat(arraySlice(dir_list, 1, 2), '/') as dir_level2
-         FROM gits
-             ARRAY JOIN \`files.file_name\`
-            , \`files.insertions\`
-            , \`files.deletions\`
-            , \`files.lines\`
-         WHERE dir_level2 = '${fullDir}'
-           AND search_key__owner = '${this.state.owner}'
-           AND search_key__repo = '${this.state.repo}'
-         )
-GROUP BY search_key__owner, search_key__repo, dir_level2
-    `;
-    runSql(getAlteredFileCountSql).then((result) => {
+    runSql(alteredFileCountSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
       console.log('alter file count data:', result.data);
     });
 
-    const getAlteredFileCountByEmailDomainSql = `
-    select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    email_domain,
-    COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        splitByChar('@',\`author_email\`)[2] as email_domain,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where dir_level2 = '${fullDir}'
-        and search_key__owner = '${this.state.owner}'
-        and search_key__repo = '${this.state.repo}'
-)
-group by search_key__owner, search_key__repo,
-    dir_level2,email_domain ORDER by alter_file_count desc limit 20
-    `;
-    runSql(getAlteredFileCountByEmailDomainSql).then((result) => {
-      console.log('getAlteredFileCountByEmailDomainSql.data:', result.data);
+    runSql(alteredFileEmailDomainSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
       const piechartData = result.data.map((item) => {
         const emailDomain = item[3];
         const fileCount = item[4];
@@ -197,38 +119,14 @@ group by search_key__owner, search_key__repo,
       this.setState({ emailDomainDist: piechartData });
     });
 
-    const getAlterFileCountByGeoDist = `
-    select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    author_tz,
-    COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where dir_level2 = '${fullDir}'
-        and search_key__owner = '${this.state.repo}'
-        and search_key__repo = '${this.state.owner}'
-)
-group by search_key__owner, search_key__repo,
-    dir_level2,author_tz
-order by alter_file_count desc
-    `;
-    runSql(getAlterFileCountByGeoDist).then((result) => {
-      console.log('getAlterFileCountByGeoDist.data:', result.data);
+    runSql(alteredFileTZSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
+      const timezoneDist = result.data.map((item) => {
+        return {
+          timezone: item[3],
+          value: item[4],
+        };
+      });
+      this.setState({ timezoneDist });
     });
   }
 
@@ -241,10 +139,11 @@ order by alter_file_count desc
           </Col>
         </Row>
         <Row>
-          <Col span={12}>
+          <Col span={8}>
             <SecondaryDir dirData={this.state.dirData} onDirSelect={this.onDirSelect} />
           </Col>
-          <Col span={12}>
+          <Col span={8}>
+            <div>{this.state.emailDomainDist.length ? 'Email Domain Distribution' : ''}</div>
             <Pie
               angleField={'value'}
               colorField={'emailDomain'}
@@ -262,6 +161,27 @@ order by alter_file_count desc
                 type: 'element-active',
               }}
               data={this.state.emailDomainDist}
+            />
+          </Col>
+          <Col span={8}>
+            <div>{this.state.timezoneDist.length ? 'Timezone Distribution' : ''}</div>
+            <Pie
+              angleField={'value'}
+              colorField={'timezone'}
+              radius={0.9}
+              label={{
+                type: 'outer',
+                // offset: '-30%',
+                // content: ({ percent }) => `${(percent * 100).toFixed(0)}%`,
+                // style: {
+                //   fontSize: 14,
+                //   textAlign: 'center',
+                // },
+              }}
+              interactions={{
+                type: 'element-active',
+              }}
+              data={this.state.timezoneDist}
             />
           </Col>
         </Row>
