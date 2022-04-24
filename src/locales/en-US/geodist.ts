@@ -11,4 +11,10 @@ export default {
   'geodist.developerContribInSecondaryDirTable.colname.developerEmail': 'Developer Email',
   'geodist.developerContribInSecondaryDirTable.colname.fileCount': 'Altered File Count',
   'geodist.developerContribInSecondaryDirTable.colname.tzDist': 'Timezone Distribution',
+
+  'geodist.developerInfoTable.colname.owner': 'Owner',
+  'geodist.developerInfoTable.colname.repo': 'Repo',
+  'geodist.developerInfoTable.colname.email': 'Email',
+  'geodist.developerInfoTable.colname.githubProfile': 'GitHub Profile',
+  'geodist.developerInfoTable.colname.contribTzDist': 'Contribution Timezone Distribution',
 };

@@ -1243,5 +1243,45 @@ from (select search_key__owner,
             group by search_key__owner, search_key__repo, author_email, author_tz
             order by alter_files_count desc))
 group by search_key__owner,search_key__repo,author_email
+order by alter_files_count desc
 `;
+}
+
+// 给定email，查找该开发者的GitHub Profile
+export function developerGitHubProfileSql(email) {
+  return `
+   select *
+ from github_profile
+ where id != 0
+   and id = (select distinct author__id
+             from github_commits
+             where commit__author__email = '${email}'
+               and author__id != 0)
+order by search_key__updated_at desc limit 1`;
+}
+
+// 给定（owner，repo，email），给出该开发者在项目中的代码提交时区分布
+export function developerContribInRepoSql(owner, repo, email) {
+  return `
+select search_key__owner,search_key__repo,author_email,groupArray(tz_distribution) from (select search_key__owner,
+       search_key__repo,
+       author_email,
+       author_tz,
+       count() as counts,
+        map(author_tz,counts) as tz_distribution
+       from(
+           select search_key__owner,
+               search_key__repo,
+               author_email,
+               author_tz
+           from gits
+           where search_key__owner = '${owner}'
+              and search_key__repo = '${repo}'
+              and author_email = '${email}'
+           )
+group by search_key__owner,
+         search_key__repo,
+         author_email,
+         author_tz order by counts desc)
+group by search_key__owner,search_key__repo,author_email`;
 }

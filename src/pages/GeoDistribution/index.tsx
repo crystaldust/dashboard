@@ -11,8 +11,11 @@ import {
   alteredFileCountRegionDistInSecondaryDirSql,
   commitsEmailDomainDistSql,
   commitsRegionDistSql,
+  developerContribInRepoSql,
   developerCountDomainDistInSecondaryDirSql,
   developerCountRegionDistInSecondaryDirSql,
+  developerGitHubProfileCompoundSql,
+  developerGitHubProfileSql,
   developersContribInSecondaryDirSql,
   secondaryDirSql,
 } from './data';
@@ -24,14 +27,14 @@ const { Column, ColumnGroup } = Table;
 const intl = getIntl();
 
 function secondaryDirTableCellRender(cellData, rowData, index) {
-  const secondaryDir = rowData.secondaryDir;
   const numItems: integer = cellData.length; // TODO If numItems is not a big number, return a <div>
   return cellData.map((regionInfo, index) => {
     const region = regionInfo[3];
     const data = regionInfo[4];
     const line = `${region}: ${data}`;
-    const key = `${secondaryDir}-${region}`;
-
+    const key = `${rowData.secondaryDir}-${region}-${line}`;
+    // TODO It's super weried that JS always complain 'each children in list should have uniq key'
+    // TODO while it's really 'uniq' enough
     return (
       // <div key={key}>
       <Tag key={key} color={'volcano'}>
@@ -68,7 +71,12 @@ const SECONDARY_DIR_TABLE_COLS = [
     render: secondaryDirTableCellRender,
   },
 ];
+
 const DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS = [
+  {
+    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.secondaryDir' }),
+    dataIndex: 'secondaryDir',
+  },
   {
     title: intl.formatMessage({
       id: 'geodist.developerContribInSecondaryDirTable.colname.developerEmail',
@@ -100,6 +108,64 @@ const DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS = [
   },
 ];
 
+// 'geodist.developerInfoTable.colname.owner': 'Owner',
+//   'geodist.developerInfoTable.colname.repo': 'Repo',
+//   'geodist.developerInfoTable.colname.email': '邮箱',
+//   'geodist.developerInfoTable.colname.githubProfile': 'GitHub个人信息',
+//   'geodist.developerInfoTable.colname.contribTzDist': '代码贡献时区分布',
+//
+// owner: contribTzDist.owner,
+//   repo: contribTzDist.repo,
+//   email: contribTzDist.email,
+//   githubProfile,
+//   dist: contribTzDist.dist,
+const DEVELOPER_INFO_COLS = [
+  {
+    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.owner' }),
+    dataIndex: 'owner',
+  },
+  {
+    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.repo' }),
+    dataIndex: 'repo',
+  },
+  {
+    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.email' }),
+    dataIndex: 'email',
+  },
+  {
+    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.githubProfile' }),
+    dataIndex: 'githubProfile',
+    render: (profile) => {
+      return (
+        <div>
+          <img src={profile.avatarUrl} width={100} height={100} />
+          <div>{profile.name}</div>
+          <a href={profile.htmlUrl} target={'_blank'}>
+            @{profile.login}
+          </a>
+        </div>
+      );
+    },
+  },
+  {
+    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.contribTzDist' }),
+    dataIndex: 'dist',
+    render: (dist) => {
+      return dist.map((item) => {
+        for (const tz in item) {
+          const count = item[tz];
+          const tzStr = parseInt(tz) > 0 ? `+${tz}` : tz;
+          const content = `${tzStr}: ${count}`;
+          return (
+            <div key={Math.random()}>
+              <Tag key={Math.random()}>{content}</Tag>
+            </div>
+          );
+        }
+      });
+    },
+  },
+];
 export default class GeoDistribution extends React.Component<any, any> {
   constructor(props) {
     super(props);
@@ -125,6 +191,7 @@ export default class GeoDistribution extends React.Component<any, any> {
 
     this.ownerRepoSelected = this.ownerRepoSelected.bind(this);
     this.onDirSelect = this.onDirSelect.bind(this);
+    this.onDeveloperRowClicked = this.onDeveloperRowClicked.bind(this);
   }
 
   ownerRepoSelected(owner: string, repo: string) {
@@ -295,6 +362,7 @@ export default class GeoDistribution extends React.Component<any, any> {
     runSql(developersContribInSecondaryDirSql(owner, repo, secondaryDir)).then((result) => {
       const developerContribInSecondaryDirData = result.data.map((item) => {
         return {
+          secondaryDir: secondaryDir,
           developerEmail: item[2],
           fileCount: item[3],
           tzDist: item[4],
@@ -305,7 +373,49 @@ export default class GeoDistribution extends React.Component<any, any> {
   }
 
   onDeveloperRowClicked(row: object) {
-    console.log('developer row:', row);
+    const owner = this.state.owner;
+    const repo = this.state.repo;
+    const email = row.developerEmail;
+    const ep = EventProxy.create();
+    ep.on(['githubProfileReady', 'contribTzDistReady'], (githubProfile, contribTzDist) => {
+      const developerInfoData = [
+        {
+          owner: contribTzDist.owner,
+          repo: contribTzDist.repo,
+          email: contribTzDist.email,
+          githubProfile,
+          dist: contribTzDist.dist,
+        },
+      ];
+      this.setState({
+        developerInfoData,
+      });
+    });
+    runSql(developerGitHubProfileSql(email)).then((result) => {
+      let profile = null;
+      if (result.data.length) {
+        const profileData = result.data[0];
+        // profile = profileData;
+        profile = {
+          id: profileData[2],
+          login: profileData[1],
+          name: profileData[19],
+          avatarUrl: profileData[4],
+          htmlUrl: profileData[7],
+        };
+      }
+      ep.emit('githubProfileReady', profile);
+    });
+    runSql(developerContribInRepoSql(owner, repo, email)).then((result) => {
+      const distData = result.data[0];
+      const contribTzDist = {
+        owner: distData[0],
+        repo: distData[1],
+        email: distData[2],
+        dist: distData[3],
+      };
+      ep.emit('contribTzDistReady', contribTzDist);
+    });
   }
 
   render() {
@@ -385,6 +495,24 @@ export default class GeoDistribution extends React.Component<any, any> {
                     },
                   };
                 }}
+              />
+            )}
+          </Col>
+        </Row>
+
+        <Row>
+          <Col span={24}>
+            {!!this.state.developerInfoData && (
+              <Table
+                columns={DEVELOPER_INFO_COLS}
+                dataSource={this.state.developerInfoData}
+                // onRow={(row) => {
+                //   return {
+                //     onClick: () => {
+                //       this.onDeveloperRowClicked(row);
+                //     },
+                //   };
+                // }}
               />
             )}
           </Col>

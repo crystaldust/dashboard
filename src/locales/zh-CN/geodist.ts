@@ -11,4 +11,10 @@ export default {
   'geodist.developerContribInSecondaryDirTable.colname.developerEmail': '开发者邮箱',
   'geodist.developerContribInSecondaryDirTable.colname.fileCount': '修改文件数量',
   'geodist.developerContribInSecondaryDirTable.colname.tzDist': '时区分布',
+
+  'geodist.developerInfoTable.colname.owner': 'Owner',
+  'geodist.developerInfoTable.colname.repo': 'Repo',
+  'geodist.developerInfoTable.colname.email': '邮箱',
+  'geodist.developerInfoTable.colname.githubProfile': 'GitHub个人信息',
+  'geodist.developerInfoTable.colname.contribTzDist': '代码贡献时区分布',
 };
