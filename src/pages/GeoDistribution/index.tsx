@@ -136,6 +136,9 @@ const DEVELOPER_INFO_COLS = [
     title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.githubProfile' }),
     dataIndex: 'githubProfile',
     render: (profile) => {
+      if (!profile) {
+        return <div>No GitHub Profile found</div>;
+      }
       return (
         <div>
           <img src={profile.avatarUrl} width={100} height={100} />
@@ -187,6 +190,8 @@ export default class GeoDistribution extends React.Component<any, any> {
       secondaryDirsTableData: [],
 
       developerContribInSecondaryDirData: [],
+
+      developerInfoData: [],
     };
 
     this.ownerRepoSelected = this.ownerRepoSelected.bind(this);
@@ -196,6 +201,12 @@ export default class GeoDistribution extends React.Component<any, any> {
 
   ownerRepoSelected(owner: string, repo: string) {
     this.setState({ owner, repo });
+
+    this.setState({
+      secondaryDirsTableData: [],
+      developerContribInSecondaryDirData: [],
+      developerInfoData: [],
+    });
 
     runSql(secondaryDirSql(owner, repo)).then((data: { columns: any; data: any }) => {
       const allDirPaths = data.data.map((item: string[]) => item[2]);
@@ -248,6 +259,14 @@ export default class GeoDistribution extends React.Component<any, any> {
   }
 
   onDirSelect(keys, selectedDirs) {
+    this.setState({
+      // Since secondaryDirsTableData will be update, don't change the state too frequently
+      // Or the web page will have great performance side effect
+      // secondaryDirsTableData: [],
+      developerContribInSecondaryDirData: [],
+      developerInfoData: [],
+    });
+
     const owner = this.state.owner;
     const repo = this.state.repo;
     const secondaryDirs = keys
@@ -356,6 +375,12 @@ export default class GeoDistribution extends React.Component<any, any> {
   }
 
   onSecondaryDirRowClicked(row: any) {
+    this.setState({
+      // Since developerContribInSecondaryDirData will be update, don't change the state too frequently
+      // Or the web page will have great performance side effect
+      // developerContribInSecondaryDirData: [],
+      developerInfoData: [],
+    });
     const owner = this.state.owner;
     const repo = this.state.repo;
     const secondaryDir = row.secondaryDir;
@@ -501,7 +526,7 @@ export default class GeoDistribution extends React.Component<any, any> {
 
         <Row>
           <Col span={24}>
-            {!!this.state.developerInfoData && (
+            {!!this.state.developerInfoData.length && (
               <Table
                 columns={DEVELOPER_INFO_COLS}
                 dataSource={this.state.developerInfoData}
