@@ -1210,3 +1210,38 @@ group by search_key__owner, search_key__repo,
     dir_level2,email_domain
 order by contributor_count desc ;`;
 }
+
+// 给定（owner，repo，二级目录），给出该二级目录中，开发者email，提交量，个人提交时区数量
+export function developersContribInSecondaryDirSql(owner, repo, dir) {
+  return `
+  select search_key__owner,search_key__repo,author_email,sum(alter_files_count) alter_files_count,groupArray(a) as tz_distribution
+from (select search_key__owner,
+             search_key__repo,
+             author_email,
+             alter_files_count,
+             map(author_tz, alter_files_count) as a
+      from (select search_key__owner, search_key__repo, author_email, author_tz, count() alter_files_count
+            from (select search_key__owner,
+                         search_key__repo,
+                         author_email,
+                         author_tz,
+                         \`files.file_name\`,
+                         \`files.insertions\`,
+                         \`files.deletions\`,
+                         \`files.lines\`,
+                         splitByChar('/', \`files.file_name\`)                as dir_list,
+                         arrayStringConcat(arraySlice(dir_list, 1, 2), '/') as dir_level2
+                  from gits
+                      array join \`files.file_name\`
+                     , \`files.insertions\`
+                     , \`files.deletions\`
+                     , \`files.lines\`
+                  where dir_level2 GLOBAL in ('${dir}')
+                    and search_key__owner = '${owner}'
+                    and search_key__repo = '${repo}'
+                    and author_email != '')
+            group by search_key__owner, search_key__repo, author_email, author_tz
+            order by alter_files_count desc))
+group by search_key__owner,search_key__repo,author_email
+`;
+}

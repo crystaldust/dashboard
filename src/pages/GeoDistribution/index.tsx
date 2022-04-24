@@ -13,6 +13,7 @@ import {
   commitsRegionDistSql,
   developerCountDomainDistInSecondaryDirSql,
   developerCountRegionDistInSecondaryDirSql,
+  developersContribInSecondaryDirSql,
   secondaryDirSql,
 } from './data';
 
@@ -67,6 +68,37 @@ const SECONDARY_DIR_TABLE_COLS = [
     render: secondaryDirTableCellRender,
   },
 ];
+const DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS = [
+  {
+    title: intl.formatMessage({
+      id: 'geodist.developerContribInSecondaryDirTable.colname.developerEmail',
+    }),
+    dataIndex: 'developerEmail',
+  },
+  {
+    title: intl.formatMessage({
+      id: 'geodist.developerContribInSecondaryDirTable.colname.fileCount',
+    }),
+    dataIndex: 'fileCount',
+  },
+  {
+    title: intl.formatMessage({ id: 'geodist.developerContribInSecondaryDirTable.colname.tzDist' }),
+    dataIndex: 'tzDist',
+    render: (cellData) => {
+      return cellData.map((item) => {
+        for (const tz in item) {
+          const count = item[tz];
+          let key = tz;
+          if (parseInt(tz) > 0) {
+            key = `+${tz}`;
+          }
+          const content = `${key}: ${count}`;
+          return <Tag key={key}>{content}</Tag>;
+        }
+      });
+    },
+  },
+];
 
 export default class GeoDistribution extends React.Component<any, any> {
   constructor(props) {
@@ -87,6 +119,8 @@ export default class GeoDistribution extends React.Component<any, any> {
       selectedDirDeveloperContributionData: [],
 
       secondaryDirsTableData: [],
+
+      developerContribInSecondaryDirData: [],
     };
 
     this.ownerRepoSelected = this.ownerRepoSelected.bind(this);
@@ -254,6 +288,26 @@ export default class GeoDistribution extends React.Component<any, any> {
     });
   }
 
+  onSecondaryDirRowClicked(row: any) {
+    const owner = this.state.owner;
+    const repo = this.state.repo;
+    const secondaryDir = row.secondaryDir;
+    runSql(developersContribInSecondaryDirSql(owner, repo, secondaryDir)).then((result) => {
+      const developerContribInSecondaryDirData = result.data.map((item) => {
+        return {
+          developerEmail: item[2],
+          fileCount: item[3],
+          tzDist: item[4],
+        };
+      });
+      this.setState({ developerContribInSecondaryDirData });
+    });
+  }
+
+  onDeveloperRowClicked(row: object) {
+    console.log('developer row:', row);
+  }
+
   render() {
     return (
       <PageContainer>
@@ -306,6 +360,31 @@ export default class GeoDistribution extends React.Component<any, any> {
               <Table
                 columns={SECONDARY_DIR_TABLE_COLS}
                 dataSource={this.state.secondaryDirsTableData}
+                onRow={(row) => {
+                  return {
+                    onClick: () => {
+                      this.onSecondaryDirRowClicked(row);
+                    },
+                  };
+                }}
+              />
+            )}
+          </Col>
+        </Row>
+
+        <Row>
+          <Col span={24}>
+            {!!this.state.developerContribInSecondaryDirData.length && (
+              <Table
+                columns={DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS}
+                dataSource={this.state.developerContribInSecondaryDirData}
+                onRow={(row) => {
+                  return {
+                    onClick: () => {
+                      this.onDeveloperRowClicked(row);
+                    },
+                  };
+                }}
               />
             )}
           </Col>
