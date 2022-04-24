@@ -139,7 +139,7 @@ const DEVELOPER_INFO_COLS = [
       return (
         <div>
           <img src={profile.avatarUrl} width={100} height={100} />
-          <div>{profile.name}</div>
+          <div>{profile.name != '' ? profile.name : profile.login}</div>
           <a href={profile.htmlUrl} target={'_blank'}>
             @{profile.login}
           </a>
@@ -395,7 +395,6 @@ export default class GeoDistribution extends React.Component<any, any> {
       let profile = null;
       if (result.data.length) {
         const profileData = result.data[0];
-        // profile = profileData;
         profile = {
           id: profileData[2],
           login: profileData[1],
