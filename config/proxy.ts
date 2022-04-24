@@ -8,6 +8,7 @@
  */
 
 let DEV_CK_TRANS_SERVER = 'http://localhost:8000';
+// Keep in mind that the proxy's url should take IP but not 'localhost'
 if (process.env.CK_TRANS_SERVER) {
   DEV_CK_TRANS_SERVER = process.env.CK_TRANS_SERVER;
 }
@@ -26,6 +27,7 @@ export default {
     },
     '/clickhouse/sql': {
       target: DEV_CK_TRANS_SERVER,
+      changeOrign: true,
       pathRewrite: { '^/clickhouse/sql': '' },
     },
   },
