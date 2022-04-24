@@ -3,20 +3,14 @@ import SecondaryDir from '@/pages/GeoDistribution/SecondaryDir';
 import { runSql } from '@/services/clickhouse';
 import OwnerRepoSelector from '@/pages/GeoDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Col, Collapse, Row } from 'antd';
+import { Col, Row, Table, Tag } from 'antd';
 import { Pie } from '@ant-design/plots';
 import EventProxy from '@dking/event-proxy';
-
 import {
-  alteredFileCountByRegionSql,
   alteredFileCountDomainDistInSecondaryDirSql,
   alteredFileCountRegionDistInSecondaryDirSql,
-  alteredFileCountSql,
-  alteredFileEmailDomainSql,
-  alteredFileTZSql,
   commitsEmailDomainDistSql,
   commitsRegionDistSql,
-  developerCountByRegionSql,
   developerCountDomainDistInSecondaryDirSql,
   developerCountRegionDistInSecondaryDirSql,
   secondaryDirSql,
@@ -24,11 +18,59 @@ import {
 
 import { getIntl } from 'umi';
 
+const { Column, ColumnGroup } = Table;
+
+const intl = getIntl();
+
+function secondaryDirTableCellRender(cellData, rowData, index) {
+  const secondaryDir = rowData.secondaryDir;
+  const numItems: integer = cellData.length; // TODO If numItems is not a big number, return a <div>
+  return cellData.map((regionInfo, index) => {
+    const region = regionInfo[3];
+    const data = regionInfo[4];
+    const line = `${region}: ${data}`;
+    const key = `${secondaryDir}-${region}`;
+
+    return (
+      // <div key={key}>
+      <Tag key={key} color={'volcano'}>
+        {line}
+      </Tag>
+      // </div>
+    );
+  });
+}
+
+const SECONDARY_DIR_TABLE_COLS = [
+  {
+    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.secondaryDir' }),
+    dataIndex: 'secondaryDir',
+  },
+  {
+    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.fileRegionDist' }),
+    dataIndex: 'fileRegionDist',
+    render: secondaryDirTableCellRender,
+  },
+  {
+    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.fileEmailDist' }),
+    dataIndex: 'fileEmailDist',
+    render: secondaryDirTableCellRender,
+  },
+  {
+    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.developerRegionDist' }),
+    dataIndex: 'developerRegionDist',
+    render: secondaryDirTableCellRender,
+  },
+  {
+    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.developerEmailDist' }),
+    dataIndex: 'developerEmailDist',
+    render: secondaryDirTableCellRender,
+  },
+];
+
 export default class GeoDistribution extends React.Component<any, any> {
-  private intl: any;
   constructor(props) {
     super(props);
-    this.intl = getIntl();
     // TODO Steps:
     // 1. Get owner, repo list and construct the drop down list
     // 2. Given owner, repo, fetch secondary dirs and statistics
@@ -43,10 +85,10 @@ export default class GeoDistribution extends React.Component<any, any> {
 
       selectedDirsFileDeveloperData: [],
       selectedDirDeveloperContributionData: [],
+
+      secondaryDirsTableData: [],
     };
 
-    // this.fetchData = this.fetchData.bind(this);
-    // this.fetchData();
     this.ownerRepoSelected = this.ownerRepoSelected.bind(this);
     this.onDirSelect = this.onDirSelect.bind(this);
   }
@@ -89,7 +131,6 @@ export default class GeoDistribution extends React.Component<any, any> {
       this.setState({ dirData: stateDirData });
     });
     runSql(commitsRegionDistSql(owner, repo)).then((result) => {
-      console.log('commitsRegionDistSql', result.data);
       const regionCommitsDist = result.data.map((item) => ({
         region: item[2],
         value: item[3],
@@ -106,159 +147,111 @@ export default class GeoDistribution extends React.Component<any, any> {
   }
 
   onDirSelect(keys, selectedDirs) {
-    const firstKey = keys[0];
-    if (firstKey.indexOf('-') == -1) {
+    const owner = this.state.owner;
+    const repo = this.state.repo;
+    const secondaryDirs = keys
+      .filter((key: string) => key.indexOf('-') != -1)
+      .map((key: string) => {
+        const parts = key.split('-');
+        const primaryIndex = parseInt(parts[0]);
+        const secondaryIndex = parseInt(parts[1]);
+        const primaryDir = this.state.dirData[primaryIndex].title;
+        const secondaryDir = this.state.dirData[primaryIndex].children[secondaryIndex].title;
+        return `${primaryDir}/${secondaryDir}`;
+      });
+    if (secondaryDirs.length == 0) {
       return;
     }
 
-    const parts = firstKey.split('-');
-    const primaryIndex = parseInt(parts[0]);
-    const secondaryIndex = parseInt(parts[1]);
-    const primaryDir = this.state.dirData[primaryIndex].title;
-    const secondaryDir = this.state.dirData[primaryIndex].children[secondaryIndex].title;
-    const fullDir = `${primaryDir}/${secondaryDir}`;
-    const owner = this.state.owner;
-    const repo = this.state.repo;
     const ep = EventProxy.create();
     ep.on(
-      ['regionFileCountStr', 'regionDeveloperStr', 'domainFileCountStr', 'domainDeveloperStr'],
-      (regionFileCountStr, regionDeveloperStr, domainFileCountStr, domainDeveloperStr) => {
-        console.log('all finished!');
-        console.log(regionFileCountStr);
-        console.log('------------------');
-        console.log(regionDeveloperStr);
-        console.log('------------------');
-        console.log(domainFileCountStr);
-        console.log('------------------');
-        console.log(domainDeveloperStr);
-        console.log('------------------');
+      secondaryDirs.map((dir) => `${dir}-ready`),
+      (...rowDatas) => {
+        this.setState({ secondaryDirsTableData: rowDatas });
       },
     );
-    runSql(alteredFileCountRegionDistInSecondaryDirSql(owner, repo, fullDir)).then((result) => {
-      let sortedFileCountStr = '';
-      result.data
-        .sort((a, b) => {
-          // a and b look like this:
-          // [
-          //     "envoyproxy",
-          //     "envoy",
-          //     "api/bazel",
-          //     "日韩",
-          //     8
-          // ]
-          return b[4] - a[4];
-        })
-        .forEach((fileCountObj) => {
-          sortedFileCountStr += `${fileCountObj[3]} : ${fileCountObj[4]}\n`;
-        });
-      ep.emit('regionFileCountStr', sortedFileCountStr);
-    });
-    runSql(developerCountRegionDistInSecondaryDirSql(owner, repo, fullDir)).then((result) => {
-      let sortedDeveloperRegionStr = '';
-      result.data
-        .sort((a, b) => {
-          // a and b look like this:
-          // [
-          //     "envoyproxy",
-          //     "envoy",
-          //     "api/bazel",
-          //     "日韩",
-          //     8
-          // ]
-          return b[4] - a[4];
-        })
-        .forEach((developerCountObj) => {
-          sortedDeveloperRegionStr += `${developerCountObj[3]} : ${developerCountObj[4]}\n`;
-        });
-      ep.emit('regionDeveloperStr', sortedDeveloperRegionStr);
-    });
-    runSql(alteredFileCountDomainDistInSecondaryDirSql(owner, repo, fullDir)).then((result) => {
-      let sortedFileCountStr = '';
-      result.data
-        .sort((a, b) => {
-          // a and b look like this:
-          // [
-          //     "envoyproxy",
-          //     "envoy",
-          //     "api/bazel",
-          //     "gmail.com",
-          //     8
-          // ]
-          return b[4] - a[4];
-        })
-        .forEach((fileCountObj) => {
-          sortedFileCountStr += `${fileCountObj[3]} : ${fileCountObj[4]}\n`;
-        });
-      ep.emit('domainFileCountStr', sortedFileCountStr);
-    });
-    runSql(developerCountDomainDistInSecondaryDirSql(owner, repo, fullDir)).then((result) => {
-      let sortedDeveloperCountStr = '';
-      result.data
-        .sort((a, b) => {
-          // a and b look like this:
-          // [
-          //     "envoyproxy",
-          //     "envoy",
-          //     "api/bazel",
-          //     "gmail.com",
-          //     8
-          // ]
-          return b[4] - a[4];
-        })
-        .forEach((developerCountObj) => {
-          sortedDeveloperCountStr += `${developerCountObj[3]} : ${developerCountObj[4]}\n`;
-        });
-      ep.emit('domainDeveloperStr', sortedDeveloperCountStr);
-    });
-    // runSql(alteredFileCountSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
-    //   console.log('alter file count data:', result.data);
-    // });
 
-    // runSql(alteredFileEmailDomainSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
-    //   const piechartData = result.data.map((item) => {
-    //     const emailDomain = item[3];
-    //     const fileCount = item[4];
-    //     return {
-    //       emailDomain: emailDomain,
-    //       value: fileCount,
-    //     };
-    //   });
-    //   this.setState({ emailDomainDist: piechartData });
-    // });
+    secondaryDirs.forEach((secondaryDir) => {
+      ep.on(
+        ['regionFileCount', 'regionDeveloper', 'domainFileCount', 'domainDeveloper'].map(
+          (dataIndex) => `${secondaryDir}-${dataIndex}-ready`,
+        ),
+        (regionFileCount, regionDeveloper, domainFileCount, domainDeveloper) => {
+          ep.emit(`${secondaryDir}-ready`, {
+            secondaryDir,
+            fileRegionDist: regionFileCount,
+            fileEmailDist: domainFileCount,
+            developerRegionDist: regionDeveloper,
+            developerEmailDist: domainDeveloper,
+          });
+        },
+      );
 
-    // runSql(alteredFileTZSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
-    //   const timezoneDist = result.data.map((item) => {
-    //     return {
-    //       timezone: item[3],
-    //       value: item[4],
-    //     };
-    //   });
-    //   this.setState({ timezoneDist });
-    // });
-
-    // runSql(alteredFileCountByRegionSql(this.state.owner, this.state.repo, fullDir)).then(
-    //   (result) => {
-    //     console.log(result.data);
-    //     console.log(result.columns);
-    //     const regionFileCountDist = result.data.map((item) => {
-    //       return {
-    //         region: item[3],
-    //         value: item[4],
-    //       };
-    //     });
-    //     this.setState({ regionFileCountDist });
-    //   },
-    // );
-    //
-    // runSql(developerCountByRegionSql(this.state.owner, this.state.repo, fullDir)).then((result) => {
-    //   console.log('developerCountByRegion:', result.data);
-    //   const regionDeveloperCountDist = result.data.map((item) => ({
-    //     region: item[3],
-    //     value: item[4],
-    //   }));
-    //
-    //   this.setState({ regionDeveloperCountDist });
-    // });
+      runSql(alteredFileCountRegionDistInSecondaryDirSql(owner, repo, secondaryDir)).then(
+        (result) => {
+          const sortedData = result.data.sort((a, b) => {
+            // a and b look like this:
+            // [
+            //     "envoyproxy",
+            //     "envoy",
+            //     "api/bazel",
+            //     "日韩",
+            //     8
+            // ]
+            return b[4] - a[4];
+          });
+          ep.emit(`${secondaryDir}-regionFileCount-ready`, sortedData);
+        },
+      );
+      runSql(developerCountRegionDistInSecondaryDirSql(owner, repo, secondaryDir)).then(
+        (result) => {
+          const sortedDeveloperRegion = result.data.sort((a, b) => {
+            // a and b look like this:
+            // [
+            //     "envoyproxy",
+            //     "envoy",
+            //     "api/bazel",
+            //     "日韩",
+            //     8
+            // ]
+            return b[4] - a[4];
+          });
+          ep.emit(`${secondaryDir}-regionDeveloper-ready`, sortedDeveloperRegion);
+        },
+      );
+      runSql(alteredFileCountDomainDistInSecondaryDirSql(owner, repo, secondaryDir)).then(
+        (result) => {
+          const sortedFileCount = result.data.sort((a, b) => {
+            // a and b look like this:
+            // [
+            //     "envoyproxy",
+            //     "envoy",
+            //     "api/bazel",
+            //     "gmail.com",
+            //     8
+            // ]
+            return b[4] - a[4];
+          });
+          ep.emit(`${secondaryDir}-domainFileCount-ready`, sortedFileCount);
+        },
+      );
+      runSql(developerCountDomainDistInSecondaryDirSql(owner, repo, secondaryDir)).then(
+        (result) => {
+          const sortedDeveloperCount = result.data.sort((a, b) => {
+            // a and b look like this:
+            // [
+            //     "envoyproxy",
+            //     "envoy",
+            //     "api/bazel",
+            //     "gmail.com",
+            //     8
+            // ]
+            return b[4] - a[4];
+          });
+          ep.emit(`${secondaryDir}-domainDeveloper-ready`, sortedDeveloperCount);
+        },
+      );
+    });
   }
 
   render() {
@@ -276,7 +269,7 @@ export default class GeoDistribution extends React.Component<any, any> {
           <Col span={6}>
             <div>
               {this.state.regionCommitsDist.length
-                ? this.intl.formatMessage({ id: 'geodist.commitsRegionDist' })
+                ? intl.formatMessage({ id: 'geodist.commitsRegionDist' })
                 : ''}
             </div>
             <Pie
@@ -289,11 +282,10 @@ export default class GeoDistribution extends React.Component<any, any> {
               radius={0.9}
             />
           </Col>
-
           <Col span={6}>
             <div>
               {this.state.emailDomainCommitsDist.length
-                ? this.intl.formatMessage({ id: 'geodist.commitsEmailDomainDist' })
+                ? intl.formatMessage({ id: 'geodist.commitsEmailDomainDist' })
                 : ''}
             </div>
             <Pie
@@ -305,6 +297,17 @@ export default class GeoDistribution extends React.Component<any, any> {
               }}
               radius={0.9}
             />
+          </Col>
+        </Row>
+
+        <Row>
+          <Col span={24}>
+            {!!this.state.secondaryDirsTableData.length && (
+              <Table
+                columns={SECONDARY_DIR_TABLE_COLS}
+                dataSource={this.state.secondaryDirsTableData}
+              />
+            )}
           </Col>
         </Row>
       </PageContainer>
