@@ -39,17 +39,28 @@ export default class OwnerRepoSelector extends React.Component<any, any> {
   }
 
   onOwnerChange() {}
+
+  ownerRepoSelected(owner, repo) {
+    console.log('owner, repo:', owner, repo);
+    if (this.props.onOwnerRepoSelected) {
+      this.props.onOwnerRepoSelected(owner, repo);
+    }
+  }
+
   onOwnerSelect(owner: string /*, option: object*/) {
     const repos = this.state.ownerRepoMap[owner].map((repo) => ({ value: repo }));
     this.setState({ repos, owner: owner });
+    if (repos.length > 0) {
+      const defaultRepo = repos[0].value;
+      this.setState({ repo: defaultRepo });
+      this.ownerRepoSelected(owner, defaultRepo);
+    }
   }
 
   onRepoSelect(repo: string /*, option: object*/) {
     this.setState({ repo });
-    // TODO Notify the parent component
-    if (this.props.onOwnerRepoSelected) {
-      this.props.onOwnerRepoSelected(this.state.owner, repo);
-    }
+    // Notify the parent component with parent's callback
+    this.ownerRepoSelected(this.state.owner, repo);
   }
 
   autoCompleteFilter(inputValue, option) {
@@ -73,6 +84,7 @@ export default class OwnerRepoSelector extends React.Component<any, any> {
           style={{ width: '200px' }}
           options={this.state.repos}
           placeholder={'Repo'}
+          value={this.state.repo}
           onSelect={this.onRepoSelect}
           // onChange={this.onOwnerChange}
           filterOption={this.autoCompleteFilter}
