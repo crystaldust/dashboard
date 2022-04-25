@@ -10,14 +10,20 @@ export default {
   'geodist.secondaryDirTable.colname.fileEmailDist': 'Committed File Email Domain Distribution',
   'geodist.secondaryDirTable.colname.developerRegionDist': 'Developer Region Distribution',
   'geodist.secondaryDirTable.colname.developerEmailDist': 'Developer Email Domain  Distribution',
+  'geodist.secondaryDirTable.header.secondaryDir': 'Contributions in Selected Directories',
+  'geodist.secondaryDirTable.desc': 'Click the row to explore the details of the secondary dir',
 
   'geodist.developerContribInSecondaryDirTable.colname.developerEmail': 'Developer Email',
   'geodist.developerContribInSecondaryDirTable.colname.fileCount': 'Altered File Count',
   'geodist.developerContribInSecondaryDirTable.colname.tzDist': 'Timezone Distribution',
+  'geodist.developerContribInSecondaryDirTable.header.developerInfo':
+    'Developers contributions in the direcotyr',
+  'geodist.developerContribInSecondaryDirTable.desc': "Click the row for developer's information",
 
   'geodist.developerInfoTable.colname.owner': 'Owner',
   'geodist.developerInfoTable.colname.repo': 'Repo',
   'geodist.developerInfoTable.colname.email': 'Email',
   'geodist.developerInfoTable.colname.githubProfile': 'GitHub Profile',
   'geodist.developerInfoTable.colname.contribTzDist': 'Contribution Timezone Distribution',
+  'geodist.developerInfoTable.header.developerInfo': "Developer's information",
 };

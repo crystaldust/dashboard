@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './index.less';
 import { getIntl } from 'umi';
 import SecondaryDir from '@/pages/GeoDistribution/SecondaryDir';
 import { runSql } from '@/services/clickhouse';
@@ -509,7 +510,8 @@ export default class GeoDistribution extends React.Component<any, any> {
             ) : (
               <div>
                 <Divider>{intl.formatMessage({ id: 'geodist.dirTree' })}</Divider>
-                <span style={{ color: '#999999' }}>
+                {/*<span className={styles.componentIntro} style={{ color: '#999999' }}>*/}
+                <span className={styles.componentIntro}>
                   {intl.formatMessage({ id: 'geodist.dirTree.desc' })}
                 </span>
               </div>
@@ -581,17 +583,25 @@ export default class GeoDistribution extends React.Component<any, any> {
           <Row>
             <Col span={24}>
               {!!this.state.secondaryDirsTableData.length && (
-                <Table
-                  columns={SECONDARY_DIR_TABLE_COLS}
-                  dataSource={this.state.secondaryDirsTableData}
-                  onRow={(row) => {
-                    return {
-                      onClick: () => {
-                        this.onSecondaryDirRowClicked(row);
-                      },
-                    };
-                  }}
-                />
+                <div>
+                  <Divider>
+                    {intl.formatMessage({ id: 'geodist.secondaryDirTable.header.secondaryDir' })}
+                  </Divider>
+                  <span className={styles.componentIntro}>
+                    {intl.formatMessage({ id: 'geodist.secondaryDirTable.desc' })}
+                  </span>
+                  <Table
+                    columns={SECONDARY_DIR_TABLE_COLS}
+                    dataSource={this.state.secondaryDirsTableData}
+                    onRow={(row) => {
+                      return {
+                        onClick: () => {
+                          this.onSecondaryDirRowClicked(row);
+                        },
+                      };
+                    }}
+                  />
+                </div>
               )}
             </Col>
           </Row>
@@ -601,17 +611,29 @@ export default class GeoDistribution extends React.Component<any, any> {
           <Row>
             <Col span={24}>
               {!!this.state.developerContribInSecondaryDirData.length && (
-                <Table
-                  columns={DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS}
-                  dataSource={this.state.developerContribInSecondaryDirData}
-                  onRow={(row) => {
-                    return {
-                      onClick: () => {
-                        this.onDeveloperRowClicked(row);
-                      },
-                    };
-                  }}
-                />
+                <div>
+                  <Divider>
+                    {intl.formatMessage({
+                      id: 'geodist.developerContribInSecondaryDirTable.header.developerInfo',
+                    })}
+                  </Divider>
+                  <span className={styles.componentIntro}>
+                    {intl.formatMessage({
+                      id: 'geodist.developerContribInSecondaryDirTable.desc',
+                    })}
+                  </span>
+                  <Table
+                    columns={DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS}
+                    dataSource={this.state.developerContribInSecondaryDirData}
+                    onRow={(row) => {
+                      return {
+                        onClick: () => {
+                          this.onDeveloperRowClicked(row);
+                        },
+                      };
+                    }}
+                  />
+                </div>
               )}
             </Col>
           </Row>
@@ -620,17 +642,22 @@ export default class GeoDistribution extends React.Component<any, any> {
         <Row>
           <Col span={24}>
             {!!this.state.developerInfoData.length && (
-              <Table
-                columns={DEVELOPER_INFO_COLS}
-                dataSource={this.state.developerInfoData}
-                // onRow={(row) => {
-                //   return {
-                //     onClick: () => {
-                //       this.onDeveloperRowClicked(row);
-                //     },
-                //   };
-                // }}
-              />
+              <div>
+                <Divider>
+                  {intl.formatMessage({ id: 'geodist.developerInfoTable.header.developerInfo' })}
+                </Divider>
+                <Table
+                  columns={DEVELOPER_INFO_COLS}
+                  dataSource={this.state.developerInfoData}
+                  // onRow={(row) => {
+                  //   return {
+                  //     onClick: () => {
+                  //       this.onDeveloperRowClicked(row);
+                  //     },
+                  //   };
+                  // }}
+                />
+              </div>
             )}
           </Col>
         </Row>
