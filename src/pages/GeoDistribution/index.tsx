@@ -1,11 +1,13 @@
 import React from 'react';
+import { getIntl } from 'umi';
 import SecondaryDir from '@/pages/GeoDistribution/SecondaryDir';
 import { runSql } from '@/services/clickhouse';
 import OwnerRepoSelector from '@/pages/GeoDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Col, Row, Table, Tag } from 'antd';
-import { Pie } from '@ant-design/plots';
+import { Col, Divider, Row, Table, Tag } from 'antd';
+import { G2, Pie } from '@ant-design/plots';
 import EventProxy from '@dking/event-proxy';
+
 import {
   alteredFileCountDomainDistInSecondaryDirSql,
   alteredFileCountRegionDistInSecondaryDirSql,
@@ -14,20 +16,31 @@ import {
   developerContribInRepoSql,
   developerCountDomainDistInSecondaryDirSql,
   developerCountRegionDistInSecondaryDirSql,
-  developerGitHubProfileCompoundSql,
   developerGitHubProfileSql,
   developersContribInSecondaryDirSql,
   secondaryDirSql,
 } from './data';
 
-import { getIntl } from 'umi';
-
-const { Column, ColumnGroup } = Table;
+const G = G2.getEngine('canvas');
 
 const intl = getIntl();
+const COLORS10_ELEGENT = [
+  '#3682be',
+  '#45a776',
+  '#f05326',
+  '#a69754',
+  '#334f65',
+  '#b3974e',
+  '#38cb7d',
+  '#ddae33',
+  '#844bb3',
+  '#93c555',
+  '#5f6694',
+  '#df3881',
+];
+const MAX_DOMAIN_LEGENDS = 10;
 
 function secondaryDirTableCellRender(cellData, rowData, index) {
-  const numItems: integer = cellData.length; // TODO If numItems is not a big number, return a <div>
   return cellData.map((regionInfo, index) => {
     const region = regionInfo[3];
     const data = regionInfo[4];
@@ -108,17 +121,6 @@ const DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS = [
   },
 ];
 
-// 'geodist.developerInfoTable.colname.owner': 'Owner',
-//   'geodist.developerInfoTable.colname.repo': 'Repo',
-//   'geodist.developerInfoTable.colname.email': '邮箱',
-//   'geodist.developerInfoTable.colname.githubProfile': 'GitHub个人信息',
-//   'geodist.developerInfoTable.colname.contribTzDist': '代码贡献时区分布',
-//
-// owner: contribTzDist.owner,
-//   repo: contribTzDist.repo,
-//   email: contribTzDist.email,
-//   githubProfile,
-//   dist: contribTzDist.dist,
 const DEVELOPER_INFO_COLS = [
   {
     title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.owner' }),
@@ -169,6 +171,39 @@ const DEVELOPER_INFO_COLS = [
     },
   },
 ];
+
+function generateLabelGroup(data, mappingData, keyField) {
+  const group = new G.Group({});
+  group.addShape({
+    type: 'circle',
+    attrs: {
+      x: 0,
+      y: 0,
+      width: 40,
+      height: 50,
+      r: 5,
+      fill: mappingData.color,
+    },
+  });
+
+  const percent = Math.round(data.percent * 100);
+  let percentStr = `${percent}%`;
+  if (percent < 1) {
+    percentStr = '< 1%';
+  }
+  group.addShape({
+    type: 'text',
+    attrs: {
+      x: 10,
+      y: 8,
+      text: `${data[keyField]} ${percentStr}`,
+      fill: mappingData.color,
+    },
+  });
+
+  return group;
+}
+
 export default class GeoDistribution extends React.Component<any, any> {
   constructor(props) {
     super(props);
@@ -176,8 +211,8 @@ export default class GeoDistribution extends React.Component<any, any> {
     // 1. Get owner, repo list and construct the drop down list
     // 2. Given owner, repo, fetch secondary dirs and statistics
     this.state = {
-      owner: 'DPDK',
-      repo: 'dpdk',
+      owner: '',
+      repo: '',
       dirData: [],
       ownerRepoMap: {},
 
@@ -243,17 +278,27 @@ export default class GeoDistribution extends React.Component<any, any> {
       this.setState({ dirData: stateDirData });
     });
     runSql(commitsRegionDistSql(owner, repo)).then((result) => {
-      const regionCommitsDist = result.data.map((item) => ({
-        region: item[2],
-        value: item[3],
-      }));
+      const regionCommitsDist = result.data
+        .map((item) => ({
+          region: item[2],
+          value: item[3],
+        }))
+        .sort((a: object, b: object) => b.value - a.value);
       this.setState({ regionCommitsDist });
     });
     runSql(commitsEmailDomainDistSql(owner, repo)).then((result) => {
-      const emailDomainCommitsDist = result.data.map((item) => ({
-        domain: item[2],
-        value: item[3],
-      }));
+      let emailDomainCommitsDist = result.data
+        .map((item) => ({
+          domain: item[2],
+          value: item[3],
+        }))
+        .sort((a: object, b: object) => b.value - a.value);
+      if (emailDomainCommitsDist.length > MAX_DOMAIN_LEGENDS) {
+        const lastDist = emailDomainCommitsDist.slice(MAX_DOMAIN_LEGENDS - 1, -1);
+        const lastSum = lastDist.reduce((accumulated, dist) => accumulated + dist.value, 0);
+        emailDomainCommitsDist = emailDomainCommitsDist.slice(0, MAX_DOMAIN_LEGENDS - 1);
+        emailDomainCommitsDist.push({ domain: 'Other', value: lastSum });
+      }
       this.setState({ emailDomainCommitsDist });
     });
   }
@@ -279,6 +324,7 @@ export default class GeoDistribution extends React.Component<any, any> {
         const secondaryDir = this.state.dirData[primaryIndex].children[secondaryIndex].title;
         return `${primaryDir}/${secondaryDir}`;
       });
+
     if (secondaryDirs.length == 0) {
       return;
     }
@@ -450,40 +496,70 @@ export default class GeoDistribution extends React.Component<any, any> {
             <OwnerRepoSelector onOwnerRepoSelected={this.ownerRepoSelected} />
           </Col>
         </Row>
-        <Row>
-          <Col span={6}>
+        <Row gutter={16}>
+          <Col span={4}>
+            <Divider>
+              {this.state.repo == '' ? '' : intl.formatMessage({ id: 'geodist.dirTree' })}
+            </Divider>
             <SecondaryDir dirData={this.state.dirData} onDirSelect={this.onDirSelect} />
           </Col>
-          <Col span={6}>
-            <div>
+          <Col span={9}>
+            <Divider>
               {this.state.regionCommitsDist.length
                 ? intl.formatMessage({ id: 'geodist.commitsRegionDist' })
                 : ''}
-            </div>
+            </Divider>
             <Pie
               angleField={'value'}
               colorField={'region'}
               data={this.state.regionCommitsDist}
+              legend={{
+                layout: 'horizontal',
+                position: 'bottom',
+                flipPage: false,
+              }}
+              // animation has to be turned off to avoid re-render when label formatter is specifed
+              animation={false}
               label={{
-                type: 'inner',
+                type: 'spider',
+                labelHeight: 40,
+                formatter: (data, mappingData) => {
+                  return generateLabelGroup(data, mappingData, 'region');
+                },
               }}
               radius={0.9}
+              theme={{
+                colors10: COLORS10_ELEGENT,
+              }}
             />
           </Col>
-          <Col span={6}>
-            <div>
+          <Col span={11}>
+            <Divider>
               {this.state.emailDomainCommitsDist.length
                 ? intl.formatMessage({ id: 'geodist.commitsEmailDomainDist' })
                 : ''}
-            </div>
+            </Divider>
             <Pie
               angleField={'value'}
               colorField={'domain'}
               data={this.state.emailDomainCommitsDist}
+              animation={false}
+              legend={{
+                layout: 'horizontal',
+                position: 'bottom',
+                flipPage: false,
+              }}
               label={{
-                type: 'inner',
+                type: 'spider',
+                labelHeight: 40,
+                formatter: (data, mappingData) => {
+                  return generateLabelGroup(data, mappingData, 'domain');
+                },
               }}
               radius={0.9}
+              theme={{
+                colors10: COLORS10_ELEGENT,
+              }}
             />
           </Col>
         </Row>

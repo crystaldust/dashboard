@@ -1,4 +1,5 @@
 export default {
+  'geodist.dirTree': 'Directory Tree',
   'geodist.commitsRegionDist': 'Commits Distribution By Region',
   'geodist.commitsEmailDomainDist': 'Commits Distribution By Email Domain',
 

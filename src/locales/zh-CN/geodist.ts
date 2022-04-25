@@ -1,4 +1,5 @@
 export default {
+  'geodist.dirTree': '目录结构',
   'geodist.commitsRegionDist': '区域提交数分布',
   'geodist.commitsEmailDomainDist': '邮箱域名提交数分布',
 
