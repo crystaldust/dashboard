@@ -122,6 +122,16 @@ const DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS = [
   },
 ];
 
+const GHPROFILE_COMPANY = intl.formatMessage({
+  id: 'geodist.developerInfoTable.githubProfile.company',
+});
+const GHPROFILE_LOCATION = intl.formatMessage({
+  id: 'geodist.developerInfoTable.githubProfile.location',
+});
+const GHPROFILE_COUNTRY = intl.formatMessage({
+  id: 'geodist.developerInfoTable.githubProfile.country',
+});
+
 const DEVELOPER_INFO_COLS = [
   {
     title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.owner' }),
@@ -149,6 +159,11 @@ const DEVELOPER_INFO_COLS = [
           <a href={profile.htmlUrl} target={'_blank'}>
             @{profile.login}
           </a>
+          <div>{profile.location != '' ? `${GHPROFILE_LOCATION}: ${profile.location}` : ''}</div>
+          <div>{profile.company != '' ? `${GHPROFILE_COMPANY}: ${profile.company}` : ''}</div>
+          <div>
+            {profile.inferedCountry != '' ? `${GHPROFILE_COUNTRY}: ${profile.inferedCountry}` : ''}
+          </div>
         </div>
       );
     },
@@ -479,6 +494,10 @@ export default class GeoDistribution extends React.Component<any, any> {
           name: profileData[19],
           avatarUrl: profileData[4],
           htmlUrl: profileData[7],
+          company: profileData[20],
+          location: profileData[22],
+          // Determine the priority of infered geolocation info
+          inferedCountry: profileData[35],
         };
       }
       ep.emit('githubProfileReady', profile);

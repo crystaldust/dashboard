@@ -24,4 +24,7 @@ export default {
   'geodist.developerInfoTable.colname.githubProfile': 'GitHub个人信息',
   'geodist.developerInfoTable.colname.contribTzDist': '代码贡献时区分布',
   'geodist.developerInfoTable.header.developerInfo': '开发者信息',
+  'geodist.developerInfoTable.githubProfile.company': '公司',
+  'geodist.developerInfoTable.githubProfile.location': '位置',
+  'geodist.developerInfoTable.githubProfile.country': '国家',
 };

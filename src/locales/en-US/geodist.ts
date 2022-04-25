@@ -26,4 +26,7 @@ export default {
   'geodist.developerInfoTable.colname.githubProfile': 'GitHub Profile',
   'geodist.developerInfoTable.colname.contribTzDist': 'Contribution Timezone Distribution',
   'geodist.developerInfoTable.header.developerInfo': "Developer's information",
+  'geodist.developerInfoTable.githubProfile.company': 'Company',
+  'geodist.developerInfoTable.githubProfile.location': 'Location',
+  'geodist.developerInfoTable.githubProfile.country': 'Country',
 };
