@@ -1,5 +1,7 @@
 export default {
   'geodist.dirTree': 'Directory Tree',
+  'geodist.dirTree.desc':
+    'Hold ctrl for multiple selection, shift for multiple continuous selection',
   'geodist.commitsRegionDist': 'Commits Distribution By Region',
   'geodist.commitsEmailDomainDist': 'Commits Distribution By Email Domain',
 

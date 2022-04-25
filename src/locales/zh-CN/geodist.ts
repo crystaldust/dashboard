@@ -1,5 +1,6 @@
 export default {
   'geodist.dirTree': '目录结构',
+  'geodist.dirTree.desc': '按住Ctrl选择多个目录，按住Shift连续选择多个目录',
   'geodist.commitsRegionDist': '区域提交数分布',
   'geodist.commitsEmailDomainDist': '邮箱域名提交数分布',
 

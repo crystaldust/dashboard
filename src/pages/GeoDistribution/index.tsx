@@ -4,7 +4,7 @@ import SecondaryDir from '@/pages/GeoDistribution/SecondaryDir';
 import { runSql } from '@/services/clickhouse';
 import OwnerRepoSelector from '@/pages/GeoDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Col, Divider, Row, Table, Tag } from 'antd';
+import { Col, Divider, Row, Table, Tag, Spin } from 'antd';
 import { G2, Pie } from '@ant-design/plots';
 import EventProxy from '@dking/event-proxy';
 
@@ -223,8 +223,10 @@ export default class GeoDistribution extends React.Component<any, any> {
       selectedDirDeveloperContributionData: [],
 
       secondaryDirsTableData: [],
+      loadingSecondaryDirsTableData: false,
 
       developerContribInSecondaryDirData: [],
+      loadingDeveloperContribInSecondaryDirData: false,
 
       developerInfoData: [],
     };
@@ -329,11 +331,13 @@ export default class GeoDistribution extends React.Component<any, any> {
       return;
     }
 
+    this.setState({ loadingSecondaryDirsTableData: true });
     const ep = EventProxy.create();
     ep.on(
       secondaryDirs.map((dir) => `${dir}-ready`),
       (...rowDatas) => {
         this.setState({ secondaryDirsTableData: rowDatas });
+        this.setState({ loadingSecondaryDirsTableData: false });
       },
     );
 
@@ -430,6 +434,7 @@ export default class GeoDistribution extends React.Component<any, any> {
     const owner = this.state.owner;
     const repo = this.state.repo;
     const secondaryDir = row.secondaryDir;
+    this.setState({ loadingDeveloperContribInSecondaryDirData: true });
     runSql(developersContribInSecondaryDirSql(owner, repo, secondaryDir)).then((result) => {
       const developerContribInSecondaryDirData = result.data.map((item) => {
         return {
@@ -440,6 +445,7 @@ export default class GeoDistribution extends React.Component<any, any> {
         };
       });
       this.setState({ developerContribInSecondaryDirData });
+      this.setState({ loadingDeveloperContribInSecondaryDirData: false });
     });
   }
 
@@ -498,9 +504,16 @@ export default class GeoDistribution extends React.Component<any, any> {
         </Row>
         <Row gutter={16}>
           <Col span={4}>
-            <Divider>
-              {this.state.repo == '' ? '' : intl.formatMessage({ id: 'geodist.dirTree' })}
-            </Divider>
+            {this.state.repo == '' ? (
+              ''
+            ) : (
+              <div>
+                <Divider>{intl.formatMessage({ id: 'geodist.dirTree' })}</Divider>
+                <span style={{ color: '#999999' }}>
+                  {intl.formatMessage({ id: 'geodist.dirTree.desc' })}
+                </span>
+              </div>
+            )}
             <SecondaryDir dirData={this.state.dirData} onDirSelect={this.onDirSelect} />
           </Col>
           <Col span={9}>
@@ -564,41 +577,45 @@ export default class GeoDistribution extends React.Component<any, any> {
           </Col>
         </Row>
 
-        <Row>
-          <Col span={24}>
-            {!!this.state.secondaryDirsTableData.length && (
-              <Table
-                columns={SECONDARY_DIR_TABLE_COLS}
-                dataSource={this.state.secondaryDirsTableData}
-                onRow={(row) => {
-                  return {
-                    onClick: () => {
-                      this.onSecondaryDirRowClicked(row);
-                    },
-                  };
-                }}
-              />
-            )}
-          </Col>
-        </Row>
+        <Spin spinning={this.state.loadingSecondaryDirsTableData}>
+          <Row>
+            <Col span={24}>
+              {!!this.state.secondaryDirsTableData.length && (
+                <Table
+                  columns={SECONDARY_DIR_TABLE_COLS}
+                  dataSource={this.state.secondaryDirsTableData}
+                  onRow={(row) => {
+                    return {
+                      onClick: () => {
+                        this.onSecondaryDirRowClicked(row);
+                      },
+                    };
+                  }}
+                />
+              )}
+            </Col>
+          </Row>
+        </Spin>
 
-        <Row>
-          <Col span={24}>
-            {!!this.state.developerContribInSecondaryDirData.length && (
-              <Table
-                columns={DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS}
-                dataSource={this.state.developerContribInSecondaryDirData}
-                onRow={(row) => {
-                  return {
-                    onClick: () => {
-                      this.onDeveloperRowClicked(row);
-                    },
-                  };
-                }}
-              />
-            )}
-          </Col>
-        </Row>
+        <Spin spinning={this.state.loadingDeveloperContribInSecondaryDirData}>
+          <Row>
+            <Col span={24}>
+              {!!this.state.developerContribInSecondaryDirData.length && (
+                <Table
+                  columns={DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS}
+                  dataSource={this.state.developerContribInSecondaryDirData}
+                  onRow={(row) => {
+                    return {
+                      onClick: () => {
+                        this.onDeveloperRowClicked(row);
+                      },
+                    };
+                  }}
+                />
+              )}
+            </Col>
+          </Row>
+        </Spin>
 
         <Row>
           <Col span={24}>
