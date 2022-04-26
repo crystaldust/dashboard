@@ -139,22 +139,31 @@ export default class GeoDistribution extends React.Component<any, any> {
       developerInfoData: [],
     });
 
+    const dirKeySet = new Set<string>();
+    keys.forEach((key) => {
+      if (key.indexOf('-') == -1) {
+        this.state.dirData[key].children.forEach((child) => dirKeySet.add(child.key));
+      } else {
+        dirKeySet.add(key);
+      }
+    });
+
     const owner = this.state.owner;
     const repo = this.state.repo;
-    const secondaryDirs = keys
-      .filter((key: string) => key.indexOf('-') != -1)
-      .map((key: string) => {
-        const parts = key.split('-');
-        const primaryIndex = parseInt(parts[0]);
-        const secondaryIndex = parseInt(parts[1]);
-        const primaryDir = this.state.dirData[primaryIndex].title;
-        const secondaryDir = this.state.dirData[primaryIndex].children[secondaryIndex].title;
-        return `${primaryDir}/${secondaryDir}`;
-      });
+    const secondaryDirs = [];
+    dirKeySet.forEach((key: string) => {
+      const parts = key.split('-');
+      const primaryIndex = parseInt(parts[0]);
+      const secondaryIndex = parseInt(parts[1]);
+      const primaryDir = this.state.dirData[primaryIndex].title;
+      const secondaryDir = this.state.dirData[primaryIndex].children[secondaryIndex].title;
+      secondaryDirs.push(`${primaryDir}/${secondaryDir}`);
+    });
 
     if (secondaryDirs.length == 0) {
       return;
     }
+    console.log('secondaryDirs', secondaryDirs);
 
     this.setState({ loadingSecondaryDirsTableData: true });
     const ep = EventProxy.create();

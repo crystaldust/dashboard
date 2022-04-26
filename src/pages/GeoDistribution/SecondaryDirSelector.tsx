@@ -13,21 +13,39 @@ export default class SecondaryDirSelector extends React.Component<any, any> {
   }
 
   onSelect(keys: React.Key[], info: any) {
-    const selectedDirs = {};
-    info.selectedNodes.forEach((node: object) => {
-      if (node.hasOwnProperty('children')) {
-        node.children.forEach((child) => {
-          const key = `${node.title}/${child.title}`;
-          selectedDirs[key] = true;
-        });
-      } else {
-        selectedDirs[node.title] = true;
-      }
-    });
     if (this.props.onDirSelect) {
-      this.props.onDirSelect(keys, selectedDirs);
+      this.props.onDirSelect(keys);
     }
   }
+
+  //   const primaryDirs = keys.filter((dir) => dir.indexOf('-') == -1);
+  //   primaryDirs.forEach(primaryDir => {
+  //   const selectedPrimaryChildren = keys.filter(key => key.indexOf(`${primaryDir}-`) == 0)
+  //   if (selectedPrimaryChildren.length != )
+  // })
+
+  // onSelect(keys: React.Key[], info: any) {
+  //   const selectedNodes: object[] = info;
+  //   const selectionMap: object; // Key: primary dir, values: children and selected children
+  //   selectedNodes.forEach((node) => {
+  //     if (node.key.indexOf('-') == -1) {
+  //       // Primary node
+  //       selectionMap[node.key] = {
+  //         children: node.children, // node.children should exist
+  //       };
+  //     } else {
+  //       const parts = node.key.split('-');
+  //       const primary = parts[0];
+  //       const secondary = parts[1];
+  //       if (!selectionMap.hasOwnProperty(primary)) {
+  //         selectionMap[primary] = {
+  //           selectedChildren: [node.key],
+  //         };
+  //       } else {
+  //       }
+  //     }
+  //   });
+  // }
 
   onExpand() {
     console.log('tree expanded');

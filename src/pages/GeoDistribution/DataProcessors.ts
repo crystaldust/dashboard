@@ -19,7 +19,7 @@ export function parseGithubProfile(rawSQLResult) {
   return profile;
 }
 
-function _githubProfileCountry(rawSQLResult: [any]) {
+function _githubProfileCountry(rawSQLResult: any[]) {
   const country_inferred_from_location = rawSQLResult[35];
   if (isNaN(parseInt(country_inferred_from_location))) {
     return country_inferred_from_location;
@@ -38,7 +38,7 @@ function _githubProfileCountry(rawSQLResult: [any]) {
   return '';
 }
 
-function _githubProfileCompany(rawSQLResult: [any]) {
+function _githubProfileCompany(rawSQLResult: any[]) {
   let company = rawSQLResult[20];
   if (!!company) {
     // TODO
@@ -53,7 +53,7 @@ function _githubProfileCompany(rawSQLResult: [any]) {
   return rawSQLResult[38];
 }
 
-function _githubProfileLocation(rawSQLResult: [any]) {
+function _githubProfileLocation(rawSQLResult: any[]) {
   // xxx's original field is inferred_from_location__xxx
   const continent = rawSQLResult[43];
   const administrative_area_level_1 = rawSQLResult[39];

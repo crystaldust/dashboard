@@ -26,7 +26,9 @@ const DEVELOPER_INFO_COLS = [
       }
       return (
         <div>
-          <img src={profile.avatarUrl} width={100} height={100} />
+          <a href={profile.htmlUrl} target={'_blank'}>
+            <img src={profile.avatarUrl} width={100} height={100} />
+          </a>
           <div>{profile.name != '' ? profile.name : profile.login}</div>
           <a href={profile.htmlUrl} target={'_blank'}>
             @{profile.login}
