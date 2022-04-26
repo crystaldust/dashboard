@@ -27,4 +27,6 @@ export default {
   'geodist.developerInfoTable.githubProfile.company': '公司',
   'geodist.developerInfoTable.githubProfile.location': '位置',
   'geodist.developerInfoTable.githubProfile.country': '国家',
+
+  'geodist.locationConnector': '，',
 };

@@ -31,11 +31,9 @@ const DEVELOPER_INFO_COLS = [
           <a href={profile.htmlUrl} target={'_blank'}>
             @{profile.login}
           </a>
-          <div>{profile.location != '' ? `${GHPROFILE_LOCATION}: ${profile.location}` : ''}</div>
           <div>{profile.company != '' ? `${GHPROFILE_COMPANY}: ${profile.company}` : ''}</div>
-          <div>
-            {profile.inferedCountry != '' ? `${GHPROFILE_COUNTRY}: ${profile.inferedCountry}` : ''}
-          </div>
+          <div>{profile.country != '' ? `${GHPROFILE_COUNTRY}: ${profile.country}` : ''}</div>
+          <div>{profile.location != '' ? `${GHPROFILE_LOCATION}: ${profile.location}` : ''}</div>
         </div>
       );
     },

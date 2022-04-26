@@ -54,7 +54,7 @@ function generateLabelGroup(data, mappingData, keyField) {
 export default class ProjectDistPies extends React.Component<any, any> {
   render() {
     return (
-      <Row>
+      <Row gutter={18}>
         <Col span={11}>
           <Divider>
             {this.props.regionCommitsDist.length

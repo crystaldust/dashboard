@@ -17,7 +17,7 @@ export default {
   'geodist.developerContribInSecondaryDirTable.colname.fileCount': 'Altered File Count',
   'geodist.developerContribInSecondaryDirTable.colname.tzDist': 'Timezone Distribution',
   'geodist.developerContribInSecondaryDirTable.header.developerInfo':
-    'Developers contributions in the direcotyr',
+    "Developers' contributions in the directory",
   'geodist.developerContribInSecondaryDirTable.desc': "Click the row for developer's information",
 
   'geodist.developerInfoTable.colname.owner': 'Owner',
@@ -29,4 +29,6 @@ export default {
   'geodist.developerInfoTable.githubProfile.company': 'Company',
   'geodist.developerInfoTable.githubProfile.location': 'Location',
   'geodist.developerInfoTable.githubProfile.country': 'Country',
+
+  'geodist.locationConnector': ',',
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './index.less';
 import { getIntl } from 'umi';
-import SecondaryDir from '@/pages/GeoDistribution/SecondaryDir';
+import SecondaryDirSelector from '@/pages/GeoDistribution/SecondaryDirSelector';
 import { runSql } from '@/services/clickhouse';
 import OwnerRepoSelector from '@/pages/GeoDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
@@ -19,11 +19,12 @@ import {
   developerGitHubProfileSql,
   developersContribInSecondaryDirSql,
   secondaryDirSql,
-} from './data';
+} from './DataSQLs';
 import ProjectDistPies from '@/pages/GeoDistribution/ProjectDistPies';
 import SecondaryDirsTable from '@/pages/GeoDistribution/SecondaryDirsTable';
 import DirDeveloperContribTable from '@/pages/GeoDistribution/DirDeveloperContribTable';
 import { DeveloperInfoTable } from '@/pages/GeoDistribution/DeveloperInfoTable';
+import { parseGithubProfile } from '@/pages/GeoDistribution/DataProcessors';
 
 const intl = getIntl();
 
@@ -32,9 +33,7 @@ const MAX_DOMAIN_LEGENDS = 10;
 export default class GeoDistribution extends React.Component<any, any> {
   constructor(props) {
     super(props);
-    // TODO Steps:
-    // 1. Get owner, repo list and construct the drop down list
-    // 2. Given owner, repo, fetch secondary dirs and statistics
+
     this.state = {
       owner: '',
       repo: '',
@@ -298,17 +297,7 @@ export default class GeoDistribution extends React.Component<any, any> {
       let profile = null;
       if (result.data.length) {
         const profileData = result.data[0];
-        profile = {
-          id: profileData[2],
-          login: profileData[1],
-          name: profileData[19],
-          avatarUrl: profileData[4],
-          htmlUrl: profileData[7],
-          company: profileData[20],
-          location: profileData[22],
-          // Determine the priority of infered geolocation info
-          inferedCountry: profileData[35],
-        };
+        profile = parseGithubProfile(profileData);
       }
       ep.emit('githubProfileReady', profile);
     });
@@ -334,7 +323,7 @@ export default class GeoDistribution extends React.Component<any, any> {
         </Row>
         <Row gutter={16}>
           <Col span={4}>
-            <SecondaryDir
+            <SecondaryDirSelector
               dirData={this.state.dirData}
               onDirSelect={this.onDirSelect}
               repo={this.state.repo}

@@ -34,7 +34,7 @@ export default class SQLEditor extends React.Component<any, any> {
     return (
       <Editor
         defaultLanguage="sql"
-        height="20vh"
+        height="7vh"
         defaultValue={this.props.defaultCode}
         onChange={this.handleEditorChange}
         onMount={this.handleEditorDidMount}

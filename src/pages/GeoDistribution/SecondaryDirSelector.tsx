@@ -6,7 +6,7 @@ import { getIntl } from 'umi';
 const intl = getIntl();
 const { DirectoryTree } = Tree;
 
-export default class SecondaryDir extends React.Component<any, any> {
+export default class SecondaryDirSelector extends React.Component<any, any> {
   constructor(props) {
     super(props);
     this.onSelect = this.onSelect.bind(this);
