@@ -22,46 +22,11 @@ import {
 } from './data';
 import ProjectDistPies from '@/pages/GeoDistribution/ProjectDistPies';
 import SecondaryDirsTable from '@/pages/GeoDistribution/SecondaryDirsTable';
+import DirDeveloperContribTable from '@/pages/GeoDistribution/DirDeveloperContribTable';
 
 const intl = getIntl();
 
 const MAX_DOMAIN_LEGENDS = 10;
-
-const DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS = [
-  {
-    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.secondaryDir' }),
-    dataIndex: 'secondaryDir',
-  },
-  {
-    title: intl.formatMessage({
-      id: 'geodist.developerContribInSecondaryDirTable.colname.developerEmail',
-    }),
-    dataIndex: 'developerEmail',
-  },
-  {
-    title: intl.formatMessage({
-      id: 'geodist.developerContribInSecondaryDirTable.colname.fileCount',
-    }),
-    dataIndex: 'fileCount',
-  },
-  {
-    title: intl.formatMessage({ id: 'geodist.developerContribInSecondaryDirTable.colname.tzDist' }),
-    dataIndex: 'tzDist',
-    render: (cellData) => {
-      return cellData.map((item) => {
-        for (const tz in item) {
-          const count = item[tz];
-          let key = tz;
-          if (parseInt(tz) > 0) {
-            key = `+${tz}`;
-          }
-          const content = `${key}: ${count}`;
-          return <Tag key={key}>{content}</Tag>;
-        }
-      });
-    },
-  },
-];
 
 const GHPROFILE_COMPANY = intl.formatMessage({
   id: 'geodist.developerInfoTable.githubProfile.company',
@@ -159,6 +124,7 @@ export default class GeoDistribution extends React.Component<any, any> {
     this.ownerRepoSelected = this.ownerRepoSelected.bind(this);
     this.onDirSelect = this.onDirSelect.bind(this);
     this.onDeveloperRowClicked = this.onDeveloperRowClicked.bind(this);
+    this.onSecondaryDirRowClicked = this.onSecondaryDirRowClicked.bind(this);
   }
 
   ownerRepoSelected(owner: string, repo: string) {
@@ -468,31 +434,10 @@ export default class GeoDistribution extends React.Component<any, any> {
         <Spin spinning={this.state.loadingDeveloperContribInSecondaryDirData}>
           <Row>
             <Col span={24}>
-              {!!this.state.developerContribInSecondaryDirData.length && (
-                <div>
-                  <Divider>
-                    {intl.formatMessage({
-                      id: 'geodist.developerContribInSecondaryDirTable.header.developerInfo',
-                    })}
-                  </Divider>
-                  <span className={styles.componentIntro}>
-                    {intl.formatMessage({
-                      id: 'geodist.developerContribInSecondaryDirTable.desc',
-                    })}
-                  </span>
-                  <Table
-                    columns={DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS}
-                    dataSource={this.state.developerContribInSecondaryDirData}
-                    onRow={(row) => {
-                      return {
-                        onClick: () => {
-                          this.onDeveloperRowClicked(row);
-                        },
-                      };
-                    }}
-                  />
-                </div>
-              )}
+              <DirDeveloperContribTable
+                developerContribInSecondaryDirData={this.state.developerContribInSecondaryDirData}
+                onDeveloperRowClicked={this.onDeveloperRowClicked}
+              />
             </Col>
           </Row>
         </Spin>
