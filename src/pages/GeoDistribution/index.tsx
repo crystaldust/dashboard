@@ -6,7 +6,6 @@ import { runSql } from '@/services/clickhouse';
 import OwnerRepoSelector from '@/pages/GeoDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Col, Divider, Row, Table, Tag, Spin } from 'antd';
-import { G2, Pie } from '@ant-design/plots';
 import EventProxy from '@dking/event-proxy';
 
 import {
@@ -21,24 +20,10 @@ import {
   developersContribInSecondaryDirSql,
   secondaryDirSql,
 } from './data';
-
-const G = G2.getEngine('canvas');
+import ProjectDistPies from '@/pages/GeoDistribution/ProjectDistPies';
 
 const intl = getIntl();
-const COLORS10_ELEGENT = [
-  '#3682be',
-  '#45a776',
-  '#f05326',
-  '#a69754',
-  '#334f65',
-  '#b3974e',
-  '#38cb7d',
-  '#ddae33',
-  '#844bb3',
-  '#93c555',
-  '#5f6694',
-  '#df3881',
-];
+
 const MAX_DOMAIN_LEGENDS = 10;
 
 function secondaryDirTableCellRender(cellData, rowData, index) {
@@ -187,38 +172,6 @@ const DEVELOPER_INFO_COLS = [
     },
   },
 ];
-
-function generateLabelGroup(data, mappingData, keyField) {
-  const group = new G.Group({});
-  group.addShape({
-    type: 'circle',
-    attrs: {
-      x: 0,
-      y: 0,
-      width: 40,
-      height: 50,
-      r: 5,
-      fill: mappingData.color,
-    },
-  });
-
-  const percent = Math.round(data.percent * 100);
-  let percentStr = `${percent}%`;
-  if (percent < 1) {
-    percentStr = '< 1%';
-  }
-  group.addShape({
-    type: 'text',
-    attrs: {
-      x: 10,
-      y: 8,
-      text: `${data[keyField]} ${percentStr}`,
-      fill: mappingData.color,
-    },
-  });
-
-  return group;
-}
 
 export default class GeoDistribution extends React.Component<any, any> {
   constructor(props) {
@@ -537,63 +490,10 @@ export default class GeoDistribution extends React.Component<any, any> {
             )}
             <SecondaryDir dirData={this.state.dirData} onDirSelect={this.onDirSelect} />
           </Col>
-          <Col span={9}>
-            <Divider>
-              {this.state.regionCommitsDist.length
-                ? intl.formatMessage({ id: 'geodist.commitsRegionDist' })
-                : ''}
-            </Divider>
-            <Pie
-              angleField={'value'}
-              colorField={'region'}
-              data={this.state.regionCommitsDist}
-              legend={{
-                layout: 'horizontal',
-                position: 'bottom',
-                flipPage: false,
-              }}
-              // animation has to be turned off to avoid re-render when label formatter is specifed
-              animation={false}
-              label={{
-                type: 'spider',
-                labelHeight: 40,
-                formatter: (data, mappingData) => {
-                  return generateLabelGroup(data, mappingData, 'region');
-                },
-              }}
-              radius={0.9}
-              theme={{
-                colors10: COLORS10_ELEGENT,
-              }}
-            />
-          </Col>
-          <Col span={11}>
-            <Divider>
-              {this.state.emailDomainCommitsDist.length
-                ? intl.formatMessage({ id: 'geodist.commitsEmailDomainDist' })
-                : ''}
-            </Divider>
-            <Pie
-              angleField={'value'}
-              colorField={'domain'}
-              data={this.state.emailDomainCommitsDist}
-              animation={false}
-              legend={{
-                layout: 'horizontal',
-                position: 'bottom',
-                flipPage: false,
-              }}
-              label={{
-                type: 'spider',
-                labelHeight: 40,
-                formatter: (data, mappingData) => {
-                  return generateLabelGroup(data, mappingData, 'domain');
-                },
-              }}
-              radius={0.9}
-              theme={{
-                colors10: COLORS10_ELEGENT,
-              }}
+          <Col span={18}>
+            <ProjectDistPies
+              regionCommitsDist={this.state.regionCommitsDist}
+              emailDomainCommitsDist={this.state.emailDomainCommitsDist}
             />
           </Col>
         </Row>
