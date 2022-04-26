@@ -23,76 +23,11 @@ import {
 import ProjectDistPies from '@/pages/GeoDistribution/ProjectDistPies';
 import SecondaryDirsTable from '@/pages/GeoDistribution/SecondaryDirsTable';
 import DirDeveloperContribTable from '@/pages/GeoDistribution/DirDeveloperContribTable';
+import { DeveloperInfoTable } from '@/pages/GeoDistribution/DeveloperInfoTable';
 
 const intl = getIntl();
 
 const MAX_DOMAIN_LEGENDS = 10;
-
-const GHPROFILE_COMPANY = intl.formatMessage({
-  id: 'geodist.developerInfoTable.githubProfile.company',
-});
-const GHPROFILE_LOCATION = intl.formatMessage({
-  id: 'geodist.developerInfoTable.githubProfile.location',
-});
-const GHPROFILE_COUNTRY = intl.formatMessage({
-  id: 'geodist.developerInfoTable.githubProfile.country',
-});
-
-const DEVELOPER_INFO_COLS = [
-  {
-    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.owner' }),
-    dataIndex: 'owner',
-  },
-  {
-    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.repo' }),
-    dataIndex: 'repo',
-  },
-  {
-    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.email' }),
-    dataIndex: 'email',
-  },
-  {
-    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.githubProfile' }),
-    dataIndex: 'githubProfile',
-    render: (profile) => {
-      if (!profile) {
-        return <div>No GitHub Profile found</div>;
-      }
-      return (
-        <div>
-          <img src={profile.avatarUrl} width={100} height={100} />
-          <div>{profile.name != '' ? profile.name : profile.login}</div>
-          <a href={profile.htmlUrl} target={'_blank'}>
-            @{profile.login}
-          </a>
-          <div>{profile.location != '' ? `${GHPROFILE_LOCATION}: ${profile.location}` : ''}</div>
-          <div>{profile.company != '' ? `${GHPROFILE_COMPANY}: ${profile.company}` : ''}</div>
-          <div>
-            {profile.inferedCountry != '' ? `${GHPROFILE_COUNTRY}: ${profile.inferedCountry}` : ''}
-          </div>
-        </div>
-      );
-    },
-  },
-  {
-    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.contribTzDist' }),
-    dataIndex: 'dist',
-    render: (dist) => {
-      return dist.map((item) => {
-        for (const tz in item) {
-          const count = item[tz];
-          const tzStr = parseInt(tz) > 0 ? `+${tz}` : tz;
-          const content = `${tzStr}: ${count}`;
-          return (
-            <div key={Math.random()}>
-              <Tag key={Math.random()}>{content}</Tag>
-            </div>
-          );
-        }
-      });
-    },
-  },
-];
 
 export default class GeoDistribution extends React.Component<any, any> {
   constructor(props) {
@@ -399,18 +334,11 @@ export default class GeoDistribution extends React.Component<any, any> {
         </Row>
         <Row gutter={16}>
           <Col span={4}>
-            {this.state.repo == '' ? (
-              ''
-            ) : (
-              <div>
-                <Divider>{intl.formatMessage({ id: 'geodist.dirTree' })}</Divider>
-                {/*<span className={styles.componentIntro} style={{ color: '#999999' }}>*/}
-                <span className={styles.componentIntro}>
-                  {intl.formatMessage({ id: 'geodist.dirTree.desc' })}
-                </span>
-              </div>
-            )}
-            <SecondaryDir dirData={this.state.dirData} onDirSelect={this.onDirSelect} />
+            <SecondaryDir
+              dirData={this.state.dirData}
+              onDirSelect={this.onDirSelect}
+              repo={this.state.repo}
+            />
           </Col>
           <Col span={18}>
             <ProjectDistPies
@@ -444,24 +372,7 @@ export default class GeoDistribution extends React.Component<any, any> {
 
         <Row>
           <Col span={24}>
-            {!!this.state.developerInfoData.length && (
-              <div>
-                <Divider>
-                  {intl.formatMessage({ id: 'geodist.developerInfoTable.header.developerInfo' })}
-                </Divider>
-                <Table
-                  columns={DEVELOPER_INFO_COLS}
-                  dataSource={this.state.developerInfoData}
-                  // onRow={(row) => {
-                  //   return {
-                  //     onClick: () => {
-                  //       this.onDeveloperRowClicked(row);
-                  //     },
-                  //   };
-                  // }}
-                />
-              </div>
-            )}
+            <DeveloperInfoTable developerInfoData={this.state.developerInfoData} />
           </Col>
         </Row>
       </PageContainer>

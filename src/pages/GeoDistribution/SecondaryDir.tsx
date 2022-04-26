@@ -1,6 +1,9 @@
 import React from 'react';
-import { Tree } from 'antd';
+import { Divider, Tree } from 'antd';
+import styles from '@/pages/GeoDistribution/index.less';
+import { getIntl } from 'umi';
 
+const intl = getIntl();
 const { DirectoryTree } = Tree;
 
 export default class SecondaryDir extends React.Component<any, any> {
@@ -32,14 +35,27 @@ export default class SecondaryDir extends React.Component<any, any> {
 
   render() {
     return (
-      <DirectoryTree
-        height={400}
-        multiple
-        defaultExpandAll
-        onSelect={this.onSelect}
-        onExpand={this.onExpand}
-        treeData={this.props.dirData}
-      />
+      <div>
+        {this.props.repo == '' ? (
+          ''
+        ) : (
+          <div>
+            <Divider>{intl.formatMessage({ id: 'geodist.dirTree' })}</Divider>
+            {/*<span className={styles.componentIntro} style={{ color: '#999999' }}>*/}
+            <span className={styles.componentIntro}>
+              {intl.formatMessage({ id: 'geodist.dirTree.desc' })}
+            </span>
+          </div>
+        )}
+        <DirectoryTree
+          height={400}
+          multiple
+          defaultExpandAll
+          onSelect={this.onSelect}
+          onExpand={this.onExpand}
+          treeData={this.props.dirData}
+        />
+      </div>
     );
   }
 }
