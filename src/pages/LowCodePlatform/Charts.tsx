@@ -22,6 +22,7 @@ export function parseActivities(rawActivities: CKData.Activity[]) {
       }
     });
   });
+
   const parsedActivities: object[] = rawActivities.map((act) => {
     [
       'code_contribution',

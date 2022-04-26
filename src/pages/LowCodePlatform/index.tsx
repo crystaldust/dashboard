@@ -1,6 +1,6 @@
 import React from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { getActivities, getDeveloperActivities, runSql } from '@/services/clickhouse';
+import { runSql } from '@/services/clickhouse';
 import { Col, Collapse, Row } from 'antd';
 
 import DynamicDataTable, { parseTableData } from '@/pages/LowCodePlatform/DynamicDataTable';
@@ -10,11 +10,10 @@ import { message } from 'antd';
 
 const { Panel } = Collapse;
 import { parseActivities } from '@/pages/LowCodePlatform/Charts';
-import { Radar } from '@ant-design/plots';
 
 const DEFAULT_SQL =
-  "SELECT * FROM activities WHERE owner='mysql' AND repo='mysql-server' ORDER BY code_contribution DESC LIMIT 100"
-  // "SELECT * FROM activities WHERE owner='kubernetes' AND repo='kubernetes' ORDER BY code_contribution DESC LIMIT 2";
+  "SELECT * FROM activities WHERE owner='mysql' AND repo='mysql-server' ORDER BY code_contribution DESC LIMIT 100";
+// "SELECT * FROM activities WHERE owner='kubernetes' AND repo='kubernetes' ORDER BY code_contribution DESC LIMIT 2";
 
 export default class Index extends React.Component<any, any> {
   constructor(props: any) {
@@ -24,22 +23,29 @@ export default class Index extends React.Component<any, any> {
     this.state = {
       tableColumns: [],
       tableData: [],
+      fetchActivities: false,
     };
 
     // SQL Editor related callbacks
     this.runSql = this.runSql.bind(this);
     // Table related callbacks
     this.tableRowClick = this.tableRowClick.bind(this);
-
+  }
+  componentDidMount() {
     // Run default SQL
     this.runSql(DEFAULT_SQL);
   }
 
   runSql(sql: string) {
+    const fetchActivities: boolean = sql.toLowerCase().indexOf(' from activities ') != -1;
+    this.setState({ fetchActivities, chartData: null });
+
     runSql(sql)
       .then((result) => {
         const tableResult = parseTableData(result);
-        // tableResult.tableData = parseActivities(tableResult.tableData);
+        if (fetchActivities) {
+          tableResult.tableData = parseActivities(tableResult.tableData);
+        }
         this.setState({ ...tableResult });
       })
       .catch((e) => {
@@ -49,9 +55,20 @@ export default class Index extends React.Component<any, any> {
   }
 
   tableRowClick(row: object) {
-    if (row.owner && row.repo && row.github_login) {
-      getDeveloperActivities(row.owner, row.repo, row.github_login).then((activity) => {
-        this.setState({ chartData: activity });
+    if (row.owner && row.repo && row.github_login && this.state.fetchActivities) {
+      this.setState({
+        chartData: {
+          codeContribution: row.code_contribution,
+          codeTweaking: row.code_tweaking,
+          githubId: row.github_id,
+          githubLogin: row.github_login,
+          issueCoordination: row.issue_coordination,
+          issueReporting: row.issue_reporting,
+          knowledgeSharing: row.knowledge_sharing,
+          owner: row.owner,
+          progressControl: row.progress_control,
+          repo: row.repo,
+        },
       });
     }
   }
@@ -77,12 +94,13 @@ export default class Index extends React.Component<any, any> {
             />
           </Col>
         </Row>
-
-        <Row>
-          <Col span={24}>
-            <Charts data={this.state.chartData} />
-          </Col>
-        </Row>
+        {this.state.fetchActivities && !!this.state.chartData && (
+          <Row>
+            <Col span={24}>
+              <Charts data={this.state.chartData} />
+            </Col>
+          </Row>
+        )}
       </PageContainer>
     );
   }
