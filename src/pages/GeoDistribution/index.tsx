@@ -21,55 +21,11 @@ import {
   secondaryDirSql,
 } from './data';
 import ProjectDistPies from '@/pages/GeoDistribution/ProjectDistPies';
+import SecondaryDirsTable from '@/pages/GeoDistribution/SecondaryDirsTable';
 
 const intl = getIntl();
 
 const MAX_DOMAIN_LEGENDS = 10;
-
-function secondaryDirTableCellRender(cellData, rowData, index) {
-  return cellData.map((regionInfo, index) => {
-    const region = regionInfo[3];
-    const data = regionInfo[4];
-    const line = `${region}: ${data}`;
-    const key = `${rowData.secondaryDir}-${region}-${line}`;
-    // TODO It's super weried that JS always complain 'each children in list should have uniq key'
-    // TODO while it's really 'uniq' enough
-    return (
-      // <div key={key}>
-      <Tag key={key} color={'volcano'}>
-        {line}
-      </Tag>
-      // </div>
-    );
-  });
-}
-
-const SECONDARY_DIR_TABLE_COLS = [
-  {
-    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.secondaryDir' }),
-    dataIndex: 'secondaryDir',
-  },
-  {
-    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.fileRegionDist' }),
-    dataIndex: 'fileRegionDist',
-    render: secondaryDirTableCellRender,
-  },
-  {
-    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.fileEmailDist' }),
-    dataIndex: 'fileEmailDist',
-    render: secondaryDirTableCellRender,
-  },
-  {
-    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.developerRegionDist' }),
-    dataIndex: 'developerRegionDist',
-    render: secondaryDirTableCellRender,
-  },
-  {
-    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.developerEmailDist' }),
-    dataIndex: 'developerEmailDist',
-    render: secondaryDirTableCellRender,
-  },
-];
 
 const DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS = [
   {
@@ -501,27 +457,10 @@ export default class GeoDistribution extends React.Component<any, any> {
         <Spin spinning={this.state.loadingSecondaryDirsTableData}>
           <Row>
             <Col span={24}>
-              {!!this.state.secondaryDirsTableData.length && (
-                <div>
-                  <Divider>
-                    {intl.formatMessage({ id: 'geodist.secondaryDirTable.header.secondaryDir' })}
-                  </Divider>
-                  <span className={styles.componentIntro}>
-                    {intl.formatMessage({ id: 'geodist.secondaryDirTable.desc' })}
-                  </span>
-                  <Table
-                    columns={SECONDARY_DIR_TABLE_COLS}
-                    dataSource={this.state.secondaryDirsTableData}
-                    onRow={(row) => {
-                      return {
-                        onClick: () => {
-                          this.onSecondaryDirRowClicked(row);
-                        },
-                      };
-                    }}
-                  />
-                </div>
-              )}
+              <SecondaryDirsTable
+                secondaryDirsTableData={this.state.secondaryDirsTableData}
+                onSecondaryDirRowClicked={this.onSecondaryDirRowClicked}
+              />
             </Col>
           </Row>
         </Spin>
