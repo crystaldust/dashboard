@@ -4,9 +4,7 @@ import { extend } from 'umi-request';
 export async function runSql(sql: string) {
   const result = await request('/clickhouse/sql', {
     method: 'POST',
-    params: {
-      sql,
-    },
+    body: sql,
   });
 
   return {
