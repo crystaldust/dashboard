@@ -133,7 +133,7 @@ export default class GeoDistribution extends React.Component<any, any> {
       this.setState({ emailDomainCommitsDist });
     });
     // TODO Replace with real owner, repo
-    const criticalityScores_sql = criticalityScoresSql('dcloudio', 'uni-app');
+    const criticalityScores_sql = criticalityScoresSql(owner, repo);
     runSql(criticalityScores_sql).then((result) => {
       const criticalityScores: any[] = [];
       result.data.forEach((values: []) => {

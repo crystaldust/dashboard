@@ -8,16 +8,26 @@ const intl = getIntl();
 const config = {
   xField: 'time_point',
   yField: 'criticality_score',
-  label: {},
-
-  tooltip: {
-    follow: false,
-    fields: ['time_point', 'org_count'],
-    customContent: (title: any, items: any) => {
-      console.log(title, items);
-
-      return <div>Hello</div>;
+  yAxis: {
+    max: 1,
+  },
+  label: {
+    content: (data: object) => {
+      return data.criticality_score.toFixed(2);
     },
+  },
+  tooltip: {
+    fields: ['org_count', 'contributor_count', 'commit_frequency', 'recent_releases_count'],
+    // customContent: (title: any, items: any) => {
+    //   console.log(title, items);
+    //
+    //   return <div>Hello</div>;
+    // },
+    // formatter: (dataum) => {
+    //   console.log(dataum);
+    //   // return { criticality_score: 100, time_point: '2022-01-08' };
+    //   return dataum;
+    // },
   },
   point: {
     size: 5,
@@ -27,9 +37,6 @@ const config = {
       stroke: '#5B8FF9',
       lineWidth: 2,
     },
-  },
-  tooltip: {
-    showMarkers: false,
   },
   state: {
     active: {
