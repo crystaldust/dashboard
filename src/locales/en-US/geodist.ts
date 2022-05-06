@@ -1,4 +1,6 @@
 export default {
+  'geodist.criticalityScore': 'Community Activeness(Criticality Score)',
+
   'geodist.dirTree': 'Directory Tree',
   'geodist.dirTree.desc':
     'Hold ctrl for multiple selection, shift for multiple continuous selection',

@@ -13,6 +13,7 @@ import {
   alteredFileCountRegionDistInSecondaryDirSql,
   commitsEmailDomainDistSql,
   commitsRegionDistSql,
+  criticalityScoresSql,
   developerContribInRepoSql,
   developerCountDomainDistInSecondaryDirSql,
   developerCountRegionDistInSecondaryDirSql,
@@ -25,6 +26,8 @@ import SecondaryDirsTable from '@/pages/GeoDistribution/SecondaryDirsTable';
 import DirDeveloperContribTable from '@/pages/GeoDistribution/DirDeveloperContribTable';
 import { DeveloperInfoTable } from '@/pages/GeoDistribution/DeveloperInfoTable';
 import { parseGithubProfile } from '@/pages/GeoDistribution/DataProcessors';
+import { CriticalityScoreChart } from '@/pages/GeoDistribution/CriticalityScoreChart';
+import { Protocol } from 'puppeteer-core';
 
 const intl = getIntl();
 
@@ -42,6 +45,7 @@ export default class GeoDistribution extends React.Component<any, any> {
 
       regionCommitsDist: [],
       emailDomainCommitsDist: [],
+      criticalityScores: [],
 
       selectedDirsFileDeveloperData: [],
       selectedDirDeveloperContributionData: [],
@@ -127,6 +131,26 @@ export default class GeoDistribution extends React.Component<any, any> {
         emailDomainCommitsDist.push({ domain: 'Other', value: lastSum });
       }
       this.setState({ emailDomainCommitsDist });
+    });
+    // TODO Replace with real owner, repo
+    const criticalityScores_sql = criticalityScoresSql('dcloudio', 'uni-app');
+    runSql(criticalityScores_sql).then((result) => {
+      const criticalityScores: any[] = [];
+      result.data.forEach((values: []) => {
+        const score: object = {};
+        result.columns.forEach((col: [], colIndex: number) => {
+          const keyName: string = col[0];
+          if (keyName == 'time_point') {
+            // sampple time_point: 2020-06-01 00:00:00.000
+            score[keyName] = values[colIndex].slice(0, 10);
+          } else {
+            score[keyName] = values[colIndex];
+          }
+        });
+        criticalityScores.push(score);
+      });
+
+      this.setState({ criticalityScores });
     });
   }
 
@@ -328,6 +352,11 @@ export default class GeoDistribution extends React.Component<any, any> {
         <Row>
           <Col span={24}>
             <OwnerRepoSelector onOwnerRepoSelected={this.ownerRepoSelected} />
+          </Col>
+        </Row>
+        <Row>
+          <Col span={24}>
+            <CriticalityScoreChart criticalityScores={this.state.criticalityScores} />
           </Col>
         </Row>
         <Row gutter={16}>

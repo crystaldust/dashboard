@@ -1,4 +1,6 @@
 export default {
+  'geodist.criticalityScore': '社区活跃度（Criticality Score）',
+
   'geodist.dirTree': '目录结构',
   'geodist.dirTree.desc': '按住Ctrl选择多个目录，按住Shift连续选择多个目录',
   'geodist.commitsRegionDist': '区域提交数分布',

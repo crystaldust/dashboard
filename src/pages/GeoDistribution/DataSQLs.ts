@@ -1285,3 +1285,24 @@ group by search_key__owner,
          author_tz order by counts desc)
 group by search_key__owner,search_key__repo,author_email`;
 }
+
+export function criticalityScoresSql(owner, repo) {
+  return `
+ select time_point,
+       created_since,
+       updated_since,
+       contributor_count,
+       org_count,
+       commit_frequency,
+       recent_releases_count,
+       updated_issues_count,
+       closed_issues_count,
+       comment_frequency,
+       dependents_count,
+       criticality_score
+from criticality_score
+where owner='${owner}'
+  and repo='${repo}'
+order by time_point
+  `;
+}
