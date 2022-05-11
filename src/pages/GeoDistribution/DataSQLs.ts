@@ -1299,6 +1299,7 @@ export function criticalityScoresSql(owner, repo) {
        closed_issues_count,
        comment_frequency,
        dependents_count,
+       contributor_lookback_days,
        criticality_score
 from criticality_score
 where owner='${owner}'

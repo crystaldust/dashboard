@@ -9,26 +9,27 @@ const config = {
   xField: 'time_point',
   yField: 'criticality_score',
   yAxis: {
-    max: 1,
+    max: 1.1,
   },
+  seriesField: 'contributor_lookback_days',
   label: {
     content: (data: object) => {
       return data.criticality_score.toFixed(2);
     },
   },
-  tooltip: {
-    fields: ['org_count', 'contributor_count', 'commit_frequency', 'recent_releases_count'],
-    // customContent: (title: any, items: any) => {
-    //   console.log(title, items);
-    //
-    //   return <div>Hello</div>;
-    // },
-    // formatter: (dataum) => {
-    //   console.log(dataum);
-    //   // return { criticality_score: 100, time_point: '2022-01-08' };
-    //   return dataum;
-    // },
-  },
+  // tooltip: {
+  //   fields: ['org_count', 'contributor_count', 'commit_frequency', 'recent_releases_count'],
+  //   // customContent: (title: any, items: any) => {
+  //   //   console.log(title, items);
+  //   //
+  //   //   return <div>Hello</div>;
+  //   // },
+  //   // formatter: (dataum) => {
+  //   //   console.log(dataum);
+  //   //   // return { criticality_score: 100, time_point: '2022-01-08' };
+  //   //   return dataum;
+  //   // },
+  // },
   point: {
     size: 5,
     shape: 'diamond',

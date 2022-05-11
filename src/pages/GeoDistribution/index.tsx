@@ -140,16 +140,24 @@ export default class GeoDistribution extends React.Component<any, any> {
         const score: object = {};
         result.columns.forEach((col: [], colIndex: number) => {
           const keyName: string = col[0];
+          const value = values[colIndex];
           if (keyName == 'time_point') {
             // sampple time_point: 2020-06-01 00:00:00.000
-            score[keyName] = values[colIndex].slice(0, 10);
+            score[keyName] = value.slice(0, 10);
+          } else if (keyName == 'contributor_lookback_days') {
+            let content = 'Contributors ';
+            if (value == 0) {
+              content += ' all the time';
+            } else {
+              content += ` look back at ${value} days`;
+            }
+            score[keyName] = content;
           } else {
-            score[keyName] = values[colIndex];
+            score[keyName] = value;
           }
         });
         criticalityScores.push(score);
       });
-
       this.setState({ criticalityScores });
     });
   }
