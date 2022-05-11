@@ -1208,7 +1208,7 @@ group by search_key__owner, search_key__repo,
     dir_level2,email_domain,author_email)
 group by search_key__owner, search_key__repo,
     dir_level2,email_domain
-order by contributor_count desc ;`;
+order by contributor_count desc`;
 }
 
 // 给定（owner，repo，二级目录），给出该二级目录中，开发者email，提交量，个人提交时区数量
