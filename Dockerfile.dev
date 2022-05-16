@@ -1,0 +1,21 @@
+FROM node:lts-slim
+RUN npm install tyarn -g
+
+ADD config/ /dev-project/config/
+ADD jest.config.js /dev-project/jest.config.js
+ADD jsconfig.json /dev-project/jsconfig.json
+ADD mock/ /dev-project/mock/
+ADD package.json /dev-project/package.json
+ADD playwright.config.ts /dev-project/playwright.config.ts
+ADD public/ /dev-project/public/
+ADD README.md /dev-project/README.md
+ADD src/ /dev-project/src/
+ADD tests/ /dev-project/tests/
+ADD tsconfig.json /dev-project/tsconfig.json
+ADD yarn.lock /dev-project/yarn.lock
+
+WORKDIR /dev-project
+
+RUN tyarn
+
+CMD ["npm", "start"]
