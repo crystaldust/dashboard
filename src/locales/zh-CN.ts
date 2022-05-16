@@ -6,6 +6,7 @@ import settingDrawer from './zh-CN/settingDrawer';
 import settings from './zh-CN/settings';
 import pages from './zh-CN/pages';
 import geodist from './zh-CN/geodist';
+import chartdownload from '@/locales/zh-CN/chartdownload';
 
 export default {
   'navBar.lang': '语言',
@@ -24,4 +25,5 @@ export default {
   ...pwa,
   ...component,
   ...geodist,
+  ...chartdownload,
 };

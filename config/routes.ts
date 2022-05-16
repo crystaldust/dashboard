@@ -36,6 +36,12 @@
     icon: 'global',
     component: './GeoDistribution',
   },
+  {
+    path: '/chart_image',
+    name: 'Chart image download',
+    icon: 'LineChart',
+    component: './CriticalityScoreDownload',
+  },
   // {
   //   path: '/backup_low_code_viz',
   //   name: '[removing]Low Code Viz(activity)',
