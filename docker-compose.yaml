@@ -1,0 +1,24 @@
+version: '0.1'
+
+services:
+  dashboard:
+    container_name: dashboard
+    hostname: dashboard
+    image: dashboard:debug
+    restart: always
+    # 跨多个Docker-compose配置文件，services在一个网桥
+    networks:
+      - dev-network
+    environment:
+      - CK_HOST=192.168.8.21
+      - CK_PORT=18000
+      - CK_USER=querydata
+      - CK_PASS=querydata
+      - PORT=8008
+    ports:
+      - "17000:80"
+
+
+networks:
+  dev-network:
+    external: true
