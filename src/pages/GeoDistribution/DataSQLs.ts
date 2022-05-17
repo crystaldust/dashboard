@@ -698,12 +698,20 @@ export function commitsEmailDomainDistSql(owner, repo, since, until, commitMsgFi
 }
 
 // 给定（owner，repo，二级目录），按照区域划分的commits修改文件数量
-export function alteredFileCountRegionDistInSecondaryDirSql(owner, repo, dir, since, until) {
+export function alteredFileCountRegionDistInSecondaryDirSql(
+  owner,
+  repo,
+  dir,
+  since,
+  until,
+  commitMsgFilter,
+) {
   let dateRangeClause =
     since && until
       ? `and authored_date>'${since}'
     and authored_date<'${until}'`
       : '';
+  let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
 
   return `
   select search_key__owner ,
@@ -733,6 +741,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -766,6 +775,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (0,1,2)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -799,6 +809,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (3,4)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -832,6 +843,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (5)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -865,6 +877,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (8)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -898,6 +911,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (9)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -931,6 +945,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (10)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -939,12 +954,20 @@ group by search_key__owner, search_key__repo,
 }
 
 // 给定（owner，repo，二级目录），按照区域划分的开发者数量
-export function developerCountRegionDistInSecondaryDirSql(owner, repo, dir, since, until) {
+export function developerCountRegionDistInSecondaryDirSql(
+  owner,
+  repo,
+  dir,
+  since,
+  until,
+  commitMsgFilter,
+) {
   let dateRangeClause =
     since && until
       ? `and authored_date>'${since}'
     and authored_date<'${until}'`
       : '';
+  let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
 
   return `
   select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
@@ -975,6 +998,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1011,6 +1035,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (0,1,2)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1047,6 +1072,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (3,4)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1083,6 +1109,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (5)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1119,6 +1146,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (8)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1155,6 +1183,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (9)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1191,6 +1220,7 @@ from (
         and search_key__repo = '${repo}'
         and author_tz global in (10)
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1199,12 +1229,20 @@ group by search_key__owner, search_key__repo,
 }
 
 // 给定（owner，repo，二级目录），按照email domain划分的commits修改文件数量
-export function alteredFileCountDomainDistInSecondaryDirSql(owner, repo, dir, since, until) {
+export function alteredFileCountDomainDistInSecondaryDirSql(
+  owner,
+  repo,
+  dir,
+  since,
+  until,
+  commitMsgFilter,
+) {
   let dateRangeClause =
     since && until
       ? `and authored_date>'${since}'
     and authored_date<'${until}'`
       : '';
+  let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
 
   return `
   select search_key__owner ,
@@ -1232,18 +1270,27 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,email_domain ORDER by alter_file_count desc limit 20`;
 }
 
 // 给定（owner，repo，二级目录），按照email domain划分的开发者数量
-export function developerCountDomainDistInSecondaryDirSql(owner, repo, dir, since, until) {
+export function developerCountDomainDistInSecondaryDirSql(
+  owner,
+  repo,
+  dir,
+  since,
+  until,
+  commitMsgFilter,
+) {
   let dateRangeClause =
     since && until
       ? `and authored_date>'${since}'
     and authored_date<'${until}'`
       : '';
+  let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
 
   return `
   select search_key__owner, search_key__repo,
@@ -1273,6 +1320,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         ${dateRangeClause}
+        ${msgFilterClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,email_domain,author_email)
@@ -1282,12 +1330,21 @@ order by contributor_count desc`;
 }
 
 // 给定（owner，repo，二级目录），给出该二级目录中，开发者email，提交量，个人提交时区数量
-export function developersContribInSecondaryDirSql(owner, repo, dir, since, until) {
+export function developersContribInSecondaryDirSql(
+  owner,
+  repo,
+  dir,
+  since,
+  until,
+  commitMsgFilter,
+) {
   let dateRangeClause =
     since && until
       ? `and authored_date>'${since}'
     and authored_date<'${until}'`
       : '';
+  let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
+
   return `
   select search_key__owner,search_key__repo,author_email,sum(alter_files_count) alter_files_count,groupArray(a) as tz_distribution
 from (select search_key__owner,
@@ -1315,7 +1372,9 @@ from (select search_key__owner,
                     and search_key__owner = '${owner}'
                     and search_key__repo = '${repo}'
                     and author_email != ''
-                    ${dateRangeClause})
+                    ${dateRangeClause}
+                    ${msgFilterClause}
+                    )
 
             group by search_key__owner, search_key__repo, author_email, author_tz
             order by alter_files_count desc))

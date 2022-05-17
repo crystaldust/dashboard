@@ -251,6 +251,7 @@ export default class GeoDistribution extends React.Component<any, any> {
     const repo = this.repo;
     const since = this.since;
     const until = this.until;
+    const commitMsgFilter = this.commitMessageFilter;
     const secondaryDirs: string[] = [];
 
     dirKeySet.forEach((key: string) => {
@@ -293,7 +294,14 @@ export default class GeoDistribution extends React.Component<any, any> {
       );
 
       runSql(
-        alteredFileCountRegionDistInSecondaryDirSql(owner, repo, secondaryDir, since, until),
+        alteredFileCountRegionDistInSecondaryDirSql(
+          owner,
+          repo,
+          secondaryDir,
+          since,
+          until,
+          commitMsgFilter,
+        ),
       ).then((result) => {
         const sortedData = result.data.sort((a, b) => {
           // a and b look like this:
@@ -309,7 +317,14 @@ export default class GeoDistribution extends React.Component<any, any> {
         ep.emit(`${secondaryDir}-regionFileCount-ready`, sortedData);
       });
       runSql(
-        developerCountRegionDistInSecondaryDirSql(owner, repo, secondaryDir, since, until),
+        developerCountRegionDistInSecondaryDirSql(
+          owner,
+          repo,
+          secondaryDir,
+          since,
+          until,
+          commitMsgFilter,
+        ),
       ).then((result) => {
         const sortedDeveloperRegion = result.data.sort((a, b) => {
           // a and b look like this:
@@ -325,7 +340,14 @@ export default class GeoDistribution extends React.Component<any, any> {
         ep.emit(`${secondaryDir}-regionDeveloper-ready`, sortedDeveloperRegion);
       });
       runSql(
-        alteredFileCountDomainDistInSecondaryDirSql(owner, repo, secondaryDir, since, until),
+        alteredFileCountDomainDistInSecondaryDirSql(
+          owner,
+          repo,
+          secondaryDir,
+          since,
+          until,
+          commitMsgFilter,
+        ),
       ).then((result) => {
         const sortedFileCount = result.data.sort((a, b) => {
           // a and b look like this:
@@ -341,7 +363,14 @@ export default class GeoDistribution extends React.Component<any, any> {
         ep.emit(`${secondaryDir}-domainFileCount-ready`, sortedFileCount);
       });
       runSql(
-        developerCountDomainDistInSecondaryDirSql(owner, repo, secondaryDir, since, until),
+        developerCountDomainDistInSecondaryDirSql(
+          owner,
+          repo,
+          secondaryDir,
+          since,
+          until,
+          commitMsgFilter,
+        ),
       ).then((result) => {
         const sortedDeveloperCount = result.data.sort((a, b) => {
           // a and b look like this:
@@ -371,7 +400,14 @@ export default class GeoDistribution extends React.Component<any, any> {
     const secondaryDir = row.secondaryDir;
     this.setState({ loadingDeveloperContribInSecondaryDirData: true });
     runSql(
-      developersContribInSecondaryDirSql(owner, repo, secondaryDir, this.since, this.until),
+      developersContribInSecondaryDirSql(
+        owner,
+        repo,
+        secondaryDir,
+        this.since,
+        this.until,
+        this.commitMessageFilter,
+      ),
     ).then((result) => {
       const developerContribInSecondaryDirData = result.data.map((item) => {
         return {
