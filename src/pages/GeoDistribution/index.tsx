@@ -5,7 +5,7 @@ import SecondaryDirSelector from '@/pages/GeoDistribution/SecondaryDirSelector';
 import { runSql } from '@/services/clickhouse';
 import OwnerRepoSelector from '@/pages/GeoDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Col, Divider, Row, Table, Tag, Spin } from 'antd';
+import { Col, Divider, Row, Table, Tag, Spin, Input, Space } from 'antd';
 import EventProxy from '@dking/event-proxy';
 import { DatePicker } from 'antd';
 
@@ -42,6 +42,7 @@ export default class GeoDistribution extends React.Component<any, any> {
   repo: string;
   since: string;
   until: string;
+  commitMessageFilter: string;
 
   constructor(props) {
     super(props);
@@ -72,6 +73,7 @@ export default class GeoDistribution extends React.Component<any, any> {
     this.until = '';
     this.owner = '';
     this.repo = '';
+    this.commitMessageFilter = '';
 
     this.updateRepoRelatedData = this.updateRepoRelatedData.bind(this);
     this.ownerRepoSelected = this.ownerRepoSelected.bind(this);
@@ -79,9 +81,24 @@ export default class GeoDistribution extends React.Component<any, any> {
     this.onDeveloperRowClicked = this.onDeveloperRowClicked.bind(this);
     this.onSecondaryDirRowClicked = this.onSecondaryDirRowClicked.bind(this);
     this.onDateRangeChanged = this.onDateRangeChanged.bind(this);
+    this.filterCommitMessage = this.filterCommitMessage.bind(this);
   }
 
-  updateRepoRelatedData(owner, repo, since, until) {
+  updateRepoRelatedData(owner, repo, since, until, commitMsgFilter = '') {
+    console.debug('updateRepoRelatedData:');
+    console.log(
+      'owner:',
+      owner,
+      'repo:',
+      repo,
+      'since:',
+      since,
+      'until:',
+      until,
+      'commitMsgFilter:',
+      commitMsgFilter,
+    );
+
     this.setState({
       secondaryDirsTableData: [],
       developerContribInSecondaryDirData: [],
@@ -122,7 +139,7 @@ export default class GeoDistribution extends React.Component<any, any> {
       }
       this.setState({ dirData: stateDirData });
     });
-    runSql(commitsRegionDistSql(owner, repo, since, until)).then((result) => {
+    runSql(commitsRegionDistSql(owner, repo, since, until, commitMsgFilter)).then((result) => {
       const regionCommitsDist = result.data
         .map((item) => ({
           region: item[2],
@@ -131,7 +148,7 @@ export default class GeoDistribution extends React.Component<any, any> {
         .sort((a: object, b: object) => b.value - a.value);
       this.setState({ regionCommitsDist });
     });
-    runSql(commitsEmailDomainDistSql(owner, repo, since, until)).then((result) => {
+    runSql(commitsEmailDomainDistSql(owner, repo, since, until, commitMsgFilter)).then((result) => {
       let emailDomainCommitsDist = result.data
         .map((item) => ({
           domain: item[2],
@@ -408,10 +425,22 @@ export default class GeoDistribution extends React.Component<any, any> {
     });
   }
 
+  filterCommitMessage(value: string) {
+    this.commitMessageFilter = value;
+
+    this.updateRepoRelatedData(
+      this.owner,
+      this.repo,
+      this.since,
+      this.until,
+      this.commitMessageFilter,
+    );
+  }
+
   render() {
     return (
       <PageContainer>
-        <Row>
+        <Row gutter={16}>
           <Col span={8}>
             <OwnerRepoSelector onOwnerRepoSelected={this.ownerRepoSelected} />
           </Col>
@@ -424,6 +453,16 @@ export default class GeoDistribution extends React.Component<any, any> {
                     ? [moment(this.since), moment(this.until)]
                     : [null, null]
                 }
+              />
+            )}
+          </Col>
+          <Space />
+          <Col span={8}>
+            {!!this.state.repo && (
+              <Input.Search
+                placeholder={'Filter Commit Message'}
+                onSearch={this.filterCommitMessage}
+                enterButton
               />
             )}
           </Col>

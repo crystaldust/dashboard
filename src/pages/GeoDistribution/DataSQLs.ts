@@ -585,12 +585,14 @@ group by search_key__owner, search_key__repo,
   `;
 }
 
-export function commitsRegionDistSql(owner, repo, since, until) {
+export function commitsRegionDistSql(owner, repo, since, until, commitMsgFilter) {
   let dateRangeClause =
     since && until
       ? `and authored_date>'${since}'
     and authored_date<'${until}'`
       : '';
+
+  let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
 
   return `
   select search_key__owner, search_key__repo,'北美' as area, COUNT() commit_count
@@ -600,6 +602,7 @@ export function commitsRegionDistSql(owner, repo, since, until) {
                                             and search_key__repo = '${repo}'
                                             and author_tz global in (-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12)
                                             ${dateRangeClause}
+                                            ${msgFilterClause}
                                           group by search_key__owner, search_key__repo
 
 union all
@@ -610,6 +613,7 @@ select search_key__owner, search_key__repo,'欧洲西部' as area, COUNT() commi
                                             and search_key__repo = '${repo}'
                                             and author_tz global in (0,1,2)
                                             ${dateRangeClause}
+                                            ${msgFilterClause}
                                           group by search_key__owner, search_key__repo
 
 union all
@@ -620,6 +624,7 @@ select search_key__owner, search_key__repo,'欧洲东部' as area, COUNT() commi
                                             and search_key__repo = '${repo}'
                                             and author_tz global in (3,4)
                                             ${dateRangeClause}
+                                            ${msgFilterClause}
                                           group by search_key__owner, search_key__repo
 union all
 select search_key__owner, search_key__repo,'印度' as area, COUNT() commit_count
@@ -629,6 +634,7 @@ select search_key__owner, search_key__repo,'印度' as area, COUNT() commit_coun
                                             and search_key__repo = '${repo}'
                                             and author_tz global in (5)
                                             ${dateRangeClause}
+                                            ${msgFilterClause}
                                           group by search_key__owner, search_key__repo
 union all
 select search_key__owner, search_key__repo,'中国' as area, COUNT() commit_count
@@ -638,6 +644,7 @@ select search_key__owner, search_key__repo,'中国' as area, COUNT() commit_coun
                                             and search_key__repo = '${repo}'
                                             and author_tz global in (8)
                                             ${dateRangeClause}
+                                            ${msgFilterClause}
                                           group by search_key__owner, search_key__repo
 union all
 select search_key__owner, search_key__repo,'日韩' as area, COUNT() commit_count
@@ -647,6 +654,7 @@ select search_key__owner, search_key__repo,'日韩' as area, COUNT() commit_coun
                                             and search_key__repo = '${repo}'
                                             and author_tz global in (9)
                                             ${dateRangeClause}
+                                            ${msgFilterClause}
                                           group by search_key__owner, search_key__repo
 union all
 select search_key__owner, search_key__repo,'澳洲' as area, COUNT() commit_count
@@ -656,15 +664,17 @@ select search_key__owner, search_key__repo,'澳洲' as area, COUNT() commit_coun
                                             and search_key__repo = '${repo}'
                                             and author_tz global in (10)
                                             ${dateRangeClause}
+                                            ${msgFilterClause}
                                           group by search_key__owner, search_key__repo`;
 }
 
-export function commitsEmailDomainDistSql(owner, repo, since, until) {
-  let dateRangeClause = '';
-  if (since && until) {
-    dateRangeClause = `and authored_date > '${since}'
-                         and authored_date < '${until}'`;
-  }
+export function commitsEmailDomainDistSql(owner, repo, since, until, commitMsgFilter) {
+  let dateRangeClause =
+    since && until
+      ? `and authored_date>'${since}'
+    and authored_date<'${until}'`
+      : '';
+  let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
 
   return `
   select search_key__owner ,search_key__repo,
@@ -678,6 +688,7 @@ export function commitsEmailDomainDistSql(owner, repo, since, until) {
     and author_email != ''
     and email_domain != ''
     ${dateRangeClause}
+    ${msgFilterClause}
 
     group by
     \t\tsearch_key__owner ,
