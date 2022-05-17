@@ -7,6 +7,9 @@ import OwnerRepoSelector from '@/pages/GeoDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Col, Divider, Row, Table, Tag, Spin } from 'antd';
 import EventProxy from '@dking/event-proxy';
+import { DatePicker } from 'antd';
+
+const { RangePicker } = DatePicker;
 
 import {
   alteredFileCountDomainDistInSecondaryDirSql,
@@ -34,12 +37,15 @@ const intl = getIntl();
 const MAX_DOMAIN_LEGENDS = 10;
 
 export default class GeoDistribution extends React.Component<any, any> {
+  owner: string;
+  repo: string;
+  since: string;
+  until: string;
+
   constructor(props) {
     super(props);
 
     this.state = {
-      owner: '',
-      repo: '',
       dirData: [],
       ownerRepoMap: {},
 
@@ -57,17 +63,24 @@ export default class GeoDistribution extends React.Component<any, any> {
       loadingDeveloperContribInSecondaryDirData: false,
 
       developerInfoData: [],
+
+      dateRange: undefined,
     };
 
+    this.since = '';
+    this.until = '';
+    this.owner = '';
+    this.repo = '';
+
+    this.updateRepoRelatedData = this.updateRepoRelatedData.bind(this);
     this.ownerRepoSelected = this.ownerRepoSelected.bind(this);
     this.onDirSelect = this.onDirSelect.bind(this);
     this.onDeveloperRowClicked = this.onDeveloperRowClicked.bind(this);
     this.onSecondaryDirRowClicked = this.onSecondaryDirRowClicked.bind(this);
+    this.onDateRangeChanged = this.onDateRangeChanged.bind(this);
   }
 
-  ownerRepoSelected(owner: string, repo: string) {
-    this.setState({ owner, repo });
-
+  updateRepoRelatedData(owner, repo, since, until) {
     this.setState({
       secondaryDirsTableData: [],
       developerContribInSecondaryDirData: [],
@@ -108,7 +121,7 @@ export default class GeoDistribution extends React.Component<any, any> {
       }
       this.setState({ dirData: stateDirData });
     });
-    runSql(commitsRegionDistSql(owner, repo)).then((result) => {
+    runSql(commitsRegionDistSql(owner, repo, since, until)).then((result) => {
       const regionCommitsDist = result.data
         .map((item) => ({
           region: item[2],
@@ -117,7 +130,7 @@ export default class GeoDistribution extends React.Component<any, any> {
         .sort((a: object, b: object) => b.value - a.value);
       this.setState({ regionCommitsDist });
     });
-    runSql(commitsEmailDomainDistSql(owner, repo)).then((result) => {
+    runSql(commitsEmailDomainDistSql(owner, repo, since, until)).then((result) => {
       let emailDomainCommitsDist = result.data
         .map((item) => ({
           domain: item[2],
@@ -162,6 +175,31 @@ export default class GeoDistribution extends React.Component<any, any> {
     });
   }
 
+  ownerRepoSelected(owner: string, repo: string) {
+    if (this.owner == owner && this.repo == repo) {
+      return;
+    }
+    if (repo) {
+      this.setState({ repo });
+    }
+
+    this.owner = owner;
+    this.repo = repo;
+    this.updateRepoRelatedData(this.owner, this.repo, this.since, this.until);
+  }
+
+  onDateRangeChanged(_, dateStrs: string[]) {
+    const since = dateStrs[0];
+    const until = dateStrs[1];
+    if (this.since == since && this.until == until) {
+      return;
+    }
+
+    this.since = since;
+    this.until = until;
+    this.updateRepoRelatedData(this.owner, this.repo, this.since, this.until);
+  }
+
   onDirSelect(keys, selectedDirs) {
     this.setState({
       // Since secondaryDirsTableData will be update, don't change the state too frequently
@@ -180,8 +218,8 @@ export default class GeoDistribution extends React.Component<any, any> {
       }
     });
 
-    const owner = this.state.owner;
-    const repo = this.state.repo;
+    const owner = this.owner;
+    const repo = this.repo;
     const secondaryDirs = [];
     dirKeySet.forEach((key: string) => {
       const parts = key.split('-');
@@ -195,7 +233,6 @@ export default class GeoDistribution extends React.Component<any, any> {
     if (secondaryDirs.length == 0) {
       return;
     }
-    console.log('secondaryDirs', secondaryDirs);
 
     this.setState({ loadingSecondaryDirsTableData: true });
     const ep = EventProxy.create();
@@ -358,8 +395,11 @@ export default class GeoDistribution extends React.Component<any, any> {
     return (
       <PageContainer>
         <Row>
-          <Col span={24}>
+          <Col span={8}>
             <OwnerRepoSelector onOwnerRepoSelected={this.ownerRepoSelected} />
+          </Col>
+          <Col span={4}>
+            {!!this.state.repo && <RangePicker onChange={this.onDateRangeChanged} />}
           </Col>
         </Row>
         <Row>
@@ -367,6 +407,7 @@ export default class GeoDistribution extends React.Component<any, any> {
             <CriticalityScoreChart criticalityScores={this.state.criticalityScores} />
           </Col>
         </Row>
+
         <Row gutter={16}>
           <Col span={4}>
             <SecondaryDirSelector

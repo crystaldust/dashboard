@@ -54,9 +54,7 @@ export default class SecondaryDirSelector extends React.Component<any, any> {
   render() {
     return (
       <div>
-        {this.props.repo == '' ? (
-          ''
-        ) : (
+        {!!this.props.repo && (
           <div>
             <Divider>{intl.formatMessage({ id: 'geodist.dirTree' })}</Divider>
             {/*<span className={styles.componentIntro} style={{ color: '#999999' }}>*/}
