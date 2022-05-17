@@ -334,8 +334,8 @@ export default class GeoDistribution extends React.Component<any, any> {
       // developerContribInSecondaryDirData: [],
       developerInfoData: [],
     });
-    const owner = this.state.owner;
-    const repo = this.state.repo;
+    const owner = this.owner;
+    const repo = this.repo;
     const secondaryDir = row.secondaryDir;
     this.setState({ loadingDeveloperContribInSecondaryDirData: true });
     runSql(developersContribInSecondaryDirSql(owner, repo, secondaryDir)).then((result) => {
@@ -353,8 +353,8 @@ export default class GeoDistribution extends React.Component<any, any> {
   }
 
   onDeveloperRowClicked(row: object) {
-    const owner = this.state.owner;
-    const repo = this.state.repo;
+    const owner = this.owner;
+    const repo = this.repo;
     const email = row.developerEmail;
     const ep = EventProxy.create();
     ep.on(['githubProfileReady', 'contribTzDistReady'], (githubProfile, contribTzDist) => {
