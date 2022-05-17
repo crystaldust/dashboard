@@ -38,9 +38,15 @@
   },
   {
     path: '/chart_image',
-    name: 'Chart image download',
+    name: 'charImageDownload',
     icon: 'LineChart',
     component: './CriticalityScoreDownload',
+  },
+  {
+    path: '/add_repo',
+    name: 'repositoriesMonitor',
+    icon: 'Github',
+    component: './RepositoriesMonitor',
   },
   // {
   //   path: '/backup_low_code_viz',

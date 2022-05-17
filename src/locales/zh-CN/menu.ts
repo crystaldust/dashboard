@@ -51,5 +51,7 @@ export default {
   'menu.editor.koni': '拓扑编辑器',
   'menu.lowCodePlatform': '低代码平台',
   'menu.geoDist': '地理分布',
+  'menu.charImageDownload': '下载图表图片',
+  'menu.repositoriesMonitor': '添加或查看代码库',
   'menu.[removing]Low Code Viz(activity)': '[待删除]低代码平台（Activities）',
 };

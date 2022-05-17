@@ -7,6 +7,7 @@ import settings from './zh-CN/settings';
 import pages from './zh-CN/pages';
 import geodist from './zh-CN/geodist';
 import chartdownload from '@/locales/zh-CN/chartdownload';
+import repositoriesMonitor from '@/locales/zh-CN/repositoriesMonitor';
 
 export default {
   'navBar.lang': '语言',
@@ -26,4 +27,5 @@ export default {
   ...component,
   ...geodist,
   ...chartdownload,
+  ...repositoriesMonitor,
 };

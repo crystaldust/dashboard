@@ -7,6 +7,7 @@ import settingDrawer from './en-US/settingDrawer';
 import settings from './en-US/settings';
 import geodist from '@/locales/en-US/geodist';
 import chartdownload from '@/locales/en-US/chartdownload';
+import repositoriesMonitor from '@/locales/en-US/repositoriesMonitor';
 
 export default {
   'navBar.lang': 'Languages',
@@ -26,4 +27,5 @@ export default {
   ...pages,
   ...geodist,
   ...chartdownload,
+  ...repositoriesMonitor,
 };
