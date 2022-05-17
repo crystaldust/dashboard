@@ -371,7 +371,7 @@ export default class GeoDistribution extends React.Component<any, any> {
         developerInfoData,
       });
     });
-    runSql(developerGitHubProfileSql(email)).then((result) => {
+    runSql(developerGitHubProfileSql(email), true).then((result) => {
       let profile = null;
       if (result.data.length) {
         const profileData = result.data[0];

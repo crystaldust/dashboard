@@ -1,10 +1,13 @@
 import { request } from 'umi';
 import { extend } from 'umi-request';
 
-export async function runSql(sql: string) {
+export async function runSql(sql: string, jsonObjects = false) {
   const result = await request('/clickhouse/sql', {
     method: 'POST',
     body: sql,
+    headers: {
+      jsonObjects,
+    },
   });
 
   return {
