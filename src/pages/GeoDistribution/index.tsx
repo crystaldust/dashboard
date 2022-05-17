@@ -353,7 +353,9 @@ export default class GeoDistribution extends React.Component<any, any> {
     const repo = this.repo;
     const secondaryDir = row.secondaryDir;
     this.setState({ loadingDeveloperContribInSecondaryDirData: true });
-    runSql(developersContribInSecondaryDirSql(owner, repo, secondaryDir)).then((result) => {
+    runSql(
+      developersContribInSecondaryDirSql(owner, repo, secondaryDir, this.since, this.until),
+    ).then((result) => {
       const developerContribInSecondaryDirData = result.data.map((item) => {
         return {
           secondaryDir: secondaryDir,

@@ -1271,7 +1271,12 @@ order by contributor_count desc`;
 }
 
 // 给定（owner，repo，二级目录），给出该二级目录中，开发者email，提交量，个人提交时区数量
-export function developersContribInSecondaryDirSql(owner, repo, dir) {
+export function developersContribInSecondaryDirSql(owner, repo, dir, since, until) {
+  let dateRangeClause =
+    since && until
+      ? `and authored_date>'${since}'
+    and authored_date<'${until}'`
+      : '';
   return `
   select search_key__owner,search_key__repo,author_email,sum(alter_files_count) alter_files_count,groupArray(a) as tz_distribution
 from (select search_key__owner,
@@ -1298,7 +1303,9 @@ from (select search_key__owner,
                   where dir_level2 GLOBAL in ('${dir}')
                     and search_key__owner = '${owner}'
                     and search_key__repo = '${repo}'
-                    and author_email != '')
+                    and author_email != ''
+                    ${dateRangeClause})
+
             group by search_key__owner, search_key__repo, author_email, author_tz
             order by alter_files_count desc))
 group by search_key__owner,search_key__repo,author_email
