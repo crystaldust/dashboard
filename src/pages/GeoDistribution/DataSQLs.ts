@@ -586,11 +586,11 @@ group by search_key__owner, search_key__repo,
 }
 
 export function commitsRegionDistSql(owner, repo, since, until) {
-  let dateRangeClause = '';
-  if (since && until) {
-    dateRangeClause = `and authored_date > '${since}'
-                         and authored_date < '${until}'`;
-  }
+  let dateRangeClause =
+    since && until
+      ? `and authored_date>'${since}'
+    and authored_date<'${until}'`
+      : '';
 
   return `
   select search_key__owner, search_key__repo,'北美' as area, COUNT() commit_count
@@ -687,7 +687,13 @@ export function commitsEmailDomainDistSql(owner, repo, since, until) {
 }
 
 // 给定（owner，repo，二级目录），按照区域划分的commits修改文件数量
-export function alteredFileCountRegionDistInSecondaryDirSql(owner, repo, dir) {
+export function alteredFileCountRegionDistInSecondaryDirSql(owner, repo, dir, since, until) {
+  let dateRangeClause =
+    since && until
+      ? `and authored_date>'${since}'
+    and authored_date<'${until}'`
+      : '';
+
   return `
   select search_key__owner ,
     search_key__repo ,
@@ -715,6 +721,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -747,6 +754,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (0,1,2)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -779,6 +787,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (3,4)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -811,6 +820,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (5)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -843,6 +853,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (8)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -875,6 +886,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (9)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -907,6 +919,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (10)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2
@@ -915,7 +928,13 @@ group by search_key__owner, search_key__repo,
 }
 
 // 给定（owner，repo，二级目录），按照区域划分的开发者数量
-export function developerCountRegionDistInSecondaryDirSql(owner, repo, dir) {
+export function developerCountRegionDistInSecondaryDirSql(owner, repo, dir, since, until) {
+  let dateRangeClause =
+    since && until
+      ? `and authored_date>'${since}'
+    and authored_date<'${until}'`
+      : '';
+
   return `
   select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
     search_key__repo ,
@@ -944,6 +963,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -979,6 +999,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (0,1,2)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1014,6 +1035,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (3,4)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1049,6 +1071,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (5)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1084,6 +1107,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (8)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1119,6 +1143,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (9)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1154,6 +1179,7 @@ from (
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
         and author_tz global in (10)
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,author_email)
@@ -1162,7 +1188,13 @@ group by search_key__owner, search_key__repo,
 }
 
 // 给定（owner，repo，二级目录），按照email domain划分的commits修改文件数量
-export function alteredFileCountDomainDistInSecondaryDirSql(owner, repo, dir) {
+export function alteredFileCountDomainDistInSecondaryDirSql(owner, repo, dir, since, until) {
+  let dateRangeClause =
+    since && until
+      ? `and authored_date>'${since}'
+    and authored_date<'${until}'`
+      : '';
+
   return `
   select search_key__owner ,
     search_key__repo ,
@@ -1188,13 +1220,20 @@ from (
     where dir_level2 = '${dir}'
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,email_domain ORDER by alter_file_count desc limit 20`;
 }
 
 // 给定（owner，repo，二级目录），按照email domain划分的开发者数量
-export function developerCountDomainDistInSecondaryDirSql(owner, repo, dir) {
+export function developerCountDomainDistInSecondaryDirSql(owner, repo, dir, since, until) {
+  let dateRangeClause =
+    since && until
+      ? `and authored_date>'${since}'
+    and authored_date<'${until}'`
+      : '';
+
   return `
   select search_key__owner, search_key__repo,
     dir_level2,email_domain,count() contributor_count from (select search_key__owner ,
@@ -1222,6 +1261,7 @@ from (
     where dir_level2 = '${dir}'
         and search_key__owner = '${owner}'
         and search_key__repo = '${repo}'
+        ${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     dir_level2,email_domain,author_email)

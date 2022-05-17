@@ -232,7 +232,10 @@ export default class GeoDistribution extends React.Component<any, any> {
 
     const owner = this.owner;
     const repo = this.repo;
-    const secondaryDirs = [];
+    const since = this.since;
+    const until = this.until;
+    const secondaryDirs: string[] = [];
+
     dirKeySet.forEach((key: string) => {
       const parts = key.split('-');
       const primaryIndex = parseInt(parts[0]);
@@ -272,70 +275,70 @@ export default class GeoDistribution extends React.Component<any, any> {
         },
       );
 
-      runSql(alteredFileCountRegionDistInSecondaryDirSql(owner, repo, secondaryDir)).then(
-        (result) => {
-          const sortedData = result.data.sort((a, b) => {
-            // a and b look like this:
-            // [
-            //     "envoyproxy",
-            //     "envoy",
-            //     "api/bazel",
-            //     "日韩",
-            //     8
-            // ]
-            return b[4] - a[4];
-          });
-          ep.emit(`${secondaryDir}-regionFileCount-ready`, sortedData);
-        },
-      );
-      runSql(developerCountRegionDistInSecondaryDirSql(owner, repo, secondaryDir)).then(
-        (result) => {
-          const sortedDeveloperRegion = result.data.sort((a, b) => {
-            // a and b look like this:
-            // [
-            //     "envoyproxy",
-            //     "envoy",
-            //     "api/bazel",
-            //     "日韩",
-            //     8
-            // ]
-            return b[4] - a[4];
-          });
-          ep.emit(`${secondaryDir}-regionDeveloper-ready`, sortedDeveloperRegion);
-        },
-      );
-      runSql(alteredFileCountDomainDistInSecondaryDirSql(owner, repo, secondaryDir)).then(
-        (result) => {
-          const sortedFileCount = result.data.sort((a, b) => {
-            // a and b look like this:
-            // [
-            //     "envoyproxy",
-            //     "envoy",
-            //     "api/bazel",
-            //     "gmail.com",
-            //     8
-            // ]
-            return b[4] - a[4];
-          });
-          ep.emit(`${secondaryDir}-domainFileCount-ready`, sortedFileCount);
-        },
-      );
-      runSql(developerCountDomainDistInSecondaryDirSql(owner, repo, secondaryDir)).then(
-        (result) => {
-          const sortedDeveloperCount = result.data.sort((a, b) => {
-            // a and b look like this:
-            // [
-            //     "envoyproxy",
-            //     "envoy",
-            //     "api/bazel",
-            //     "gmail.com",
-            //     8
-            // ]
-            return b[4] - a[4];
-          });
-          ep.emit(`${secondaryDir}-domainDeveloper-ready`, sortedDeveloperCount);
-        },
-      );
+      runSql(
+        alteredFileCountRegionDistInSecondaryDirSql(owner, repo, secondaryDir, since, until),
+      ).then((result) => {
+        const sortedData = result.data.sort((a, b) => {
+          // a and b look like this:
+          // [
+          //     "envoyproxy",
+          //     "envoy",
+          //     "api/bazel",
+          //     "日韩",
+          //     8
+          // ]
+          return b[4] - a[4];
+        });
+        ep.emit(`${secondaryDir}-regionFileCount-ready`, sortedData);
+      });
+      runSql(
+        developerCountRegionDistInSecondaryDirSql(owner, repo, secondaryDir, since, until),
+      ).then((result) => {
+        const sortedDeveloperRegion = result.data.sort((a, b) => {
+          // a and b look like this:
+          // [
+          //     "envoyproxy",
+          //     "envoy",
+          //     "api/bazel",
+          //     "日韩",
+          //     8
+          // ]
+          return b[4] - a[4];
+        });
+        ep.emit(`${secondaryDir}-regionDeveloper-ready`, sortedDeveloperRegion);
+      });
+      runSql(
+        alteredFileCountDomainDistInSecondaryDirSql(owner, repo, secondaryDir, since, until),
+      ).then((result) => {
+        const sortedFileCount = result.data.sort((a, b) => {
+          // a and b look like this:
+          // [
+          //     "envoyproxy",
+          //     "envoy",
+          //     "api/bazel",
+          //     "gmail.com",
+          //     8
+          // ]
+          return b[4] - a[4];
+        });
+        ep.emit(`${secondaryDir}-domainFileCount-ready`, sortedFileCount);
+      });
+      runSql(
+        developerCountDomainDistInSecondaryDirSql(owner, repo, secondaryDir, since, until),
+      ).then((result) => {
+        const sortedDeveloperCount = result.data.sort((a, b) => {
+          // a and b look like this:
+          // [
+          //     "envoyproxy",
+          //     "envoy",
+          //     "api/bazel",
+          //     "gmail.com",
+          //     8
+          // ]
+          return b[4] - a[4];
+        });
+        ep.emit(`${secondaryDir}-domainDeveloper-ready`, sortedDeveloperCount);
+      });
     });
   }
 
