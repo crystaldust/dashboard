@@ -31,6 +31,7 @@ import { DeveloperInfoTable } from '@/pages/GeoDistribution/DeveloperInfoTable';
 import { parseGithubProfile } from '@/pages/GeoDistribution/DataProcessors';
 import { CriticalityScoreChart } from '@/pages/GeoDistribution/CriticalityScoreChart';
 import { Protocol } from 'puppeteer-core';
+import moment from 'moment';
 
 const intl = getIntl();
 
@@ -64,7 +65,7 @@ export default class GeoDistribution extends React.Component<any, any> {
 
       developerInfoData: [],
 
-      dateRange: undefined,
+      dateRangeSelection: false,
     };
 
     this.since = '';
@@ -182,6 +183,12 @@ export default class GeoDistribution extends React.Component<any, any> {
     if (repo) {
       this.setState({ repo });
     }
+    if (this.since || this.until) {
+      // Clear the date range selection
+      this.since = '';
+      this.until = '';
+      this.setState({ dateRangeSelection: false });
+    }
 
     this.owner = owner;
     this.repo = repo;
@@ -197,6 +204,11 @@ export default class GeoDistribution extends React.Component<any, any> {
 
     this.since = since;
     this.until = until;
+    if (since && until) {
+      // If clear button is clicked, both until and since are empty string, when we shouldn't update the
+      // picker's value
+      this.setState({ dateRangeSelection: true });
+    }
     this.updateRepoRelatedData(this.owner, this.repo, this.since, this.until);
   }
 
@@ -399,7 +411,16 @@ export default class GeoDistribution extends React.Component<any, any> {
             <OwnerRepoSelector onOwnerRepoSelected={this.ownerRepoSelected} />
           </Col>
           <Col span={4}>
-            {!!this.state.repo && <RangePicker onChange={this.onDateRangeChanged} />}
+            {!!this.state.repo && (
+              <RangePicker
+                onChange={this.onDateRangeChanged}
+                value={
+                  this.state.dateRangeSelection && this.since && this.until
+                    ? [moment(this.since), moment(this.until)]
+                    : [null, null]
+                }
+              />
+            )}
           </Col>
         </Row>
         <Row>

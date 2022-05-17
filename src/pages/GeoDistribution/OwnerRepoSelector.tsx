@@ -41,7 +41,6 @@ export default class OwnerRepoSelector extends React.Component<any, any> {
   onOwnerChange() {}
 
   ownerRepoSelected(owner, repo) {
-    console.log('owner, repo:', owner, repo);
     if (this.props.onOwnerRepoSelected) {
       this.props.onOwnerRepoSelected(owner, repo);
     }
