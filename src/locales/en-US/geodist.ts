@@ -8,10 +8,11 @@ export default {
   'geodist.commitsEmailDomainDist': 'Commits Distribution By Email Domain',
 
   'geodist.secondaryDirTable.colname.secondaryDir': 'Secondary Dir Path',
-  'geodist.secondaryDirTable.colname.fileRegionDist': 'Committed File Region Distribution',
-  'geodist.secondaryDirTable.colname.fileEmailDist': 'Committed File Email Domain Distribution',
-  'geodist.secondaryDirTable.colname.developerRegionDist': 'Developer Region Distribution',
-  'geodist.secondaryDirTable.colname.developerEmailDist': 'Developer Email Domain  Distribution',
+  'geodist.secondaryDirTable.colname.fileRegionDist': 'Committed File Distribution by Region',
+  'geodist.secondaryDirTable.colname.fileEmailDist': 'Committed File Distribution by Email Domain',
+  'geodist.secondaryDirTable.colname.developerRegionDist': 'Developer Count Distribution by Region',
+  'geodist.secondaryDirTable.colname.developerEmailDist':
+    'Developer Count Distribution by Email Domain',
   'geodist.secondaryDirTable.header.secondaryDir': 'Contributions in Selected Directories',
   'geodist.secondaryDirTable.desc': 'Click the row to explore the details of the secondary dir',
 

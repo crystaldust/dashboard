@@ -10,7 +10,7 @@ export default {
   'geodist.secondaryDirTable.colname.fileRegionDist': '提交文件数量 区域分布',
   'geodist.secondaryDirTable.colname.fileEmailDist': '提交文件数量 邮箱域名分布',
   'geodist.secondaryDirTable.colname.developerRegionDist': '开发者数量 区域分布',
-  'geodist.secondaryDirTable.colname.developerEmailDist': '提交文件数量 邮箱域名分布',
+  'geodist.secondaryDirTable.colname.developerEmailDist': '开发者数量 邮箱域名分布',
   'geodist.secondaryDirTable.header.secondaryDir': '选中目录的贡献情况',
   'geodist.secondaryDirTable.desc': '点击表格行显示该目录贡献细节',
 
