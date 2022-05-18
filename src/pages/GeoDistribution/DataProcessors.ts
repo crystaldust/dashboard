@@ -87,3 +87,57 @@ function _githubProfileLocation(rawSQLResult: object) {
   // important info 'Remote' is dropped
   return locationItems.filter((item) => !!item).join(LOCATION_CONNECTOR);
 }
+
+export function pathsToTree(paths) {
+  const dataTree = {}; // 最终结果
+  const treeIndex = {}; // 索引 | 族谱
+  paths.forEach(function (row) {
+    const nodeParent = row.split('/').slice(0, -2).join('/');
+    const nodeItemPath = row.split('/').slice(0, -1).join('/');
+    const nodeItem = {
+      title: nodeItemPath.slice(nodeParent.length + 1),
+      key: row.split('/').slice(0, -1).join('/'),
+    };
+
+    treeIndex[nodeItemPath] = nodeItem;
+    if (nodeParent == '') {
+      nodeItem.title = nodeItemPath;
+      dataTree[nodeItemPath] = nodeItem;
+      // console.log("dataTree:",dataTree)
+      // console.log("treeIndex:",treeIndex)
+    } else {
+      // console.log("nodeParent:",nodeParent)
+      // console.log("treeIndex[nodeParent]:",treeIndex[nodeParent])
+      // treeIndex[nodeParent] =
+      if (treeIndex[nodeParent]['children'] === undefined) {
+        treeIndex[nodeParent]['children'] = [];
+      }
+      treeIndex[nodeParent]['children'].push(nodeItem);
+    }
+
+    //     if (treeIndex[nodeParent]["children"] === undefined) {
+    //     treeIndex[nodeParent]["children"] = [nodeItem];
+    // } else {
+    //     treeIndex[nodeParent] = [nodeItem];
+    // }
+  });
+  const ary = [];
+  for (let key in dataTree) {
+    ary.push(dataTree[key]);
+  }
+  return ary;
+}
+
+export function fetchAllChildren(allPaths: string[], node: object) {
+  if (
+    !node.hasOwnProperty('children') ||
+    node.children === undefined ||
+    node.children.length == 0
+  ) {
+    allPaths.push(node.key);
+    return;
+  }
+  node.children.forEach((child) => {
+    fetchAllChildren(allPaths, child);
+  });
+}
