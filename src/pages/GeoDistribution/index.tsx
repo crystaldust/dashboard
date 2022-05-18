@@ -191,7 +191,7 @@ export default class GeoDistribution extends React.Component<any, any> {
     this.updateRepoRelatedData(this.owner, this.repo, this.since, this.until);
   }
 
-  onDirSelect(keys, event) {
+  onDirSelect(selectedDirs, event) {
     this.setState({
       // Since secondaryDirsTableData will be update, don't change the state too frequently
       // Or the web page will have great performance side effect
@@ -199,8 +199,6 @@ export default class GeoDistribution extends React.Component<any, any> {
       developerContribInSecondaryDirData: [],
       developerInfoData: [],
     });
-    const selectedDirs: string[] = [];
-    fetchAllChildren(selectedDirs, event.node);
 
     const owner = this.owner;
     const repo = this.repo;
