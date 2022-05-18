@@ -213,8 +213,9 @@ export default class GeoDistribution extends React.Component<any, any> {
   }
 
   onDateRangeChanged(_, dateStrs: string[]) {
-    const since = dateStrs[0];
-    const until = dateStrs[1];
+    // Format '%YYYY-%MM' in clickhouse doesn't work, add the 'day one' suffix
+    const since = dateStrs[0] + '-01';
+    const until = dateStrs[1] + '-01';
     if (this.since == since && this.until == until) {
       return;
     }
@@ -456,6 +457,7 @@ export default class GeoDistribution extends React.Component<any, any> {
             {!!this.state.repo && (
               <RangePicker
                 onChange={this.onDateRangeChanged}
+                picker="month"
                 value={
                   this.state.dateRangeSelection && this.since && this.until
                     ? [moment(this.since), moment(this.until)]
