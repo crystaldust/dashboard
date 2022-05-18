@@ -303,18 +303,11 @@ export default class GeoDistribution extends React.Component<any, any> {
           commitMsgFilter,
         ),
       ).then((result) => {
-        const sortedData = result.data.sort((a, b) => {
-          // a and b look like this:
-          // [
-          //     "envoyproxy",
-          //     "envoy",
-          //     "api/bazel",
-          //     "日韩",
-          //     8
-          // ]
-          return b[4] - a[4];
+        console.log(result.data);
+        const fileCountRegionDist = result.data.map((item: any[]) => {
+          return { region: item[1], value: item[0] };
         });
-        ep.emit(`${secondaryDir}-regionFileCount-ready`, sortedData);
+        ep.emit(`${secondaryDir}-regionFileCount-ready`, fileCountRegionDist);
       });
       runSql(
         developerCountRegionDistInSecondaryDirSql(
@@ -326,18 +319,10 @@ export default class GeoDistribution extends React.Component<any, any> {
           commitMsgFilter,
         ),
       ).then((result) => {
-        const sortedDeveloperRegion = result.data.sort((a, b) => {
-          // a and b look like this:
-          // [
-          //     "envoyproxy",
-          //     "envoy",
-          //     "api/bazel",
-          //     "日韩",
-          //     8
-          // ]
-          return b[4] - a[4];
+        const developerRegionDist = result.data.map((item: any[]) => {
+          return { region: item[1], value: item[0] };
         });
-        ep.emit(`${secondaryDir}-regionDeveloper-ready`, sortedDeveloperRegion);
+        ep.emit(`${secondaryDir}-regionDeveloper-ready`, developerRegionDist);
       });
       runSql(
         alteredFileCountDomainDistInSecondaryDirSql(
@@ -349,18 +334,13 @@ export default class GeoDistribution extends React.Component<any, any> {
           commitMsgFilter,
         ),
       ).then((result) => {
-        const sortedFileCount = result.data.sort((a, b) => {
-          // a and b look like this:
-          // [
-          //     "envoyproxy",
-          //     "envoy",
-          //     "api/bazel",
-          //     "gmail.com",
-          //     8
-          // ]
-          return b[4] - a[4];
+        const fileCountEmailDomainDist = result.data.map((item) => {
+          return {
+            region: item[1],
+            value: item[0],
+          };
         });
-        ep.emit(`${secondaryDir}-domainFileCount-ready`, sortedFileCount);
+        ep.emit(`${secondaryDir}-domainFileCount-ready`, fileCountEmailDomainDist);
       });
       runSql(
         developerCountDomainDistInSecondaryDirSql(
@@ -372,18 +352,10 @@ export default class GeoDistribution extends React.Component<any, any> {
           commitMsgFilter,
         ),
       ).then((result) => {
-        const sortedDeveloperCount = result.data.sort((a, b) => {
-          // a and b look like this:
-          // [
-          //     "envoyproxy",
-          //     "envoy",
-          //     "api/bazel",
-          //     "gmail.com",
-          //     8
-          // ]
-          return b[4] - a[4];
+        const developerEmailDomainDist = result.data.map((item) => {
+          return { region: item[1], value: item[0] };
         });
-        ep.emit(`${secondaryDir}-domainDeveloper-ready`, sortedDeveloperCount);
+        ep.emit(`${secondaryDir}-domainDeveloper-ready`, developerEmailDomainDist);
       });
     });
   }

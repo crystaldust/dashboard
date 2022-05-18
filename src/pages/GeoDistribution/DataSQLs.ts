@@ -712,245 +712,252 @@ export function alteredFileCountRegionDistInSecondaryDirSql(
     and authored_date<'${until}'`
       : '';
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
-
   return `
-  select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '北美' as area,
-    COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2
-
-union all
-
-select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '欧洲西部' as area,
-    COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (0,1,2)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2
-
-union all
-
-select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '欧洲东部' as area,
-    COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (3,4)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2
-
-union all
-
-select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '印度' as area,
-    COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (5)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2
-
-union all
-
-select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '中国' as area,
-    COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (8)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2
-
-union all
-
-select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '日韩' as area,
-    COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (9)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2
-
-union all
-
-select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '澳洲' as area,
-    COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (10)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2
-
+  select sum(alter_file_count) as count, area from gits_alter_file_times
+where search_key__owner='${owner}'
+and search_key__repo='${repo}'
+and in_dir='${dir}/'
+group by area
+order by count desc
   `;
+  //   return `
+  //   select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '北美' as area,
+  //     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2
+  //
+  // union all
+  //
+  // select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '欧洲西部' as area,
+  //     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (0,1,2)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2
+  //
+  // union all
+  //
+  // select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '欧洲东部' as area,
+  //     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (3,4)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2
+  //
+  // union all
+  //
+  // select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '印度' as area,
+  //     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (5)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2
+  //
+  // union all
+  //
+  // select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '中国' as area,
+  //     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (8)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2
+  //
+  // union all
+  //
+  // select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '日韩' as area,
+  //     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (9)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2
+  //
+  // union all
+  //
+  // select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '澳洲' as area,
+  //     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (10)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2
+  //
+  //   `;
 }
 
 // 给定（owner，repo，二级目录），按照区域划分的开发者数量
@@ -968,264 +975,272 @@ export function developerCountRegionDistInSecondaryDirSql(
     and authored_date<'${until}'`
       : '';
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
-
   return `
-  select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '北美' as area,
-    author_email
---     COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2,author_email)
-group by search_key__owner, search_key__repo,
-    dir_level2,area
+select sum(contributer_count) as count, area from gits_dir_contributer
+where search_key__owner='${owner}'
+and search_key__repo='${repo}'
+and in_dir='${dir}/'
+group by area
+order by count desc
+  `;
 
-union all
-
-select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '欧洲西部' as area,
-    author_email
---     COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (0,1,2)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2,author_email)
-group by search_key__owner, search_key__repo,
-    dir_level2,area
-
-union all
-
-select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '欧洲东部' as area,
-    author_email
---     COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (3,4)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2,author_email)
-group by search_key__owner, search_key__repo,
-    dir_level2,area
-
-union all
-
-select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '印度' as area,
-    author_email
---     COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (5)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2,author_email)
-group by search_key__owner, search_key__repo,
-    dir_level2,area
-
-union all
-
-select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '中国' as area,
-    author_email
---     COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (8)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2,author_email)
-group by search_key__owner, search_key__repo,
-    dir_level2,area
-
-union all
-
-select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '日韩' as area,
-    author_email
---     COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (9)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2,author_email)
-group by search_key__owner, search_key__repo,
-    dir_level2,area
-
-union all
-
-select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    '澳洲' as area,
-    author_email
---     COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email ,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where
-        dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        and author_tz global in (10)
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2,author_email)
-group by search_key__owner, search_key__repo,
-    dir_level2,area`;
+  //   return `
+  //   select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '北美' as area,
+  //     author_email
+  // --     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,author_email)
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,area
+  //
+  // union all
+  //
+  // select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '欧洲西部' as area,
+  //     author_email
+  // --     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (0,1,2)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,author_email)
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,area
+  //
+  // union all
+  //
+  // select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '欧洲东部' as area,
+  //     author_email
+  // --     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (3,4)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,author_email)
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,area
+  //
+  // union all
+  //
+  // select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '印度' as area,
+  //     author_email
+  // --     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (5)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,author_email)
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,area
+  //
+  // union all
+  //
+  // select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '中国' as area,
+  //     author_email
+  // --     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (8)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,author_email)
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,area
+  //
+  // union all
+  //
+  // select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '日韩' as area,
+  //     author_email
+  // --     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (9)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,author_email)
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,area
+  //
+  // union all
+  //
+  // select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     '澳洲' as area,
+  //     author_email
+  // --     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email ,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where
+  //         dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         and author_tz global in (10)
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,author_email)
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,area`;
 }
 
 // 给定（owner，repo，二级目录），按照email domain划分的commits修改文件数量
@@ -1243,37 +1258,45 @@ export function alteredFileCountDomainDistInSecondaryDirSql(
     and authored_date<'${until}'`
       : '';
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
-
   return `
-  select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    email_domain,
-    COUNT() alter_file_count
-from (
-    select search_key__owner,
-        search_key__repo,
-        splitByChar('@',\`author_email\`)[2] as email_domain,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2,email_domain ORDER by alter_file_count desc limit 20`;
+  select sum(alter_file_count) as count, email_domain from gits_dir_email_domain_alter_file_count
+where search_key__owner='${owner}'
+and search_key__repo='${repo}'
+and in_dir='${dir}/'
+group by email_domain
+order by count desc
+  `;
+
+  //   return `
+  //   select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     email_domain,
+  //     COUNT() alter_file_count
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         splitByChar('@',\`author_email\`)[2] as email_domain,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,email_domain ORDER by alter_file_count desc limit 20`;
 }
 
 // 给定（owner，repo，二级目录），按照email domain划分的开发者数量
@@ -1291,42 +1314,50 @@ export function developerCountDomainDistInSecondaryDirSql(
     and authored_date<'${until}'`
       : '';
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
-
   return `
-  select search_key__owner, search_key__repo,
-    dir_level2,email_domain,count() contributor_count from (select search_key__owner ,
-    search_key__repo ,
-    dir_level2 ,
-    email_domain,
-    author_email
-from (
-    select search_key__owner,
-        search_key__repo,
-        author_email,
-        splitByChar('@',\`author_email\`)[2] as email_domain,
-        author_tz ,
-        \`files.file_name\` ,
-            \`files.insertions\`,
-            \`files.deletions\`,
-            \`files.lines\` ,
-        splitByChar('/',\`files.file_name\`) as dir_list,
-        arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
-    from gits
-    array join \`files.file_name\` ,
-        \`files.insertions\`,
-        \`files.deletions\`,
-        \`files.lines\`
-    where dir_level2 = '${dir}'
-        and search_key__owner = '${owner}'
-        and search_key__repo = '${repo}'
-        ${dateRangeClause}
-        ${msgFilterClause}
-)
-group by search_key__owner, search_key__repo,
-    dir_level2,email_domain,author_email)
-group by search_key__owner, search_key__repo,
-    dir_level2,email_domain
-order by contributor_count desc`;
+  select sum(contributer_count) as count, email_domain from gits_dir_email_domain_contributer_count
+where search_key__owner='${owner}'
+and search_key__repo='${repo}'
+and in_dir='${dir}/'
+group by email_domain
+order by count desc
+  `;
+
+  //   return `
+  //   select search_key__owner, search_key__repo,
+  //     dir_level2,email_domain,count() contributor_count from (select search_key__owner ,
+  //     search_key__repo ,
+  //     dir_level2 ,
+  //     email_domain,
+  //     author_email
+  // from (
+  //     select search_key__owner,
+  //         search_key__repo,
+  //         author_email,
+  //         splitByChar('@',\`author_email\`)[2] as email_domain,
+  //         author_tz ,
+  //         \`files.file_name\` ,
+  //             \`files.insertions\`,
+  //             \`files.deletions\`,
+  //             \`files.lines\` ,
+  //         splitByChar('/',\`files.file_name\`) as dir_list,
+  //         arrayStringConcat(arraySlice(dir_list, 1,2),'/') as dir_level2
+  //     from gits
+  //     array join \`files.file_name\` ,
+  //         \`files.insertions\`,
+  //         \`files.deletions\`,
+  //         \`files.lines\`
+  //     where dir_level2 = '${dir}'
+  //         and search_key__owner = '${owner}'
+  //         and search_key__repo = '${repo}'
+  //         ${dateRangeClause}
+  //         ${msgFilterClause}
+  // )
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,email_domain,author_email)
+  // group by search_key__owner, search_key__repo,
+  //     dir_level2,email_domain
+  // order by contributor_count desc`;
 }
 
 // 给定（owner，repo，二级目录），给出该二级目录中，开发者email，提交量，个人提交时区数量

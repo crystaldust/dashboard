@@ -33,9 +33,8 @@ const SECONDARY_DIR_TABLE_COLS = [
 
 function secondaryDirTableCellRender(cellData, rowData, index) {
   return cellData.map((regionInfo, index) => {
-    const region = regionInfo[3];
-    const data = regionInfo[4];
-    const line = `${region}: ${data}`;
+    const { region, value } = regionInfo;
+    const line = `${region}: ${value}`;
     const key = `${rowData.secondaryDir}-${region}-${line}`;
     // TODO It's super weried that JS always complain 'each children in list should have uniq key'
     // TODO while it's really 'uniq' enough
