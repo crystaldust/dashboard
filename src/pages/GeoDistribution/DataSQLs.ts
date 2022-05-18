@@ -1,25 +1,10 @@
 export function secondaryDirSql(owner, repo) {
   return `
-      SELECT search_key__owner,search_key__repo, dir_level2
-      FROM (
-          SELECT search_key__owner,
-              search_key__repo,
-              splitByChar('/', \`files.file_name\`)                as dir_list,
-              arrayStringConcat(arraySlice(dir_list, 1, 2), '/') as dir_level2
-           FROM gits
-               array join \`files.file_name\`
-              , \`files.insertions\`
-              , \`files.deletions\`
-              , \`files.lines\`
-           WHERE if_merged = 0
-             AND files.file_name not like '%=>%'
-             AND length(dir_list) >= 3
-             AND search_key__owner = '${owner}'
-             AND search_key__repo = '${repo}'
-
-      )
-      GROUP BY search_key__owner, search_key__repo, dir_level2
-      ORDER BY dir_level2
+    select dir
+  from gits_dir
+  where search_key__owner = '${owner}'
+    and search_key__repo = '${repo}'
+  order by dir
     `;
 }
 
