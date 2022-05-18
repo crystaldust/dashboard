@@ -1362,6 +1362,15 @@ export function developersContribInSecondaryDirSql(
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
 
   return `
+  select in_dir, author_email, alter_files_count, tz_distribution
+from gits_dir_contributor_tz_distribution
+where search_key__owner = '${owner}'
+  and search_key__repo == '${repo}'
+  and in_dir == '${dir}/'
+  order by alter_files_count desc
+  `;
+
+  return `
   select search_key__owner,search_key__repo,author_email,sum(alter_files_count) alter_files_count,groupArray(a) as tz_distribution
 from (select search_key__owner,
              search_key__repo,

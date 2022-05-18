@@ -324,13 +324,14 @@ export default class GeoDistribution extends React.Component<any, any> {
         this.until,
         this.commitMessageFilter,
       ),
+      true,
     ).then((result) => {
       const developerContribInSecondaryDirData = result.data.map((item) => {
         return {
-          secondaryDir: secondaryDir,
-          developerEmail: item[2],
-          fileCount: item[3],
-          tzDist: item[4],
+          secondaryDir: item.in_dir,
+          developerEmail: item.author_email,
+          fileCount: item.alter_files_count,
+          tzDist: item.tz_distribution,
         };
       });
       this.setState({ developerContribInSecondaryDirData });
