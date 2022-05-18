@@ -28,7 +28,11 @@ import ProjectDistPies from '@/pages/GeoDistribution/ProjectDistPies';
 import SecondaryDirsTable from '@/pages/GeoDistribution/SecondaryDirsTable';
 import DirDeveloperContribTable from '@/pages/GeoDistribution/DirDeveloperContribTable';
 import { DeveloperInfoTable } from '@/pages/GeoDistribution/DeveloperInfoTable';
-import { parseGithubProfile } from '@/pages/GeoDistribution/DataProcessors';
+import {
+  fetchAllChildren,
+  parseGithubProfile,
+  pathsToTree,
+} from '@/pages/GeoDistribution/DataProcessors';
 import { CriticalityScoreChart } from '@/pages/GeoDistribution/CriticalityScoreChart';
 import { Protocol } from 'puppeteer-core';
 import moment from 'moment';
@@ -85,59 +89,16 @@ export default class GeoDistribution extends React.Component<any, any> {
   }
 
   updateRepoRelatedData(owner, repo, since, until, commitMsgFilter = '') {
-    console.debug('updateRepoRelatedData:');
-    console.log(
-      'owner:',
-      owner,
-      'repo:',
-      repo,
-      'since:',
-      since,
-      'until:',
-      until,
-      'commitMsgFilter:',
-      commitMsgFilter,
-    );
-
     this.setState({
       secondaryDirsTableData: [],
       developerContribInSecondaryDirData: [],
       developerInfoData: [],
     });
 
-    runSql(secondaryDirSql(owner, repo)).then((data: { columns: any; data: any }) => {
-      const allDirPaths = data.data.map((item: string[]) => item[2]);
-      const dirData: object = {};
-      allDirPaths.forEach((path: string) => {
-        const parts = path.split('/');
-        const primary = parts[0];
-        const secondary = parts[1];
-        if (dirData.hasOwnProperty(primary)) {
-          dirData[primary].push(secondary);
-        } else {
-          dirData[primary] = [secondary];
-        }
-      });
-      const stateDirData = [];
-      let pIndex = 0;
-      for (const primary in dirData) {
-        const dirItem: object = {
-          title: primary,
-          children: [],
-          key: `${pIndex}`,
-        };
-        let sIndex = 0;
-        dirData[primary].forEach((secondary) => {
-          dirItem.children.push({
-            title: secondary,
-            key: `${pIndex}-${sIndex}`,
-          });
-          ++sIndex;
-        });
-        stateDirData.push(dirItem);
-        ++pIndex;
-      }
-      this.setState({ dirData: stateDirData });
+    runSql(secondaryDirSql(owner, repo)).then((result: { columns: any; data: any }) => {
+      const allDirPaths = result.data.map((item: string[]) => item[0]);
+      const dirTree = pathsToTree(allDirPaths);
+      this.setState({ dirData: dirTree });
     });
     runSql(commitsRegionDistSql(owner, repo, since, until, commitMsgFilter)).then((result) => {
       const regionCommitsDist = result.data
@@ -230,7 +191,7 @@ export default class GeoDistribution extends React.Component<any, any> {
     this.updateRepoRelatedData(this.owner, this.repo, this.since, this.until);
   }
 
-  onDirSelect(keys, selectedDirs) {
+  onDirSelect(keys, event) {
     this.setState({
       // Since secondaryDirsTableData will be update, don't change the state too frequently
       // Or the web page will have great performance side effect
@@ -238,47 +199,30 @@ export default class GeoDistribution extends React.Component<any, any> {
       developerContribInSecondaryDirData: [],
       developerInfoData: [],
     });
-
-    const dirKeySet = new Set<string>();
-    keys.forEach((key) => {
-      if (key.indexOf('-') == -1) {
-        this.state.dirData[key].children.forEach((child) => dirKeySet.add(child.key));
-      } else {
-        dirKeySet.add(key);
-      }
-    });
+    const selectedDirs: string[] = [];
+    fetchAllChildren(selectedDirs, event.node);
 
     const owner = this.owner;
     const repo = this.repo;
     const since = this.since;
     const until = this.until;
     const commitMsgFilter = this.commitMessageFilter;
-    const secondaryDirs: string[] = [];
 
-    dirKeySet.forEach((key: string) => {
-      const parts = key.split('-');
-      const primaryIndex = parseInt(parts[0]);
-      const secondaryIndex = parseInt(parts[1]);
-      const primaryDir = this.state.dirData[primaryIndex].title;
-      const secondaryDir = this.state.dirData[primaryIndex].children[secondaryIndex].title;
-      secondaryDirs.push(`${primaryDir}/${secondaryDir}`);
-    });
-
-    if (secondaryDirs.length == 0) {
+    if (selectedDirs.length == 0) {
       return;
     }
 
     this.setState({ loadingSecondaryDirsTableData: true });
     const ep = EventProxy.create();
     ep.on(
-      secondaryDirs.map((dir) => `${dir}-ready`),
+      selectedDirs.map((dir) => `${dir}-ready`),
       (...rowDatas) => {
         this.setState({ secondaryDirsTableData: rowDatas });
         this.setState({ loadingSecondaryDirsTableData: false });
       },
     );
 
-    secondaryDirs.forEach((secondaryDir) => {
+    selectedDirs.forEach((secondaryDir) => {
       ep.on(
         ['regionFileCount', 'regionDeveloper', 'domainFileCount', 'domainDeveloper'].map(
           (dataIndex) => `${secondaryDir}-${dataIndex}-ready`,
@@ -304,7 +248,6 @@ export default class GeoDistribution extends React.Component<any, any> {
           commitMsgFilter,
         ),
       ).then((result) => {
-        console.log(result.data);
         const fileCountRegionDist = result.data.map((item: any[]) => {
           return { region: item[1], value: item[0] };
         });
