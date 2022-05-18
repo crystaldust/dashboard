@@ -7,7 +7,7 @@ export default {
   'geodist.commitsRegionDist': 'Commits Distribution By Region',
   'geodist.commitsEmailDomainDist': 'Commits Distribution By Email Domain',
 
-  'geodist.secondaryDirTable.colname.secondaryDir': 'Secondary Dir Path',
+  'geodist.secondaryDirTable.colname.selectedDirs': 'Selected Dirs',
   'geodist.secondaryDirTable.colname.fileRegionDist': 'Committed File Distribution by Region',
   'geodist.secondaryDirTable.colname.fileEmailDist': 'Committed File Distribution by Email Domain',
   'geodist.secondaryDirTable.colname.developerRegionDist': 'Developer Count Distribution by Region',
@@ -31,7 +31,7 @@ export default {
   'geodist.developerInfoTable.header.developerInfo': "Developer's information",
   'geodist.developerInfoTable.githubProfile.company': 'Company',
   'geodist.developerInfoTable.githubProfile.location': 'Location',
-  'geodist.developerInfoTable.githubProfile.country': 'Country',
+  'geodist.developerInfoTable.githubProfile.countryOrRegion': 'Country/Region',
 
   'geodist.locationConnector': ',',
 };

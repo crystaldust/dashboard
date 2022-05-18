@@ -7,7 +7,7 @@ const intl = getIntl();
 
 const DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS = [
   {
-    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.secondaryDir' }),
+    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.selectedDirs' }),
     dataIndex: 'secondaryDir',
   },
   {

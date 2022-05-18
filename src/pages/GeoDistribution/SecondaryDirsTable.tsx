@@ -6,7 +6,7 @@ import { getIntl } from 'umi';
 const intl = getIntl();
 const SECONDARY_DIR_TABLE_COLS = [
   {
-    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.secondaryDir' }),
+    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.selectedDirs' }),
     dataIndex: 'secondaryDir',
   },
   {

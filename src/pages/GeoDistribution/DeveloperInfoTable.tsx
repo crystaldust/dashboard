@@ -2,6 +2,7 @@ import React from 'react';
 import { Divider, Table, Tag } from 'antd';
 
 import { getIntl } from 'umi';
+
 const intl = getIntl();
 
 const DEVELOPER_INFO_COLS = [
@@ -66,8 +67,9 @@ const GHPROFILE_LOCATION = intl.formatMessage({
   id: 'geodist.developerInfoTable.githubProfile.location',
 });
 const GHPROFILE_COUNTRY = intl.formatMessage({
-  id: 'geodist.developerInfoTable.githubProfile.country',
+  id: 'geodist.developerInfoTable.githubProfile.countryOrRegion',
 });
+
 export class DeveloperInfoTable extends React.Component<any, any> {
   render() {
     return (
