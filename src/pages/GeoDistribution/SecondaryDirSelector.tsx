@@ -14,7 +14,7 @@ export default class SecondaryDirSelector extends React.Component<any, any> {
 
   onSelect(keys: React.Key[], info: any) {
     if (this.props.onDirSelect) {
-      this.props.onDirSelect(keys);
+      this.props.onDirSelect(keys, info);
     }
   }
 
