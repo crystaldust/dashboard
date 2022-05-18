@@ -175,20 +175,35 @@ export default class GeoDistribution extends React.Component<any, any> {
 
   onDateRangeChanged(_, dateStrs: string[]) {
     // Format '%YYYY-%MM' in clickhouse doesn't work, add the 'day one' suffix
-    const since = dateStrs[0] + '-01';
-    const until = dateStrs[1] + '-01';
-    if (this.since == since && this.until == until) {
+    let since = dateStrs[0];
+    let until = dateStrs[1];
+    if (this.since == since + '-01' && this.until == until + '-01') {
       return;
     }
 
-    this.since = since;
-    this.until = until;
     if (since && until) {
       // If clear button is clicked, both until and since are empty string, when we shouldn't update the
       // picker's value
       this.setState({ dateRangeSelection: true });
     }
-    this.updateRepoRelatedData(this.owner, this.repo, this.since, this.until);
+
+    if (since) {
+      since += '-01';
+    }
+    if (until) {
+      until += '-01';
+    }
+
+    this.since = since;
+    this.until = until;
+
+    this.updateRepoRelatedData(
+      this.owner,
+      this.repo,
+      this.since,
+      this.until,
+      this.commitMessageFilter,
+    );
   }
 
   onDirSelect(selectedDirs, event) {
@@ -377,7 +392,7 @@ export default class GeoDistribution extends React.Component<any, any> {
   }
 
   filterCommitMessage(value: string) {
-    this.commitMessageFilter = value;
+    this.commitMessageFilter = value.toLowerCase();
 
     this.updateRepoRelatedData(
       this.owner,
