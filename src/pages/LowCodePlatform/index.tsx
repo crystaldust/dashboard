@@ -10,6 +10,9 @@ import { message } from 'antd';
 
 const { Panel } = Collapse;
 import { parseActivities } from '@/pages/LowCodePlatform/Charts';
+import { getIntl } from 'umi';
+
+const intl = getIntl();
 
 const DEFAULT_SQL =
   "SELECT * FROM activities WHERE owner='mysql' AND repo='mysql-server' ORDER BY code_contribution DESC LIMIT 100";
@@ -31,6 +34,7 @@ export default class Index extends React.Component<any, any> {
     // Table related callbacks
     this.tableRowClick = this.tableRowClick.bind(this);
   }
+
   componentDidMount() {
     // Run default SQL
     this.runSql(DEFAULT_SQL);
@@ -79,28 +83,30 @@ export default class Index extends React.Component<any, any> {
         <Row>
           <Col span={24}>
             <Collapse>
-              <Panel header="SQL Editor" key="1">
+              <Panel header={intl.formatMessage({ id: 'lowcodePlatform.sqlEditor' })} key="1">
+                <div style={{ fontSize: 12, color: '#888888' }}>
+                  {intl.formatMessage({ id: 'lowcodePlatform.sqlEditorIntro' })}
+                </div>
                 <SQLEditor defaultCode={DEFAULT_SQL} runSql={this.runSql} />
               </Panel>
             </Collapse>
           </Col>
         </Row>
-        <Row>
-          <Col span={24}>
+        <Row align="middle">
+          <Col span={18}>
             <DynamicDataTable
               columns={this.state.tableColumns}
               tableData={this.state.tableData}
               rowClick={this.tableRowClick}
             />
           </Col>
-        </Row>
-        {this.state.fetchActivities && !!this.state.chartData && (
-          <Row>
-            <Col span={24}>
+
+          {this.state.fetchActivities && !!this.state.chartData && (
+            <Col span={6}>
               <Charts data={this.state.chartData} />
             </Col>
-          </Row>
-        )}
+          )}
+        </Row>
       </PageContainer>
     );
   }

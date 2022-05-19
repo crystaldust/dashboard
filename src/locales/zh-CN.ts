@@ -5,6 +5,7 @@ import pwa from './zh-CN/pwa';
 import settingDrawer from './zh-CN/settingDrawer';
 import settings from './zh-CN/settings';
 import pages from './zh-CN/pages';
+import lowcodePlatform from '@/locales/zh-CN/lowcodePlatform';
 import geodist from './zh-CN/geodist';
 import chartdownload from '@/locales/zh-CN/chartdownload';
 import repositoriesMonitor from '@/locales/zh-CN/repositoriesMonitor';
@@ -25,6 +26,7 @@ export default {
   ...settings,
   ...pwa,
   ...component,
+  ...lowcodePlatform,
   ...geodist,
   ...chartdownload,
   ...repositoriesMonitor,
