@@ -1,11 +1,9 @@
-import React from 'react';
-import styles from './index.less';
-import { getIntl } from 'umi';
+import React, { BaseSyntheticEvent } from 'react';
 import SecondaryDirSelector from '@/pages/GeoDistribution/SecondaryDirSelector';
 import { runSql } from '@/services/clickhouse';
 import OwnerRepoSelector from '@/pages/GeoDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Col, Divider, Row, Table, Tag, Spin, Input, Space } from 'antd';
+import { Col, Row, Spin, Input, Space } from 'antd';
 import EventProxy from '@dking/event-proxy';
 import { DatePicker } from 'antd';
 
@@ -28,16 +26,9 @@ import ProjectDistPies from '@/pages/GeoDistribution/ProjectDistPies';
 import SecondaryDirsTable from '@/pages/GeoDistribution/SecondaryDirsTable';
 import DirDeveloperContribTable from '@/pages/GeoDistribution/DirDeveloperContribTable';
 import { DeveloperInfoTable } from '@/pages/GeoDistribution/DeveloperInfoTable';
-import {
-  fetchAllChildren,
-  parseGithubProfile,
-  pathsToTree,
-} from '@/pages/GeoDistribution/DataProcessors';
+import { parseGithubProfile, pathsToTree } from '@/pages/GeoDistribution/DataProcessors';
 import { CriticalityScoreChart } from '@/pages/GeoDistribution/CriticalityScoreChart';
-import { Protocol } from 'puppeteer-core';
 import moment from 'moment';
-
-const intl = getIntl();
 
 const MAX_DOMAIN_LEGENDS = 10;
 
@@ -86,6 +77,7 @@ export default class GeoDistribution extends React.Component<any, any> {
     this.onSecondaryDirRowClicked = this.onSecondaryDirRowClicked.bind(this);
     this.onDateRangeChanged = this.onDateRangeChanged.bind(this);
     this.filterCommitMessage = this.filterCommitMessage.bind(this);
+    this.onSearchInputChange = this.onSearchInputChange.bind(this);
   }
 
   updateRepoRelatedData(owner, repo, since, until, commitMsgFilter = '') {
@@ -167,6 +159,12 @@ export default class GeoDistribution extends React.Component<any, any> {
       this.until = '';
       this.setState({ dateRangeSelection: false });
     }
+
+    if (this.commitMessageFilter) {
+      // Clear the commit message filter input
+      this.commitMessageFilter = '';
+    }
+    this.setState({ commitMsgFilter: '' });
 
     this.owner = owner;
     this.repo = repo;
@@ -403,6 +401,10 @@ export default class GeoDistribution extends React.Component<any, any> {
     );
   }
 
+  onSearchInputChange(event: BaseSyntheticEvent) {
+    this.setState({ commitMsgFilter: event.target.value });
+  }
+
   render() {
     return (
       <PageContainer>
@@ -429,7 +431,10 @@ export default class GeoDistribution extends React.Component<any, any> {
               <Input.Search
                 placeholder={'Filter Commit Message'}
                 onSearch={this.filterCommitMessage}
+                onChange={this.onSearchInputChange}
+                value={this.state.commitMsgFilter}
                 enterButton
+                allowClear
               />
             )}
           </Col>

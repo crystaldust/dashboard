@@ -138,7 +138,7 @@ export default class AddRepository extends React.Component<any, any> {
             <Card>
               <Statistic
                 title={intl.formatMessage({ id: 'repositoriesMonitor.githubIssues' })}
-                value={this.state.numIssue}
+                value={this.state.numIssues}
                 loading={this.state.numIssues == -1}
               />
             </Card>
