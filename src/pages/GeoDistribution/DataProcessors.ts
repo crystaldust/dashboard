@@ -141,3 +141,9 @@ export function fetchAllChildren(allPaths: string[], node: object) {
     fetchAllChildren(allPaths, child);
   });
 }
+
+// Convert date string to year*100+month
+// 2020-05-10 => 202005(int)
+export function dateToYearMonthInt(dateStr) {
+  return parseInt(dateStr.split('-').slice(0, 2).join(''));
+}

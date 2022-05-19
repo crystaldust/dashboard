@@ -1,3 +1,5 @@
+import { dateToYearMonthInt } from '@/pages/GeoDistribution/DataProcessors';
+
 export function secondaryDirSql(owner, repo) {
   return `
     select dir
@@ -691,17 +693,29 @@ export function alteredFileCountRegionDistInSecondaryDirSql(
   until,
   commitMsgFilter,
 ) {
+  // For the cached table, date is converted to Int type(like 2022-05(str) => 202205(int)) for better
+  // performance and skip ClickHouse's constraint on date length(date with format YYYY-MM won't work, it
+  // requires YYYY-MM-DD at least)
+  // So here the date string is converted to int to take the advantage of cache table's optimization
+  // This trick is also applied to these functions:
+  // - developerCountRegionDistInSecondaryDirSql
+  // - alteredFileCountDomainDistInSecondaryDirSql
+  // - developerCountDomainDistInSecondaryDirSql
+
+  // TODO Should we use <= and >= instead of < and > ?
   let dateRangeClause =
     since && until
-      ? `and authored_date>'${since}'
-    and authored_date<'${until}'`
+      ? `and authored_date>${dateToYearMonthInt(since)}
+    and authored_date<${dateToYearMonthInt(until)}`
       : '';
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
+
   return `
   select sum(alter_file_count) as count, area from gits_alter_file_times
 where search_key__owner='${owner}'
 and search_key__repo='${repo}'
 and in_dir='${dir}/'
+${dateRangeClause}
 group by area
 order by count desc
   `;
@@ -956,8 +970,8 @@ export function developerCountRegionDistInSecondaryDirSql(
 ) {
   let dateRangeClause =
     since && until
-      ? `and authored_date>'${since}'
-    and authored_date<'${until}'`
+      ? `and authored_date>${dateToYearMonthInt(since)}
+    and authored_date<${dateToYearMonthInt(until)}`
       : '';
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
   return `
@@ -965,6 +979,7 @@ select sum(contributer_count) as count, area from gits_dir_contributer
 where search_key__owner='${owner}'
 and search_key__repo='${repo}'
 and in_dir='${dir}/'
+${dateRangeClause}
 group by area
 order by count desc
   `;
@@ -1239,8 +1254,8 @@ export function alteredFileCountDomainDistInSecondaryDirSql(
 ) {
   let dateRangeClause =
     since && until
-      ? `and authored_date>'${since}'
-    and authored_date<'${until}'`
+      ? `and authored_date>${dateToYearMonthInt(since)}
+    and authored_date<${dateToYearMonthInt(until)}`
       : '';
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
   return `
@@ -1248,6 +1263,7 @@ export function alteredFileCountDomainDistInSecondaryDirSql(
 where search_key__owner='${owner}'
 and search_key__repo='${repo}'
 and in_dir='${dir}/'
+${dateRangeClause}
 group by email_domain
 order by count desc
   `;
@@ -1295,8 +1311,8 @@ export function developerCountDomainDistInSecondaryDirSql(
 ) {
   let dateRangeClause =
     since && until
-      ? `and authored_date>'${since}'
-    and authored_date<'${until}'`
+      ? `and authored_date>${dateToYearMonthInt(since)}
+    and authored_date<${dateToYearMonthInt(until)}`
       : '';
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
   return `
@@ -1304,6 +1320,7 @@ export function developerCountDomainDistInSecondaryDirSql(
 where search_key__owner='${owner}'
 and search_key__repo='${repo}'
 and in_dir='${dir}/'
+${dateRangeClause}
 group by email_domain
 order by count desc
   `;
