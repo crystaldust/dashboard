@@ -8,7 +8,7 @@ import pages from './zh-CN/pages';
 import lowcodePlatform from '@/locales/zh-CN/lowcodePlatform';
 import contribDist from './zh-CN/contribDist';
 import chartdownload from '@/locales/zh-CN/chartdownload';
-import repositoriesMonitor from '@/locales/zh-CN/repositoriesMonitor';
+import repositoriesManager from '@/locales/zh-CN/repositoriesManager';
 
 export default {
   'navBar.lang': '语言',
@@ -29,5 +29,5 @@ export default {
   ...lowcodePlatform,
   ...contribDist,
   ...chartdownload,
-  ...repositoriesMonitor,
+  ...repositoriesManager,
 };

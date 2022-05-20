@@ -7,14 +7,14 @@ import {
   issueCountSql,
   prCountSql,
   repoCountSql,
-} from '@/pages/RepositoriesMonitor/DataSQLs';
+} from '@/pages/RepositoriesManager/DataSQLs';
 import { runSql } from '@/services/clickhouse';
 import { PageContainer } from '@ant-design/pro-layout';
 import { getIntl } from 'umi';
 
 const intl = getIntl();
 
-export default class AddRepository extends React.Component<any, any> {
+export default class RepositoriesManager extends React.Component<any, any> {
   constructor(props) {
     super(props);
     this.state = {
@@ -79,7 +79,7 @@ export default class AddRepository extends React.Component<any, any> {
             <AutoComplete
               style={{ width: 400 }}
               options={this.state.repoOptions}
-              placeholder={intl.formatMessage({ id: 'repositoriesMonitor.inputTip' })}
+              placeholder={intl.formatMessage({ id: 'repositoriesManager.inputTip' })}
               filterOption={(inputValue, option) => {
                 return (
                   option!.owner.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1 ||
@@ -92,12 +92,12 @@ export default class AddRepository extends React.Component<any, any> {
           </Col>
         </Row>
 
-        <Divider>{intl.formatMessage({ id: 'repositoriesMonitor.statistics' })}</Divider>
+        <Divider>{intl.formatMessage({ id: 'repositoriesManager.statistics' })}</Divider>
         <Row>
           <Col span={4}>
             <Card>
               <Statistic
-                title={intl.formatMessage({ id: 'repositoriesMonitor.repositories' })}
+                title={intl.formatMessage({ id: 'repositoriesManager.repositories' })}
                 value={this.state.numRepos}
                 loading={this.state.numRepos == -1}
               />
@@ -107,7 +107,7 @@ export default class AddRepository extends React.Component<any, any> {
           <Col span={4}>
             <Card>
               <Statistic
-                title={intl.formatMessage({ id: 'repositoriesMonitor.repositoriesDownloading' })}
+                title={intl.formatMessage({ id: 'repositoriesManager.repositoriesDownloading' })}
                 value={this.state.numDownloadingRepos}
                 loading={this.state.numDownloadingRepos == -1}
               />
@@ -117,7 +117,7 @@ export default class AddRepository extends React.Component<any, any> {
           <Col span={4}>
             <Card>
               <Statistic
-                title={intl.formatMessage({ id: 'repositoriesMonitor.gitCommits' })}
+                title={intl.formatMessage({ id: 'repositoriesManager.gitCommits' })}
                 value={this.state.numCommits}
                 loading={this.state.numCommits == -1}
               />
@@ -127,7 +127,7 @@ export default class AddRepository extends React.Component<any, any> {
           <Col span={4}>
             <Card>
               <Statistic
-                title={intl.formatMessage({ id: 'repositoriesMonitor.developers' })}
+                title={intl.formatMessage({ id: 'repositoriesManager.developers' })}
                 value={this.state.numDevelopers}
                 loading={this.state.numDevelopers == -1}
               />
@@ -137,7 +137,7 @@ export default class AddRepository extends React.Component<any, any> {
           <Col span={4}>
             <Card>
               <Statistic
-                title={intl.formatMessage({ id: 'repositoriesMonitor.githubIssues' })}
+                title={intl.formatMessage({ id: 'repositoriesManager.githubIssues' })}
                 value={this.state.numIssues}
                 loading={this.state.numIssues == -1}
               />
@@ -146,7 +146,7 @@ export default class AddRepository extends React.Component<any, any> {
           <Col span={4}>
             <Card>
               <Statistic
-                title={intl.formatMessage({ id: 'repositoriesMonitor.githubPullRequests' })}
+                title={intl.formatMessage({ id: 'repositoriesManager.githubPullRequests' })}
                 value={this.state.numPRs}
                 loading={this.state.numPRs == -1}
               />
@@ -154,13 +154,15 @@ export default class AddRepository extends React.Component<any, any> {
           </Col>
         </Row>
 
-        <Divider>{intl.formatMessage({ id: 'repositoriesMonitor.repositories' })}</Divider>
-        <Row>
+        <Divider>{intl.formatMessage({ id: 'repositoriesManager.repositories' })}</Divider>
+        <Row gutter={[10, 10]}>
           {this.state.repoOptions.map((option) => {
             return (
               <Col span={4}>
                 <a href={option.origin} target={'_blank'}>
-                  <Card>{option.value}</Card>
+                  <Card style={{ height: 90 }} hoverable>
+                    {option.value}
+                  </Card>
                 </a>
               </Col>
             );

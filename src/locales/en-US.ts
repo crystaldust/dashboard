@@ -8,7 +8,7 @@ import settings from './en-US/settings';
 import lowcodePlatform from '@/locales/en-US/lowcodePlatform';
 import contribDist from '@/locales/en-US/contribDist';
 import chartdownload from '@/locales/en-US/chartdownload';
-import repositoriesMonitor from '@/locales/en-US/repositoriesMonitor';
+import repositoriesManager from '@/locales/en-US/repositoriesManager';
 
 export default {
   'navBar.lang': 'Languages',
@@ -29,5 +29,5 @@ export default {
   ...lowcodePlatform,
   ...contribDist,
   ...chartdownload,
-  ...repositoriesMonitor,
+  ...repositoriesManager,
 };

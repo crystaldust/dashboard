@@ -26,9 +26,9 @@
   // },
   {
     path: '/repositories',
-    name: 'repositoriesMonitor',
+    name: 'repositoriesManager',
     icon: 'Github',
-    component: './RepositoriesMonitor',
+    component: './RepositoriesManager',
   },
   {
     path: '/contrib_distribution',

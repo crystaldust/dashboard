@@ -52,6 +52,6 @@ export default {
   'menu.lowCodePlatform': 'Low Code Platform',
   'menu.contribDist': 'Contribution Distribution',
   'menu.charImageDownload': 'Chart Image Download',
-  'menu.repositoriesMonitor': 'Add & Watch Repos',
+  'menu.repositoriesManager': 'OS Project Management',
   'menu.[removing]Low Code Viz(activity)': '[Removing]Low Code Viz(Activities)',
 };

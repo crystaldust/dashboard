@@ -52,6 +52,6 @@ export default {
   'menu.lowCodePlatform': '低代码平台',
   'menu.contribDist': '代码贡献分布',
   'menu.charImageDownload': '下载图表图片',
-  'menu.repositoriesMonitor': '添加或查看代码库',
+  'menu.repositoriesManager': '开源项目管理',
   'menu.[removing]Low Code Viz(activity)': '[待删除]低代码平台（Activities）',
 };

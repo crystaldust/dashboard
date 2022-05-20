@@ -3,7 +3,8 @@ export function allProjectsSQL() {
    select distinct search_key__origin,
                 search_key__owner,
                 search_key__repo
-from gits`;
+from gits
+order by (search_key__owner, search_key__repo)`;
 }
 
 export function commitCountSql() {
