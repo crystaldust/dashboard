@@ -31,7 +31,7 @@ import { CriticalityScoreChart } from '@/pages/ContribDistribution/CriticalitySc
 import moment from 'moment';
 
 const MAX_DOMAIN_LEGENDS = 10;
-
+const MAX_DOMAIN_TAGS = 200;
 export default class ContribDistribution extends React.Component<any, any> {
   owner: string;
   repo: string;
@@ -292,7 +292,7 @@ export default class ContribDistribution extends React.Component<any, any> {
           commitMsgFilter,
         ),
       ).then((result) => {
-        const fileCountEmailDomainDist = result.data.map((item) => {
+        const fileCountEmailDomainDist = result.data.slice(0, MAX_DOMAIN_TAGS).map((item) => {
           return {
             region: item[1],
             value: item[0],
@@ -310,7 +310,7 @@ export default class ContribDistribution extends React.Component<any, any> {
           commitMsgFilter,
         ),
       ).then((result) => {
-        const developerEmailDomainDist = result.data.map((item) => {
+        const developerEmailDomainDist = result.data.slice(0, MAX_DOMAIN_TAGS).map((item) => {
           return { region: item[1], value: item[0] };
         });
         ep.emit(`${secondaryDir}-domainDeveloper-ready`, developerEmailDomainDist);

@@ -38,9 +38,13 @@ function secondaryDirTableCellRender(cellData, rowData, index) {
     const key = `${rowData.secondaryDir}-${region}-${line}`;
     // TODO It's super weried that JS always complain 'each children in list should have uniq key'
     // TODO while it's really 'uniq' enough
+    let color = 'volcano';
+    if (typeof region == 'string' && region.toLowerCase().indexOf('huawei') != -1) {
+      color = '#108ee9';
+    }
     return (
       // <div key={key}>
-      <Tag key={key} color={'volcano'}>
+      <Tag key={key} color={color}>
         {line}
       </Tag>
       // </div>
