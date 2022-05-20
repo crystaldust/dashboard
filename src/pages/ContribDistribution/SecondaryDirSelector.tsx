@@ -1,6 +1,6 @@
 import React from 'react';
 import { Divider, Tree } from 'antd';
-import styles from '@/pages/GeoDistribution/index.less';
+import styles from '@/pages/ContribDistribution/index.less';
 import { getIntl } from 'umi';
 
 const intl = getIntl();
@@ -56,10 +56,10 @@ export default class SecondaryDirSelector extends React.Component<any, any> {
       <div>
         {!!this.props.repo && (
           <div>
-            <Divider>{intl.formatMessage({ id: 'geodist.dirTree' })}</Divider>
+            <Divider>{intl.formatMessage({ id: 'contribDist.dirTree' })}</Divider>
             {/*<span className={styles.componentIntro} style={{ color: '#999999' }}>*/}
             <span className={styles.componentIntro}>
-              {intl.formatMessage({ id: 'geodist.dirTree.desc' })}
+              {intl.formatMessage({ id: 'contribDist.dirTree.desc' })}
             </span>
           </div>
         )}

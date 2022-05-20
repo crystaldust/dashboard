@@ -58,7 +58,7 @@ export default class ProjectDistPies extends React.Component<any, any> {
         <Col span={11}>
           <Divider>
             {this.props.regionCommitsDist.length
-              ? intl.formatMessage({ id: 'geodist.commitsRegionDist' })
+              ? intl.formatMessage({ id: 'contribDist.commitsRegionDist' })
               : ''}
           </Divider>
           <Pie
@@ -88,7 +88,7 @@ export default class ProjectDistPies extends React.Component<any, any> {
         <Col span={13}>
           <Divider>
             {this.props.emailDomainCommitsDist.length
-              ? intl.formatMessage({ id: 'geodist.commitsEmailDomainDist' })
+              ? intl.formatMessage({ id: 'contribDist.commitsEmailDomainDist' })
               : ''}
           </Divider>
           <Pie

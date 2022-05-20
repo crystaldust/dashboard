@@ -2,7 +2,7 @@ import { getIntl, getLocale } from 'umi';
 
 const intl = getIntl();
 const CURRENT_LOCALE = getLocale();
-const LOCATION_CONNECTOR = intl.formatMessage({ id: 'geodist.locationConnector' }) + ' ';
+const LOCATION_CONNECTOR = intl.formatMessage({ id: 'contribDist.locationConnector' }) + ' ';
 
 export function parseGithubProfile(rawSQLResult) {
   const profile = {

@@ -1,4 +1,4 @@
-import { dateToYearMonthInt } from '@/pages/GeoDistribution/DataProcessors';
+import { dateToYearMonthInt } from '@/pages/ContribDistribution/DataProcessors';
 
 export function secondaryDirSql(owner, repo) {
   return `

@@ -1,7 +1,7 @@
 import React, { BaseSyntheticEvent } from 'react';
-import SecondaryDirSelector from '@/pages/GeoDistribution/SecondaryDirSelector';
+import SecondaryDirSelector from '@/pages/ContribDistribution/SecondaryDirSelector';
 import { runSql } from '@/services/clickhouse';
-import OwnerRepoSelector from '@/pages/GeoDistribution/OwnerRepoSelector';
+import OwnerRepoSelector from '@/pages/ContribDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Col, Row, Spin, Input, Space } from 'antd';
 import EventProxy from '@dking/event-proxy';
@@ -22,17 +22,17 @@ import {
   developersContribInSecondaryDirSql,
   secondaryDirSql,
 } from './DataSQLs';
-import ProjectDistPies from '@/pages/GeoDistribution/ProjectDistPies';
-import SecondaryDirsTable from '@/pages/GeoDistribution/SecondaryDirsTable';
-import DirDeveloperContribTable from '@/pages/GeoDistribution/DirDeveloperContribTable';
-import { DeveloperInfoTable } from '@/pages/GeoDistribution/DeveloperInfoTable';
-import { parseGithubProfile, pathsToTree } from '@/pages/GeoDistribution/DataProcessors';
-import { CriticalityScoreChart } from '@/pages/GeoDistribution/CriticalityScoreChart';
+import ProjectDistPies from '@/pages/ContribDistribution/ProjectDistPies';
+import SecondaryDirsTable from '@/pages/ContribDistribution/SecondaryDirsTable';
+import DirDeveloperContribTable from '@/pages/ContribDistribution/DirDeveloperContribTable';
+import { DeveloperInfoTable } from '@/pages/ContribDistribution/DeveloperInfoTable';
+import { parseGithubProfile, pathsToTree } from '@/pages/ContribDistribution/DataProcessors';
+import { CriticalityScoreChart } from '@/pages/ContribDistribution/CriticalityScoreChart';
 import moment from 'moment';
 
 const MAX_DOMAIN_LEGENDS = 10;
 
-export default class GeoDistribution extends React.Component<any, any> {
+export default class ContribDistribution extends React.Component<any, any> {
   owner: string;
   repo: string;
   since: string;

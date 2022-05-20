@@ -1,29 +1,29 @@
 import React from 'react';
 import { Divider, Table, Tag } from 'antd';
-import styles from '@/pages/GeoDistribution/index.less';
+import styles from '@/pages/ContribDistribution/index.less';
 import { getIntl } from 'umi';
 
 const intl = getIntl();
 
 const DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS = [
   {
-    title: intl.formatMessage({ id: 'geodist.secondaryDirTable.colname.selectedDirs' }),
+    title: intl.formatMessage({ id: 'contribDist.secondaryDirTable.colname.selectedDirs' }),
     dataIndex: 'secondaryDir',
   },
   {
     title: intl.formatMessage({
-      id: 'geodist.developerContribInSecondaryDirTable.colname.developerEmail',
+      id: 'contribDist.developerContribInSecondaryDirTable.colname.developerEmail',
     }),
     dataIndex: 'developerEmail',
   },
   {
     title: intl.formatMessage({
-      id: 'geodist.developerContribInSecondaryDirTable.colname.fileCount',
+      id: 'contribDist.developerContribInSecondaryDirTable.colname.fileCount',
     }),
     dataIndex: 'fileCount',
   },
   {
-    title: intl.formatMessage({ id: 'geodist.developerContribInSecondaryDirTable.colname.tzDist' }),
+    title: intl.formatMessage({ id: 'contribDist.developerContribInSecondaryDirTable.colname.tzDist' }),
     dataIndex: 'tzDist',
     render: (cellData) => {
       return cellData.map((item) => {
@@ -49,12 +49,12 @@ export default class DirDeveloperContribTable extends React.Component<any, any> 
           <div>
             <Divider>
               {intl.formatMessage({
-                id: 'geodist.developerContribInSecondaryDirTable.header.developerInfo',
+                id: 'contribDist.developerContribInSecondaryDirTable.header.developerInfo',
               })}
             </Divider>
             <span className={styles.componentIntro}>
               {intl.formatMessage({
-                id: 'geodist.developerContribInSecondaryDirTable.desc',
+                id: 'contribDist.developerContribInSecondaryDirTable.desc',
               })}
             </span>
             <Table

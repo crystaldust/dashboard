@@ -18,11 +18,23 @@
       },
     ],
   },
+  // {
+  //   path: '/welcome',
+  //   name: 'welcome',
+  //   icon: 'smile',
+  //   component: './Welcome',
+  // },
   {
-    path: '/welcome',
-    name: 'welcome',
-    icon: 'smile',
-    component: './Welcome',
+    path: '/repositories',
+    name: 'repositoriesMonitor',
+    icon: 'Github',
+    component: './RepositoriesMonitor',
+  },
+  {
+    path: '/contrib_distribution',
+    name: 'contribDist',
+    icon: 'LineChart',
+    component: './ContribDistribution',
   },
   {
     path: '/low_code_platform',
@@ -30,24 +42,12 @@
     icon: 'rocket',
     component: './LowCodePlatform',
   },
-  {
-    path: '/geo_distribution',
-    name: 'geoDist',
-    icon: 'global',
-    component: './GeoDistribution',
-  },
-  {
-    path: '/chart_image',
-    name: 'charImageDownload',
-    icon: 'LineChart',
-    component: './CriticalityScoreDownload',
-  },
-  {
-    path: '/add_repo',
-    name: 'repositoriesMonitor',
-    icon: 'Github',
-    component: './RepositoriesMonitor',
-  },
+  // {
+  //   path: '/chart_image',
+  //   name: 'charImageDownload',
+  //   icon: 'LineChart',
+  //   component: './CriticalityScoreDownload',
+  // },
   // {
   //   path: '/backup_low_code_viz',
   //   name: '[removing]Low Code Viz(activity)',
@@ -80,7 +80,7 @@
   // },
   {
     path: '/',
-    redirect: '/welcome',
+    redirect: '/repositories',
   },
   {
     component: './404',

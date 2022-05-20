@@ -60,7 +60,7 @@ export class CriticalityScoreChart extends React.Component<any, any> {
       <div>
         {!!this.props.criticalityScores.length && (
           <div>
-            <Divider>{intl.formatMessage({ id: 'geodist.criticalityScore' })}</Divider>
+            <Divider>{intl.formatMessage({ id: 'contribDist.criticalityScore' })}</Divider>
             <Line height={200} {...config} data={this.props.criticalityScores} />
           </div>
         )}

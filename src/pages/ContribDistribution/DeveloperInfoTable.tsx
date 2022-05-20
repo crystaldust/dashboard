@@ -7,19 +7,19 @@ const intl = getIntl();
 
 const DEVELOPER_INFO_COLS = [
   {
-    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.owner' }),
+    title: intl.formatMessage({ id: 'contribDist.developerInfoTable.colname.owner' }),
     dataIndex: 'owner',
   },
   {
-    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.repo' }),
+    title: intl.formatMessage({ id: 'contribDist.developerInfoTable.colname.repo' }),
     dataIndex: 'repo',
   },
   {
-    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.email' }),
+    title: intl.formatMessage({ id: 'contribDist.developerInfoTable.colname.email' }),
     dataIndex: 'email',
   },
   {
-    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.githubProfile' }),
+    title: intl.formatMessage({ id: 'contribDist.developerInfoTable.colname.githubProfile' }),
     dataIndex: 'githubProfile',
     render: (profile) => {
       if (!profile) {
@@ -42,7 +42,7 @@ const DEVELOPER_INFO_COLS = [
     },
   },
   {
-    title: intl.formatMessage({ id: 'geodist.developerInfoTable.colname.contribTzDist' }),
+    title: intl.formatMessage({ id: 'contribDist.developerInfoTable.colname.contribTzDist' }),
     dataIndex: 'dist',
     render: (dist) => {
       return dist.map((item) => {
@@ -61,13 +61,13 @@ const DEVELOPER_INFO_COLS = [
   },
 ];
 const GHPROFILE_COMPANY = intl.formatMessage({
-  id: 'geodist.developerInfoTable.githubProfile.company',
+  id: 'contribDist.developerInfoTable.githubProfile.company',
 });
 const GHPROFILE_LOCATION = intl.formatMessage({
-  id: 'geodist.developerInfoTable.githubProfile.location',
+  id: 'contribDist.developerInfoTable.githubProfile.location',
 });
 const GHPROFILE_COUNTRY = intl.formatMessage({
-  id: 'geodist.developerInfoTable.githubProfile.countryOrRegion',
+  id: 'contribDist.developerInfoTable.githubProfile.countryOrRegion',
 });
 
 export class DeveloperInfoTable extends React.Component<any, any> {
@@ -77,7 +77,7 @@ export class DeveloperInfoTable extends React.Component<any, any> {
         {!!this.props.developerInfoData.length && (
           <div>
             <Divider>
-              {intl.formatMessage({ id: 'geodist.developerInfoTable.header.developerInfo' })}
+              {intl.formatMessage({ id: 'contribDist.developerInfoTable.header.developerInfo' })}
             </Divider>
             <Table
               columns={DEVELOPER_INFO_COLS}

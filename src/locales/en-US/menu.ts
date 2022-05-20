@@ -50,7 +50,7 @@ export default {
   'menu.editor.mind': 'Mind Editor',
   'menu.editor.koni': 'Koni Editor',
   'menu.lowCodePlatform': 'Low Code Platform',
-  'menu.geoDist': 'Geographic Distribution',
+  'menu.contribDist': 'Contribution Distribution',
   'menu.charImageDownload': 'Chart Image Download',
   'menu.repositoriesMonitor': 'Add & Watch Repos',
   'menu.[removing]Low Code Viz(activity)': '[Removing]Low Code Viz(Activities)',

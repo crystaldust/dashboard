@@ -6,7 +6,7 @@ import pwa from './en-US/pwa';
 import settingDrawer from './en-US/settingDrawer';
 import settings from './en-US/settings';
 import lowcodePlatform from '@/locales/en-US/lowcodePlatform';
-import geodist from '@/locales/en-US/geodist';
+import contribDist from '@/locales/en-US/contribDist';
 import chartdownload from '@/locales/en-US/chartdownload';
 import repositoriesMonitor from '@/locales/en-US/repositoriesMonitor';
 
@@ -27,7 +27,7 @@ export default {
   ...component,
   ...pages,
   ...lowcodePlatform,
-  ...geodist,
+  ...contribDist,
   ...chartdownload,
   ...repositoriesMonitor,
 };
