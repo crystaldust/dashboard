@@ -12,9 +12,9 @@ export default class SecondaryDirSelector extends React.Component<any, any> {
     this.onSelect = this.onSelect.bind(this);
   }
 
-  onSelect(keys: React.Key[], info: any) {
+  onSelect(keys: React.Key[], event: any) {
     if (this.props.onDirSelect) {
-      this.props.onDirSelect(keys, info);
+      this.props.onDirSelect(keys, event);
     }
   }
 
@@ -70,6 +70,7 @@ export default class SecondaryDirSelector extends React.Component<any, any> {
           onSelect={this.onSelect}
           onExpand={this.onExpand}
           treeData={this.props.dirData}
+          expandAction={false}
         />
       </div>
     );
