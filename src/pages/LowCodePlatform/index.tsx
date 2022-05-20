@@ -84,7 +84,7 @@ export default class Index extends React.Component<any, any> {
           <Col span={24}>
             <Collapse>
               <Panel header={intl.formatMessage({ id: 'lowcodePlatform.sqlEditor' })} key="1">
-                <div style={{ fontSize: 12, color: '#888888' }}>
+                <div style={{ fontSize: 14, color: '#555555' }}>
                   {intl.formatMessage({ id: 'lowcodePlatform.sqlEditorIntro' })}
                 </div>
                 <SQLEditor defaultCode={DEFAULT_SQL} runSql={this.runSql} />
