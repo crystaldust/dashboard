@@ -53,6 +53,7 @@ export default class ContribDistribution extends React.Component<any, any> {
       selectedDirsFileDeveloperData: [],
       selectedDirDeveloperContributionData: [],
 
+      selectedDirs: [],
       secondaryDirsTableData: [],
       loadingSecondaryDirsTableData: false,
 
@@ -82,6 +83,7 @@ export default class ContribDistribution extends React.Component<any, any> {
 
   updateRepoRelatedData(owner, repo, since, until, commitMsgFilter = '') {
     this.setState({
+      selectedDirs: [],
       secondaryDirsTableData: [],
       developerContribInSecondaryDirData: [],
       developerInfoData: [],
@@ -209,6 +211,7 @@ export default class ContribDistribution extends React.Component<any, any> {
       // Since secondaryDirsTableData will be update, don't change the state too frequently
       // Or the web page will have great performance side effect
       // secondaryDirsTableData: [],
+      selectedDirs,
       developerContribInSecondaryDirData: [],
       developerInfoData: [],
     });
@@ -451,6 +454,7 @@ export default class ContribDistribution extends React.Component<any, any> {
               dirData={this.state.dirData}
               onDirSelect={this.onDirSelect}
               repo={this.state.repo}
+              selectedDirs={this.state.selectedDirs}
             />
           </Col>
           <Col span={18}>

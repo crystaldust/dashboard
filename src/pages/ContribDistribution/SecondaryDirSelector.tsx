@@ -71,6 +71,7 @@ export default class SecondaryDirSelector extends React.Component<any, any> {
           onExpand={this.onExpand}
           treeData={this.props.dirData}
           expandAction={false}
+          selectedKeys={this.props.selectedDirs}
         />
       </div>
     );
