@@ -186,19 +186,25 @@ export default class CriticalityScoreDownload extends React.Component<any, any> 
   buttonClick() {
     runSql('SELECT distinct(owner, repo) from criticality_score').then((result) => {
       let i = 0;
-      const numProjects = result.data.length;
+      const filteredResultData = result.data.filter((item) => {
+        const owner = item[0][0];
+        const repo = item[0][1];
+        return (owner == 'openjdk' && repo == 'jdk') || (owner == 'qemu' && repo == 'qemu');
+        // return true // For all project
+      });
+      const numProjects = filteredResultData.length;
+      console.log(filteredResultData);
+      // return
       // const numProjects = 2;
 
       const interval = setInterval(() => {
-        const item = result.data[i];
+        const item = filteredResultData[i];
         const owner = item[0][0];
         const repo = item[0][1];
         const progress = Math.round((i / numProjects) * 100);
         this.setState({ progress });
         this.forceUpdate();
-		if (owner == 'docker' && repo=='roadmap'){
-        	this.fetchAndDownload(owner, repo);
-		}
+        this.fetchAndDownload(owner, repo);
         ++i;
         if (i >= numProjects) {
           clearInterval(interval);
@@ -207,9 +213,11 @@ export default class CriticalityScoreDownload extends React.Component<any, any> 
       }, 350);
     });
   }
+
   onLineReady(plot) {
     this.lineRef.current = plot;
   }
+
   updateLineChartWidth(width) {
     this.setState({ lineChartWidth: width });
   }
@@ -217,6 +225,7 @@ export default class CriticalityScoreDownload extends React.Component<any, any> 
   updateLineChartHeight(height) {
     this.setState({ lineChartHeight: height });
   }
+
   // componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>, snapshot?: any) {}
 
   render() {
