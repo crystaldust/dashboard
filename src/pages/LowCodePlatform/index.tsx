@@ -15,7 +15,7 @@ import { getIntl } from 'umi';
 const intl = getIntl();
 
 const DEFAULT_SQL =
-  "SELECT * FROM activities WHERE owner='mysql' AND repo='mysql-server' ORDER BY code_contribution DESC LIMIT 100";
+  "SELECT * FROM activities WHERE owner='torvalds' AND repo='linux' ORDER BY code_contribution DESC LIMIT 100";
 // "SELECT * FROM activities WHERE owner='kubernetes' AND repo='kubernetes' ORDER BY code_contribution DESC LIMIT 2";
 
 export default class Index extends React.Component<any, any> {
