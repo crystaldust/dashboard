@@ -1,5 +1,6 @@
 export default {
   'contribDist.criticalityScore': '社区活跃度（Criticality Score）',
+  'contribDist.filterCommitMessage': '过滤Commit信息： ',
 
   'contribDist.dirTree': '目录结构',
   'contribDist.dirTree.desc': '按住Ctrl选择多个目录，按住Shift连续选择多个目录',

@@ -3,7 +3,7 @@ import SecondaryDirSelector from '@/pages/ContribDistribution/SecondaryDirSelect
 import { runSql } from '@/services/clickhouse';
 import OwnerRepoSelector from '@/pages/ContribDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Col, Row, Spin, Input, Space } from 'antd';
+import { Col, Row, Spin, Input, Space, Button } from 'antd';
 import EventProxy from '@dking/event-proxy';
 import { DatePicker } from 'antd';
 
@@ -29,6 +29,7 @@ import { DeveloperInfoTable } from '@/pages/ContribDistribution/DeveloperInfoTab
 import { parseGithubProfile, pathsToTree } from '@/pages/ContribDistribution/DataProcessors';
 import { CriticalityScoreChart } from '@/pages/ContribDistribution/CriticalityScoreChart';
 import moment from 'moment';
+import { getIntl } from 'umi';
 
 const MAX_DOMAIN_LEGENDS = 10;
 const MAX_DOMAIN_TAGS = 200;
@@ -411,7 +412,7 @@ export default class ContribDistribution extends React.Component<any, any> {
   render() {
     return (
       <PageContainer>
-        <Row gutter={16}>
+        <Row align={'middle'}>
           <Col span={8}>
             <OwnerRepoSelector onOwnerRepoSelected={this.ownerRepoSelected} />
           </Col>
@@ -429,10 +430,16 @@ export default class ContribDistribution extends React.Component<any, any> {
             )}
           </Col>
           <Space />
-          <Col span={8}>
+          <Space />
+          <Col span={1.6}>
+            {!!this.state.repo && (
+              <span>{getIntl().formatMessage({ id: 'contribDist.filterCommitMessage' })} </span>
+            )}
+          </Col>
+          <Col span={6}>
             {!!this.state.repo && (
               <Input.Search
-                placeholder={'Filter Commit Message'}
+                // placeholder={'Filter Commit Message'}
                 onSearch={this.filterCommitMessage}
                 onChange={this.onSearchInputChange}
                 value={this.state.commitMsgFilter}

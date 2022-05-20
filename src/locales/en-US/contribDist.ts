@@ -1,5 +1,6 @@
 export default {
   'contribDist.criticalityScore': 'Community Activeness(Criticality Score)',
+  'contribDist.filterCommitMessage': 'Filter Commit Message: ',
 
   'contribDist.dirTree': 'Directory Tree',
   'contribDist.dirTree.desc':
@@ -9,8 +10,10 @@ export default {
 
   'contribDist.secondaryDirTable.colname.selectedDirs': 'Selected Dirs',
   'contribDist.secondaryDirTable.colname.fileRegionDist': 'Committed File Distribution by Region',
-  'contribDist.secondaryDirTable.colname.fileEmailDist': 'Committed File Distribution by Email Domain',
-  'contribDist.secondaryDirTable.colname.developerRegionDist': 'Developer Count Distribution by Region',
+  'contribDist.secondaryDirTable.colname.fileEmailDist':
+    'Committed File Distribution by Email Domain',
+  'contribDist.secondaryDirTable.colname.developerRegionDist':
+    'Developer Count Distribution by Region',
   'contribDist.secondaryDirTable.colname.developerEmailDist':
     'Developer Count Distribution by Email Domain',
   'contribDist.secondaryDirTable.header.secondaryDir': 'Contributions in Selected Directories',
@@ -21,7 +24,8 @@ export default {
   'contribDist.developerContribInSecondaryDirTable.colname.tzDist': 'Timezone Distribution',
   'contribDist.developerContribInSecondaryDirTable.header.developerInfo':
     "Developers' contributions in the directory",
-  'contribDist.developerContribInSecondaryDirTable.desc': "Click the row for developer's information",
+  'contribDist.developerContribInSecondaryDirTable.desc':
+    "Click the row for developer's information",
 
   'contribDist.developerInfoTable.colname.owner': 'Owner',
   'contribDist.developerInfoTable.colname.repo': 'Repo',
