@@ -11,11 +11,14 @@ import {
 import { runSql } from '@/services/clickhouse';
 import { PageContainer } from '@ant-design/pro-layout';
 import { getIntl, Link } from 'umi';
-import { addRepository } from '@/services/intelligengine';
+import { addRepository, getRepositories } from '@/services/intelligengine';
 
 const IS_GIT_URL_REGEX = /(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|\#[-\d\w._]+?)$/;
 
 const intl = getIntl();
+
+const REPO_DOWNLOADING = 1;
+const REPO_DOWNLOADED = 2;
 
 export default class RepositoriesManager extends React.Component<any, any> {
   repoFound: boolean = false;
@@ -26,6 +29,7 @@ export default class RepositoriesManager extends React.Component<any, any> {
       repoOptions: [],
       numRepos: -1,
       numDownloadingRepos: 0,
+      downloadingRepos: [],
       numCommits: -1,
       numDevelopers: -1,
       numIssues: -1,
@@ -34,8 +38,9 @@ export default class RepositoriesManager extends React.Component<any, any> {
       searchInput: '',
     };
 
-    this.onSearch = this.onSearch.bind(this);
+    this.onSearchInputChange = this.onSearchInputChange.bind(this);
     this.onAddRepo = this.onAddRepo.bind(this);
+    this.syncDownloadingRepos = this.syncDownloadingRepos.bind(this);
 
     runSql(allProjectsSQL(), true).then((result) => {
       const repoOptions = result.data.map((item) => ({
@@ -75,9 +80,12 @@ export default class RepositoriesManager extends React.Component<any, any> {
       .catch((err) => {
         this.setState({ numPRs: 0 });
       });
+
+    this.syncDownloadingRepos();
+    setInterval(this.syncDownloadingRepos, 5000);
   }
 
-  onSearch(inputValue) {
+  onSearchInputChange(inputValue) {
     // this.repoFound is assigned in a single option match scope, it's NOT accurate
     // we should check it here!
     let repoFound = false;
@@ -96,31 +104,61 @@ export default class RepositoriesManager extends React.Component<any, any> {
   }
 
   onAddRepo() {
-    addRepository(this.state.searchInput)
+    const repoUrl = this.state.searchInput;
+    addRepository(repoUrl)
       .then((result) => {
+        this.setState({ searchInput: '' });
         notification.info({
-          message: 'Repo added!',
+          message: intl.formatMessage({ id: 'repositoriesManager.repoAdded' }),
           description: `Repo ${this.state.searchInput} is added to download list`,
           placement: 'top',
         });
       })
       .catch((e) => {
-        let description = `Failed to add ${this.state.searchInput}`;
+        const failedToAddStr = intl.formatMessage({ id: 'repositoriesManager.failedToAdd' });
+        const failedToAddRepoStr = intl.formatMessage({
+          id: 'repositoriesManager.failedToAddRepo',
+        });
+        const alreadyInDownloadListStr = intl.formatMessage({
+          id: 'repositoriesManager.repoAlreadyInDownloadList',
+        });
+        const alreadyDownloadedStr = intl.formatMessage({
+          id: 'repositoriesManager.repoAlreadyDownloaded',
+        });
+        const invalidGitUrlStr = intl.formatMessage({
+          id: 'repositoriesManager.invalidGitUrl',
+        });
+        let description = `${failedToAddStr} ${repoUrl}`;
         switch (e.response.status) {
           case 409:
-            description = `${description}: repo already exists`;
+            const repoStatus = e.response.headers.get('repo_status');
+            const statusStr =
+              repoStatus == REPO_DOWNLOADED ? alreadyDownloadedStr : alreadyInDownloadListStr;
+            description = `${description}: ${statusStr}`;
+            break;
+          case 400:
+            description = `${description}: ${invalidGitUrlStr}`;
             break;
           default:
             description = `${description}: ${e}`;
         }
         notification.error({
-          message: 'Failed to add repo!',
+          message: failedToAddRepoStr,
           description,
           placement: 'top',
         });
       });
   }
 
+  syncDownloadingRepos() {
+    getRepositories()
+      .then((result) => {
+        this.setState({ downloadingRepos: result, numDownloadingRepos: result.length });
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  }
   render() {
     return (
       <PageContainer>
@@ -137,11 +175,17 @@ export default class RepositoriesManager extends React.Component<any, any> {
                   option!.origin.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 );
               }}
-              onSearch={this.onSearch}
+              value={this.state.searchInput}
+              onSearch={this.onSearchInputChange}
+              onSelect={this.onSearchInputChange}
             />
           </Col>
           <Col span={4}>
-            {!this.state.repoFound && <Button onClick={this.onAddRepo}>Add</Button>}
+            {!this.state.repoFound && (
+              <Button onClick={this.onAddRepo}>
+                {intl.formatMessage({ id: 'repositoriesManager.addButtonTitle' })}
+              </Button>
+            )}
           </Col>
         </Row>
 
@@ -209,7 +253,22 @@ export default class RepositoriesManager extends React.Component<any, any> {
 
         <Divider>{intl.formatMessage({ id: 'repositoriesManager.repositories' })}</Divider>
         <Row gutter={[10, 10]}>
-          {this.state.repoOptions.map((option, index) => {
+          {this.state.downloadingRepos.map((repoInfo, index) => {
+            const { owner, repo, url: repoUrl } = repoInfo;
+            return (
+              <Col key={`downloading__repo__col__${owner}___${repo}`} span={4}>
+                <a href={repoUrl} target={'_blank'}>
+                  <Card style={{ height: 90, background: 'rgba(105,248,212,0.8)' }} hoverable>
+                    {`${owner}/${repo}`}
+                  </Card>
+                </a>
+              </Col>
+            );
+          })}
+        </Row>
+        <br />
+        <Row gutter={[10, 10]}>
+          {this.state.repoOptions.map((option) => {
             const { owner, repo } = option;
             const colKey = `col__${owner}__${repo}`;
             return (
