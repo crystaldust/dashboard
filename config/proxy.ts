@@ -7,28 +7,28 @@
  * https://pro.ant.design/docs/deploy
  */
 
-let DEV_CK_TRANS_SERVER = 'http://localhost:8000';
+let DEV_SERVER = 'http://127.0.0.1:8000';
 // Keep in mind that the proxy's url should take IP but not 'localhost'
-if (process.env.CK_TRANS_SERVER) {
-  DEV_CK_TRANS_SERVER = process.env.CK_TRANS_SERVER;
+if (process.env.DEV_SERVER) {
+  DEV_SERVER = process.env.DEV_SERVER;
 }
 
-console.log('DEV_CK_TRANS_SERVER:', DEV_CK_TRANS_SERVER)
+console.log('DEV_SERVER:', DEV_SERVER);
 
 export default {
   dev: {
-    // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
-    '/api/': {
-      // 要代理的地址
-      target: 'https://preview.pro.ant.design',
-      // 配置了这个可以从 http 代理到 https
-      // 依赖 origin 的功能可能需要这个，比如 cookie
-      changeOrigin: true,
-    },
-    '/clickhouse/sql': {
-      target: DEV_CK_TRANS_SERVER,
+    // // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
+    // '/api/': {
+    //   // 要代理的地址
+    //   target: 'https://preview.pro.ant.design',
+    //   // 配置了这个可以从 http 代理到 https
+    //   // 依赖 origin 的功能可能需要这个，比如 cookie
+    //   changeOrigin: true,
+    // },
+    '/api': {
+      target: DEV_SERVER,
       changeOrign: true,
-      pathRewrite: { '^/clickhouse/sql': '' },
+      pathRewrite: { '^/api': '' },
     },
   },
   test: {
