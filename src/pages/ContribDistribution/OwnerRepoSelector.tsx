@@ -3,7 +3,8 @@ import React, { createRef } from 'react';
 import { Select } from 'antd';
 import { runSql } from '@/services/clickhouse';
 
-const UNIQ_OWNER_REPO_SQL = 'SELECT DISTINCT(search_key__owner , search_key__repo) FROM gits';
+const UNIQ_OWNER_REPO_SQL =
+  'SELECT DISTINCT(search_key__owner , search_key__repo) FROM gits ORDER BY (search_key__owner , search_key__repo)';
 
 export default class OwnerRepoSelector extends React.Component<any, any> {
   constructor(props) {
