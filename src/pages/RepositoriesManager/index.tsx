@@ -1,5 +1,5 @@
 import React from 'react';
-import { AutoComplete, Card, Col, Divider, Row, Statistic, Button } from 'antd';
+import { AutoComplete, Button, Card, Col, Divider, Row, Statistic, notification } from 'antd';
 import {
   allProjectsSQL,
   commitCountSql,
@@ -11,10 +11,15 @@ import {
 import { runSql } from '@/services/clickhouse';
 import { PageContainer } from '@ant-design/pro-layout';
 import { getIntl, Link } from 'umi';
+import { addRepository } from '@/services/intelligengine';
+
+const IS_GIT_URL_REGEX = /(?:git|ssh|https?|git@[-\w.]+):(\/\/)?(.*?)(\.git)(\/?|\#[-\d\w._]+?)$/;
 
 const intl = getIntl();
 
 export default class RepositoriesManager extends React.Component<any, any> {
+  repoFound: boolean = false;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -26,7 +31,11 @@ export default class RepositoriesManager extends React.Component<any, any> {
       numIssues: -1,
       numPRs: -1,
       repoFound: true,
+      searchInput: '',
     };
+
+    this.onSearch = this.onSearch.bind(this);
+    this.onAddRepo = this.onAddRepo.bind(this);
 
     runSql(allProjectsSQL(), true).then((result) => {
       const repoOptions = result.data.map((item) => ({
@@ -68,31 +77,72 @@ export default class RepositoriesManager extends React.Component<any, any> {
       });
   }
 
-  onSearch(value) {
-    console.log('onSearch.value:', value);
+  onSearch(inputValue) {
+    // this.repoFound is assigned in a single option match scope, it's NOT accurate
+    // we should check it here!
+    let repoFound = false;
+    for (let i = 0; i < this.state.repoOptions.length; ++i) {
+      const option = this.state.repoOptions[i];
+      if (
+        option!.owner.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1 ||
+        option!.repo.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1 ||
+        option!.origin.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+      ) {
+        repoFound = true;
+        break;
+      }
+    }
+    this.setState({ repoFound, searchInput: inputValue });
+  }
+
+  onAddRepo() {
+    addRepository(this.state.searchInput)
+      .then((result) => {
+        notification.info({
+          message: 'Repo added!',
+          description: `Repo ${this.state.searchInput} is added to download list`,
+          placement: 'top',
+        });
+      })
+      .catch((e) => {
+        let description = `Failed to add ${this.state.searchInput}`;
+        switch (e.response.status) {
+          case 409:
+            description = `${description}: repo already exists`;
+            break;
+          default:
+            description = `${description}: ${e}`;
+        }
+        notification.error({
+          message: 'Failed to add repo!',
+          description,
+          placement: 'top',
+        });
+      });
   }
 
   render() {
     return (
       <PageContainer>
         <Row>
-          <Col span={20}>
+          <Col span={7}>
             <AutoComplete
               style={{ width: 400 }}
               options={this.state.repoOptions}
               placeholder={intl.formatMessage({ id: 'repositoriesManager.inputTip' })}
               filterOption={(inputValue, option) => {
-                const found: boolean =
+                return (
                   option!.owner.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1 ||
                   option!.repo.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1 ||
-                  option!.origin.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1;
-                this.setState({ repoFound: found });
-                return found;
+                  option!.origin.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                );
               }}
               onSearch={this.onSearch}
             />
           </Col>
-          {/*<Col span={4}>{!this.state.repoFound && <Button>Add</Button>}</Col>*/}
+          <Col span={4}>
+            {!this.state.repoFound && <Button onClick={this.onAddRepo}>Add</Button>}
+          </Col>
         </Row>
 
         <Divider>{intl.formatMessage({ id: 'repositoriesManager.statistics' })}</Divider>
@@ -159,13 +209,15 @@ export default class RepositoriesManager extends React.Component<any, any> {
 
         <Divider>{intl.formatMessage({ id: 'repositoriesManager.repositories' })}</Divider>
         <Row gutter={[10, 10]}>
-          {this.state.repoOptions.map((option) => {
+          {this.state.repoOptions.map((option, index) => {
+            const { owner, repo } = option;
+            const colKey = `col__${owner}__${repo}`;
             return (
-              <Col span={4}>
+              <Col span={4} key={colKey}>
                 <Link
                   to={{
                     pathname: '/contrib_distribution',
-                    search: `?owner=${option.owner}&repo=${option.repo}`,
+                    search: `?owner=${owner}&repo=${repo}`,
                   }}
                 >
                   <Card style={{ height: 90 }} hoverable>
