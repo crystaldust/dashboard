@@ -1,5 +1,5 @@
 import React from 'react';
-import { AutoComplete, Card, Col, Divider, Row, Statistic } from 'antd';
+import { AutoComplete, Card, Col, Divider, Row, Statistic, Button } from 'antd';
 import {
   allProjectsSQL,
   commitCountSql,
@@ -10,7 +10,7 @@ import {
 } from '@/pages/RepositoriesManager/DataSQLs';
 import { runSql } from '@/services/clickhouse';
 import { PageContainer } from '@ant-design/pro-layout';
-import { getIntl } from 'umi';
+import { getIntl, Link } from 'umi';
 
 const intl = getIntl();
 
@@ -25,6 +25,7 @@ export default class RepositoriesManager extends React.Component<any, any> {
       numDevelopers: -1,
       numIssues: -1,
       numPRs: -1,
+      repoFound: true,
     };
 
     runSql(allProjectsSQL(), true).then((result) => {
@@ -81,15 +82,17 @@ export default class RepositoriesManager extends React.Component<any, any> {
               options={this.state.repoOptions}
               placeholder={intl.formatMessage({ id: 'repositoriesManager.inputTip' })}
               filterOption={(inputValue, option) => {
-                return (
+                const found: boolean =
                   option!.owner.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1 ||
                   option!.repo.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1 ||
-                  option!.origin.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-                );
+                  option!.origin.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1;
+                this.setState({ repoFound: found });
+                return found;
               }}
               onSearch={this.onSearch}
             />
           </Col>
+          {/*<Col span={4}>{!this.state.repoFound && <Button>Add</Button>}</Col>*/}
         </Row>
 
         <Divider>{intl.formatMessage({ id: 'repositoriesManager.statistics' })}</Divider>
@@ -159,11 +162,16 @@ export default class RepositoriesManager extends React.Component<any, any> {
           {this.state.repoOptions.map((option) => {
             return (
               <Col span={4}>
-                <a href={option.origin} target={'_blank'}>
+                <Link
+                  to={{
+                    pathname: '/contrib_distribution',
+                    search: `?owner=${option.owner}&repo=${option.repo}`,
+                  }}
+                >
                   <Card style={{ height: 90 }} hoverable>
                     {option.value}
                   </Card>
-                </a>
+                </Link>
               </Col>
             );
           })}

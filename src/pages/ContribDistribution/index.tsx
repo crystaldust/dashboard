@@ -82,6 +82,14 @@ export default class ContribDistribution extends React.Component<any, any> {
     this.onSearchInputChange = this.onSearchInputChange.bind(this);
   }
 
+  componentDidMount() {
+    const { owner, repo } = this.props.location.query;
+    if (owner && repo) {
+      console.log('we should load ', owner, repo);
+      this.ownerRepoSelected(owner, repo);
+    }
+  }
+
   updateRepoRelatedData(owner, repo, since, until, commitMsgFilter = '') {
     this.setState({
       selectedDirs: [],
