@@ -572,14 +572,43 @@ group by search_key__owner, search_key__repo,
   `;
 }
 
-export function commitsRegionDistSql(owner, repo, since, until, commitMsgFilter) {
+export function commitsRegionDistSql(
+  owner,
+  repo,
+  since,
+  until,
+  commitMsgFilter,
+  include,
+  caseSensitive,
+) {
   let dateRangeClause =
     since && until
       ? `and authored_date>'${since}'
     and authored_date<'${until}'`
       : '';
 
-  let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
+  let msgFilterClause = '';
+  if (commitMsgFilter) {
+    msgFilterClause = 'and ';
+
+    if (caseSensitive) {
+      msgFilterClause = `${msgFilterClause} message`;
+    } else {
+      msgFilterClause = `${msgFilterClause} lowerUTF8(message)`;
+    }
+
+    if (include) {
+      msgFilterClause = `${msgFilterClause} like`;
+    } else {
+      msgFilterClause = `${msgFilterClause} not like`;
+    }
+
+    if (caseSensitive) {
+      msgFilterClause = `${msgFilterClause} '%${commitMsgFilter}%'`;
+    } else {
+      msgFilterClause = `${msgFilterClause} '%${commitMsgFilter.toLowerCase()}%'`;
+    }
+  }
 
   return `
   select search_key__owner, search_key__repo,'北美' as area, COUNT() commit_count
@@ -655,14 +684,43 @@ select search_key__owner, search_key__repo,'澳洲' as area, COUNT() commit_coun
                                           group by search_key__owner, search_key__repo`;
 }
 
-export function commitsEmailDomainDistSql(owner, repo, since, until, commitMsgFilter) {
+export function commitsEmailDomainDistSql(
+  owner,
+  repo,
+  since,
+  until,
+  commitMsgFilter,
+  include,
+  caseSensitive,
+) {
   let dateRangeClause =
     since && until
       ? `and authored_date>'${since}'
     and authored_date<'${until}'`
       : '';
-  let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
+  // let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
+  let msgFilterClause = '';
+  if (commitMsgFilter) {
+    msgFilterClause = 'and ';
 
+    if (caseSensitive) {
+      msgFilterClause = `${msgFilterClause} message`;
+    } else {
+      msgFilterClause = `${msgFilterClause} lowerUTF8(message)`;
+    }
+
+    if (include) {
+      msgFilterClause = `${msgFilterClause} like`;
+    } else {
+      msgFilterClause = `${msgFilterClause} not like`;
+    }
+
+    if (caseSensitive) {
+      msgFilterClause = `${msgFilterClause} '%${commitMsgFilter}%'`;
+    } else {
+      msgFilterClause = `${msgFilterClause} '%${commitMsgFilter.toLowerCase()}%'`;
+    }
+  }
   return `
   select search_key__owner ,search_key__repo,
     \t\tsplitByChar('@',\`author_email\`)[2] as email_domain,

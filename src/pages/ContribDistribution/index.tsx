@@ -3,7 +3,7 @@ import SecondaryDirSelector from '@/pages/ContribDistribution/SecondaryDirSelect
 import { runSql } from '@/services/clickhouse';
 import OwnerRepoSelector from '@/pages/ContribDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Col, Row, Spin, Input, Space, Button } from 'antd';
+import { Col, Row, Spin, Input, Space, Button, Checkbox } from 'antd';
 import EventProxy from '@dking/event-proxy';
 import { DatePicker } from 'antd';
 
@@ -30,7 +30,9 @@ import { parseGithubProfile, pathsToTree } from '@/pages/ContribDistribution/Dat
 import { CriticalityScoreChart } from '@/pages/ContribDistribution/CriticalityScoreChart';
 import moment from 'moment';
 import { getIntl } from 'umi';
+import { CheckboxChangeEvent } from 'antd/es/checkbox';
 
+const intl = getIntl();
 const MAX_DOMAIN_LEGENDS = 10;
 const MAX_DOMAIN_TAGS = 200;
 export default class ContribDistribution extends React.Component<any, any> {
@@ -39,6 +41,8 @@ export default class ContribDistribution extends React.Component<any, any> {
   since: string;
   until: string;
   commitMessageFilter: string;
+  commitMessageFilterInclude: boolean = true;
+  commitMessageFilterCaseSensitive: boolean = false;
 
   constructor(props) {
     super(props);
@@ -80,17 +84,26 @@ export default class ContribDistribution extends React.Component<any, any> {
     this.onDateRangeChanged = this.onDateRangeChanged.bind(this);
     this.filterCommitMessage = this.filterCommitMessage.bind(this);
     this.onSearchInputChange = this.onSearchInputChange.bind(this);
+    this.onIncludeCheckChange = this.onIncludeCheckChange.bind(this);
+    this.onCaseSensitivityCheckChange = this.onCaseSensitivityCheckChange.bind(this);
   }
 
   componentDidMount() {
     const { owner, repo } = this.props.location.query;
     if (owner && repo) {
-      console.log('we should load ', owner, repo);
       this.ownerRepoSelected(owner, repo);
     }
   }
 
-  updateRepoRelatedData(owner, repo, since, until, commitMsgFilter = '') {
+  updateRepoRelatedData(
+    owner,
+    repo,
+    since,
+    until,
+    commitMsgFilter = '',
+    include = true,
+    caseSensitive = false,
+  ) {
     this.setState({
       selectedDirs: [],
       secondaryDirsTableData: [],
@@ -103,7 +116,9 @@ export default class ContribDistribution extends React.Component<any, any> {
       const dirTree = pathsToTree(allDirPaths);
       this.setState({ dirData: dirTree });
     });
-    runSql(commitsRegionDistSql(owner, repo, since, until, commitMsgFilter)).then((result) => {
+    runSql(
+      commitsRegionDistSql(owner, repo, since, until, commitMsgFilter, include, caseSensitive),
+    ).then((result) => {
       const regionCommitsDist = result.data
         .map((item) => ({
           region: item[2],
@@ -112,7 +127,9 @@ export default class ContribDistribution extends React.Component<any, any> {
         .sort((a: object, b: object) => b.value - a.value);
       this.setState({ regionCommitsDist });
     });
-    runSql(commitsEmailDomainDistSql(owner, repo, since, until, commitMsgFilter)).then((result) => {
+    runSql(
+      commitsEmailDomainDistSql(owner, repo, since, until, commitMsgFilter, include, caseSensitive),
+    ).then((result) => {
       let emailDomainCommitsDist = result.data
         .map((item) => ({
           domain: item[2],
@@ -423,7 +440,7 @@ export default class ContribDistribution extends React.Component<any, any> {
   }
 
   filterCommitMessage(value: string) {
-    this.commitMessageFilter = value.toLowerCase();
+    this.commitMessageFilter = value;
 
     this.updateRepoRelatedData(
       this.owner,
@@ -431,11 +448,19 @@ export default class ContribDistribution extends React.Component<any, any> {
       this.since,
       this.until,
       this.commitMessageFilter,
+      this.commitMessageFilterInclude,
+      this.commitMessageFilterCaseSensitive,
     );
   }
 
   onSearchInputChange(event: BaseSyntheticEvent) {
     this.setState({ commitMsgFilter: event.target.value });
+  }
+  onIncludeCheckChange(e: CheckboxChangeEvent) {
+    this.commitMessageFilterInclude = e.target.checked;
+  }
+  onCaseSensitivityCheckChange(e: CheckboxChangeEvent) {
+    this.commitMessageFilterCaseSensitive = e.target.checked;
   }
 
   render() {
@@ -460,21 +485,41 @@ export default class ContribDistribution extends React.Component<any, any> {
           </Col>
           <Space />
           <Space />
-          <Col span={1.6}>
+
+          <Col span={12}>
             {!!this.state.repo && (
-              <span>{getIntl().formatMessage({ id: 'contribDist.filterCommitMessage' })} </span>
-            )}
-          </Col>
-          <Col span={6}>
-            {!!this.state.repo && (
-              <Input.Search
-                // placeholder={'Filter Commit Message'}
-                onSearch={this.filterCommitMessage}
-                onChange={this.onSearchInputChange}
-                value={this.state.commitMsgFilter}
-                enterButton
-                allowClear
-              />
+              <Input.Group>
+                <Row align={'middle'}>
+                  <Col span={1.6}>
+                    {!!this.state.repo && (
+                      <span>{intl.formatMessage({ id: 'contribDist.filterCommitMessage' })} </span>
+                    )}
+                  </Col>
+
+                  <Col span={3}>
+                    <Checkbox defaultChecked onClick={this.onIncludeCheckChange}>
+                      {intl.formatMessage({ id: 'contribDist.filterCommitMessageInclude' })}
+                    </Checkbox>
+                  </Col>
+
+                  <Col span={5}>
+                    <Checkbox onChange={this.onCaseSensitivityCheckChange}>
+                      {intl.formatMessage({ id: 'contribDist.filterCommitMessageCaseSensitivity' })}
+                    </Checkbox>
+                  </Col>
+
+                  <Col span={8}>
+                    <Input.Search
+                      // placeholder={'Filter Commit Message'}
+                      onSearch={this.filterCommitMessage}
+                      onChange={this.onSearchInputChange}
+                      value={this.state.commitMsgFilter}
+                      enterButton
+                      allowClear
+                    />
+                  </Col>
+                </Row>
+              </Input.Group>
             )}
           </Col>
         </Row>

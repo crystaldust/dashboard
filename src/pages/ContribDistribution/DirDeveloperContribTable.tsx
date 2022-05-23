@@ -43,7 +43,7 @@ const DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS = [
   },
 ];
 
-let prevClickedRowRef = undefined;
+let prevClickedRow = undefined;
 
 export default class DirDeveloperContribTable extends React.Component<any, any> {
   render() {
@@ -80,6 +80,12 @@ export default class DirDeveloperContribTable extends React.Component<any, any> 
                     // tr.style.backgroundColor = 'rgb(115,201,236)';
                     // prevClickedRowRef = tr;
                     row.clicked = true;
+
+                    if (prevClickedRow && prevClickedRow != row) {
+                      prevClickedRow.clicked = false;
+                    }
+
+                    prevClickedRow = row;
 
                     if (this.props.onDeveloperRowClicked) {
                       this.props.onDeveloperRowClicked(row);

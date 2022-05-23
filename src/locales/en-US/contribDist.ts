@@ -1,6 +1,8 @@
 export default {
   'contribDist.criticalityScore': 'Community Activeness(Criticality Score)',
   'contribDist.filterCommitMessage': 'Filter Commit Message: ',
+  'contribDist.filterCommitMessageInclude': 'Include',
+  'contribDist.filterCommitMessageCaseSensitivity': 'Case Sensitive',
 
   'contribDist.dirTree': 'Directory Tree',
   'contribDist.dirTree.desc':
