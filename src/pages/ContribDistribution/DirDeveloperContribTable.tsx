@@ -63,7 +63,7 @@ export default class DirDeveloperContribTable extends React.Component<any, any> 
             </span>
             <Table
               rowClassName={(record, index) => {
-                console.log(record);
+                // console.log(record);
                 return record.clicked ? styles.clickedTableRow : styles.normalTableRow;
               }}
               columns={DEVELOPER_CONTRIB_IN_SECONDARY_DIR_COLS}

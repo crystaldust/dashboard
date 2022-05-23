@@ -272,7 +272,13 @@ export default class ContribDistribution extends React.Component<any, any> {
         ),
       ).then((result) => {
         const fileCountRegionDist = result.data.map((item: any[]) => {
-          return { region: item[1], value: item[0] };
+          return {
+            key: item[1],
+            value: item[0],
+            type: 'file_region_dist',
+            owner: this.owner,
+            repo: this.repo,
+          };
         });
         ep.emit(`${secondaryDir}-regionFileCount-ready`, fileCountRegionDist);
       });
@@ -287,7 +293,13 @@ export default class ContribDistribution extends React.Component<any, any> {
         ),
       ).then((result) => {
         const developerRegionDist = result.data.map((item: any[]) => {
-          return { region: item[1], value: item[0] };
+          return {
+            key: item[1],
+            value: item[0],
+            type: 'developer_region_dist',
+            owner: this.owner,
+            repo: this.repo,
+          };
         });
         ep.emit(`${secondaryDir}-regionDeveloper-ready`, developerRegionDist);
       });
@@ -303,8 +315,11 @@ export default class ContribDistribution extends React.Component<any, any> {
       ).then((result) => {
         const fileCountEmailDomainDist = result.data.slice(0, MAX_DOMAIN_TAGS).map((item) => {
           return {
-            region: item[1],
+            key: item[1],
             value: item[0],
+            type: 'file_domain_dist',
+            owner: this.owner,
+            repo: this.repo,
           };
         });
         ep.emit(`${secondaryDir}-domainFileCount-ready`, fileCountEmailDomainDist);
@@ -320,7 +335,13 @@ export default class ContribDistribution extends React.Component<any, any> {
         ),
       ).then((result) => {
         const developerEmailDomainDist = result.data.slice(0, MAX_DOMAIN_TAGS).map((item) => {
-          return { region: item[1], value: item[0] };
+          return {
+            key: item[1],
+            value: item[0],
+            type: 'developer_domain_dist',
+            owner: this.owner,
+            repo: this.repo,
+          };
         });
         ep.emit(`${secondaryDir}-domainDeveloper-ready`, developerEmailDomainDist);
       });

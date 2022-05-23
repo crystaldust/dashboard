@@ -1485,3 +1485,94 @@ where owner='${owner}'
 order by time_point
   `;
 }
+
+const REGION_TZ_MAP = {
+  NORTH_AMERICA: [-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12],
+  WEST_EUROPE: [0, 1, 2],
+  EAST_EUROPE: [3, 4],
+  INDIA: [5],
+  CHINA: [8],
+  JP_KR: [9],
+  AUSTRALIA: [10],
+};
+
+export function ownerRepoDirRegionFileTzDistSql(owner, repo, dir, region) {
+  const tzs = REGION_TZ_MAP[region]; // Array in `${var}` will be translated to var.join(',')
+  return `
+  with '${owner}' as OWNER,
+     '${repo}' as REPO,
+     '${dir}/' as DIR,
+     (${tzs}) as TZ
+select author_tz,
+       count() as alter_file_count
+from gits_dir_label where
+                        search_key__owner = OWNER
+                        and search_key__repo = REPO
+                        and in_dir = DIR
+                        and author_tz global in TZ
+group by author_tz order by alter_file_count desc`;
+}
+
+export function ownerRepoDirRegionDeveloperTzDistSql(owner, repo, dir, region) {
+  const tzs = REGION_TZ_MAP[region];
+  return `
+  with '${owner}' as OWNER,
+     '${repo}' as REPO,
+     '${dir}/' as DIR,
+     (${tzs}) as TZ
+select author_tz,count() as contributor_count from (select author_tz,author_email
+from gits_dir_label where
+                        search_key__owner = OWNER
+                        and search_key__repo = REPO
+                        and in_dir = DIR
+                        and author_tz global in TZ
+group by author_tz,author_email) group by author_tz order by contributor_count desc`;
+}
+
+export function ownerRepoDirDomainFileTzDistSql(owner, repo, dir, domain) {
+  return `
+  with '${owner}' as OWNER,
+     '${repo}' as REPO,
+     '${dir}/' as DIR,
+     '${domain}' as EMAIL_DOMAIN
+select author_tz,count() as alter_file_count from (select author_email,author_tz,
+       multiIf(author_email='',
+               if(author_name like '%@%',
+               splitByChar('@',\`author_name\`)[2],'empty_domain'),
+               author_email like '%@%',
+               splitByChar('@',\`author_email\`)[2],
+               author_email like '%\\%%',
+               splitByChar('%',\`author_email\`)[2],
+               author_email) as email_domain
+from gits_dir_label
+where
+                        search_key__owner = OWNER
+                        and search_key__repo = REPO
+                        and in_dir = DIR
+                        and email_domain=EMAIL_DOMAIN)
+group by author_tz order by alter_file_count desc`;
+}
+
+export function ownerRepoDirDomainDeveloperTzDistSql(owner, repo, dir, domain) {
+  return `
+with '${owner}' as OWNER,
+     '${repo}' as REPO,
+     '${dir}/' as DIR,
+     '${domain}' as EMAIL_DOMAIN
+select author_tz,count() as contributor_count  from (select author_tz,author_email from (select author_email,author_tz,
+       multiIf(author_email='',
+               if(author_name like '%@%',
+               splitByChar('@',\`author_name\`)[2],'empty_domain'),
+               author_email like '%@%',
+               splitByChar('@',\`author_email\`)[2],
+               author_email like '%\%%',
+               splitByChar('%',\`author_email\`)[2],
+               author_email) as email_domain
+from gits_dir_label
+where
+                        search_key__owner = OWNER
+                        and search_key__repo = REPO
+                        and in_dir = DIR
+                        and email_domain=EMAIL_DOMAIN)
+group by author_tz,author_email) group by author_tz order by contributor_count desc`;
+}
