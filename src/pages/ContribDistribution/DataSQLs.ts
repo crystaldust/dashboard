@@ -1032,15 +1032,192 @@ export function developerCountRegionDistInSecondaryDirSql(
     and authored_date<${dateToYearMonthInt(until)}`
       : '';
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
-  return `
-select sum(contributer_count) as count, area from gits_dir_contributer
-where search_key__owner='${owner}'
-and search_key__repo='${repo}'
-and in_dir='${dir}/'
-${dateRangeClause}
-group by area
-order by count desc
-  `;
+  if (dateRangeClause) {
+    return `
+  select sum(contributer_count) as count, area from gits_dir_contributer
+  where search_key__owner='${owner}'
+  and search_key__repo='${repo}'
+  and in_dir='${dir}/'
+  ${dateRangeClause}
+  group by area
+  order by count desc
+    `;
+  } else {
+    // TODO Replace it with malin's new SQL
+    return `
+select * from (
+select search_key__owner,search_key__repo,in_dir,area,count() as contributor_count from (select search_key__owner ,
+    search_key__repo ,
+    in_dir ,
+    '北美' as area,
+    author_email
+--     COUNT() alter_file_count
+from (
+    select search_key__owner,
+        search_key__repo,
+        author_email,
+
+        in_dir
+    from gits_dir_label
+    where
+author_tz global in (-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12)
+and search_key__owner = '${owner}'
+and search_key__repo = '${repo}'
+and in_dir = '${dir}/'
+)
+group by search_key__owner, search_key__repo,
+    in_dir,author_email)
+group by search_key__owner, search_key__repo,
+    in_dir,area
+
+union all
+
+select search_key__owner,search_key__repo,in_dir,area,count() as contributor_count from (select search_key__owner ,
+    search_key__repo ,
+    in_dir ,
+    '欧洲西部' as area,
+    author_email
+--     COUNT() alter_file_count
+from (
+    select search_key__owner,
+        search_key__repo,
+        author_email,
+        in_dir
+    from gits_dir_label
+    where
+         author_tz global in (0,1,2)
+    and search_key__owner = '${owner}'
+and search_key__repo = '${repo}'
+and in_dir = '${dir}/'
+)
+group by search_key__owner, search_key__repo,
+    in_dir,author_email)
+group by search_key__owner, search_key__repo,
+    in_dir,area
+
+union all
+
+select search_key__owner,search_key__repo,in_dir,area,count() as contributor_count from (select search_key__owner ,
+    search_key__repo ,
+    in_dir ,
+    '欧洲东部' as area,
+    author_email
+--     COUNT() alter_file_count
+from (
+    select search_key__owner,
+        search_key__repo,
+        author_email,
+        in_dir
+    from gits_dir_label
+    where
+         author_tz global in (3,4)
+    and search_key__owner = '${owner}'
+and search_key__repo = '${repo}'
+and in_dir = '${dir}/'
+)
+group by search_key__owner, search_key__repo,
+    in_dir,author_email)
+group by search_key__owner, search_key__repo,
+    in_dir,area
+
+union all
+
+select search_key__owner,search_key__repo,in_dir,area,count() as contributor_count from (select search_key__owner ,
+    search_key__repo ,
+    in_dir ,
+    '印度' as area,
+    author_email
+--     COUNT() alter_file_count
+from (
+    select search_key__owner,
+        search_key__repo,
+        author_email,
+        in_dir
+    from gits_dir_label
+    where author_tz global in (5)
+    and search_key__owner = '${owner}'
+and search_key__repo = '${repo}'
+and in_dir = '${dir}/'
+)
+group by search_key__owner, search_key__repo,
+    in_dir,author_email)
+group by search_key__owner, search_key__repo,
+    in_dir,area
+
+union all
+
+select search_key__owner,search_key__repo,in_dir,area,count() as contributor_count from (select search_key__owner ,
+    search_key__repo ,
+    in_dir ,
+    '中国' as area,
+    author_email
+--     COUNT() alter_file_count
+from (
+    select search_key__owner,
+        search_key__repo,
+        author_email,
+        in_dir
+    from gits_dir_label
+    where author_tz global in (8)
+    and search_key__owner = '${owner}'
+and search_key__repo = '${repo}'
+and in_dir = '${dir}/'
+)
+group by search_key__owner, search_key__repo,
+    in_dir,author_email)
+group by search_key__owner, search_key__repo,
+    in_dir,area
+
+union all
+
+select search_key__owner,search_key__repo,in_dir,area,count() as contributor_count from (select search_key__owner ,
+    search_key__repo ,
+    in_dir ,
+    '日韩' as area,
+    author_email
+--     COUNT() alter_file_count
+from (
+    select search_key__owner,
+        search_key__repo,
+        author_email,
+        in_dir
+    from gits_dir_label
+    where author_tz global in (9)
+    and search_key__owner = '${owner}'
+and search_key__repo = '${repo}'
+and in_dir = '${dir}/'
+)
+group by search_key__owner, search_key__repo,
+    in_dir,author_email)
+group by search_key__owner, search_key__repo,
+    in_dir,area
+
+union all
+
+select search_key__owner,search_key__repo,in_dir,area,count() as contributor_count from (select search_key__owner ,
+    search_key__repo ,
+    in_dir ,
+    '澳洲' as area,
+    author_email
+--     COUNT() alter_file_count
+from (
+    select search_key__owner,
+        search_key__repo,
+        author_email,
+        in_dir
+    from gits_dir_label
+    where author_tz global in (10)
+    and search_key__owner = '${owner}'
+and search_key__repo = '${repo}'
+and in_dir = '${dir}/'
+)
+group by search_key__owner, search_key__repo,
+    in_dir,author_email)
+group by search_key__owner, search_key__repo,
+    in_dir,area
+) order by contributor_count desc
+    `;
+  }
 
   //   return `
   //   select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
@@ -1298,7 +1475,7 @@ order by count desc
   // group by search_key__owner, search_key__repo,
   //     dir_level2,author_email)
   // group by search_key__owner, search_key__repo,
-  //     dir_level2,area`;
+  //     dir_level2,area`;OK
 }
 
 // 给定（owner，repo，二级目录），按照email domain划分的commits修改文件数量
@@ -1373,7 +1550,8 @@ export function developerCountDomainDistInSecondaryDirSql(
     and authored_date<${dateToYearMonthInt(until)}`
       : '';
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
-  return `
+  if (dateRangeClause) {
+    return `
   select sum(contributer_count) as count, email_domain from gits_dir_email_domain_contributer_count
 where search_key__owner='${owner}'
 and search_key__repo='${repo}'
@@ -1382,6 +1560,38 @@ ${dateRangeClause}
 group by email_domain
 order by count desc
   `;
+  } else {
+    // TODO Replace it with malin's new SQL
+    return `
+select search_key__owner, search_key__repo,
+    in_dir,email_domain,count() contributor_count from (
+    select search_key__owner,search_key__repo,email,email_domain,in_dir from
+    (select search_key__owner,
+        search_key__repo,
+
+        if(author_email='',
+            if(author_name like '%@%',author_name,'empty_email'),
+            author_email) as email,
+        multiIf(author_email='',
+            if(author_name like '%@%',
+                splitByChar('@',\`author_name\`)[2],'empty_domain'),
+            author_email like '%@%',
+            splitByChar('@',\`author_email\`)[2],
+            author_email like '%\%%',
+            splitByChar('%',\`author_email\`)[2],
+            author_email) as email_domain,
+        in_dir
+    from gits_dir_label where search_key__owner = '${owner}'
+and search_key__repo = '${repo}'
+and in_dir = '${dir}/')
+    group by search_key__owner,search_key__repo,email,email_domain,in_dir
+
+)
+group by search_key__owner, search_key__repo,
+    in_dir,email_domain
+order by contributor_count desc
+  `;
+  }
 
   //   return `
   //   select search_key__owner, search_key__repo,

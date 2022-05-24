@@ -49,6 +49,8 @@ REGION_MAP['中国'] = 'CHINA';
 
 function getTagTzDist(owner, repo, secondaryDir, type, key, callback) {
   let title = '';
+  let total = 0;
+
   switch (type) {
     case 'file_region_dist':
       runSql(ownerRepoDirRegionFileTzDistSql(owner, repo, secondaryDir, REGION_MAP[key])).then(
@@ -57,10 +59,12 @@ function getTagTzDist(owner, repo, secondaryDir, type, key, callback) {
             .map((item) => {
               const tz = item[0];
               const count = item[1];
+              total += count;
               const tzStr = tz > 0 ? `+${tz}` : `${tz}`;
               return `${tzStr}: ${count}`;
             })
             .join(', ');
+          // title += `, total: ${total}`;
           callback(title);
         },
       );
@@ -71,10 +75,14 @@ function getTagTzDist(owner, repo, secondaryDir, type, key, callback) {
           .map((item) => {
             const tz = item[0];
             const count = item[1];
+            total += count;
+
             const tzStr = tz > 0 ? `+${tz}` : `${tz}`;
             return `${tzStr}: ${count}`;
           })
           .join(', ');
+        // title += `, total: ${total}`;
+
         callback(title);
       });
       break;
@@ -85,10 +93,14 @@ function getTagTzDist(owner, repo, secondaryDir, type, key, callback) {
             .map((item) => {
               const tz = item[0];
               const count = item[1];
+              total += count;
+
               const tzStr = tz > 0 ? `+${tz}` : `${tz}`;
               return `${tzStr}: ${count}`;
             })
             .join(', ');
+          // title += `, total: ${total}`;
+
           callback(title);
         },
       );
@@ -100,10 +112,13 @@ function getTagTzDist(owner, repo, secondaryDir, type, key, callback) {
             .map((item) => {
               const tz = item[0];
               const count = item[1];
+              total += count;
               const tzStr = tz > 0 ? `+${tz}` : `${tz}`;
               return `${tzStr}: ${count}`;
             })
             .join(', ');
+          // title += `, total: ${total}`;
+
           callback(title);
         },
       );
