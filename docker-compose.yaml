@@ -4,7 +4,7 @@ services:
   dashboard:
     container_name: dashboard
     hostname: dashboard
-    image: dashboard:debug
+    image: dashboard:test
     restart: always
     # 跨多个Docker-compose配置文件，services在一个网桥
     networks:
@@ -16,7 +16,7 @@ services:
       - CK_PASS=querydata
       - PORT=8008
     ports:
-      - "17000:80"
+      - "81:81"
 
 
 networks:
