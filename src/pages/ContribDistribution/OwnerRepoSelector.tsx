@@ -67,6 +67,10 @@ export default class OwnerRepoSelector extends React.Component<any, any> {
     return option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1;
   }
 
+  updateOwnerRepo(owner, repo) {
+    this.setState({ owner, repo });
+  }
+
   render() {
     return (
       <span>
@@ -78,6 +82,7 @@ export default class OwnerRepoSelector extends React.Component<any, any> {
           onChange={this.onOwnerChange}
           onSelect={this.onOwnerSelect}
           filterOption={this.autoCompleteFilter}
+          value={this.state.owner}
         />
         <Select
           showSearch

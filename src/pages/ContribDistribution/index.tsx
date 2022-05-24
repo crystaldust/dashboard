@@ -1,4 +1,4 @@
-import React, { BaseSyntheticEvent } from 'react';
+import React, { BaseSyntheticEvent, createRef, RefObject } from 'react';
 import SecondaryDirSelector from '@/pages/ContribDistribution/SecondaryDirSelector';
 import { runSql } from '@/services/clickhouse';
 import OwnerRepoSelector from '@/pages/ContribDistribution/OwnerRepoSelector';
@@ -43,6 +43,7 @@ export default class ContribDistribution extends React.Component<any, any> {
   commitMessageFilter: string;
   commitMessageFilterInclude: boolean = true;
   commitMessageFilterCaseSensitive: boolean = false;
+  ownerRepoSelectorRef: RefObject<OwnerRepoSelector>;
 
   constructor(props) {
     super(props);
@@ -75,6 +76,7 @@ export default class ContribDistribution extends React.Component<any, any> {
     this.owner = '';
     this.repo = '';
     this.commitMessageFilter = '';
+    this.ownerRepoSelectorRef = createRef();
 
     this.updateRepoRelatedData = this.updateRepoRelatedData.bind(this);
     this.ownerRepoSelected = this.ownerRepoSelected.bind(this);
@@ -91,7 +93,8 @@ export default class ContribDistribution extends React.Component<any, any> {
   componentDidMount() {
     const { owner, repo } = this.props.location.query;
     if (owner && repo) {
-      this.ownerRepoSelected(owner, repo);
+      this.ownerRepoSelected(owner, repo); // Update the date viz for the owner repo
+      this.ownerRepoSelectorRef.current.updateOwnerRepo(owner, repo); // Just update the selector's values
     }
   }
 
@@ -315,6 +318,9 @@ export default class ContribDistribution extends React.Component<any, any> {
             owner: this.owner,
             repo: this.repo,
           };
+          // TODO This snippet is for the temp solution
+          // which fetch developer dist data from the intermediate table
+          // It should be abandoned in the future
           if (this.since && this.until) {
             parsedItem.key = item[1];
             parsedItem.value = item[0];
@@ -480,7 +486,10 @@ export default class ContribDistribution extends React.Component<any, any> {
       <PageContainer>
         <Row align={'middle'}>
           <Col span={8}>
-            <OwnerRepoSelector onOwnerRepoSelected={this.ownerRepoSelected} />
+            <OwnerRepoSelector
+              ref={this.ownerRepoSelectorRef}
+              onOwnerRepoSelected={this.ownerRepoSelected}
+            />
           </Col>
           <Col span={4}>
             {!!this.state.repo && (
