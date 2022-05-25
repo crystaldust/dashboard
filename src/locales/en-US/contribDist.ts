@@ -37,6 +37,8 @@ export default {
   'contribDist.developerInfoTable.colname.email': 'Email',
   'contribDist.developerInfoTable.colname.githubProfile': 'GitHub Profile',
   'contribDist.developerInfoTable.colname.contribTzDist': 'Contribution Timezone Distribution',
+  'contribDist.developerInfoTable.colname.activityRadar': 'Activities Radar',
+
   'contribDist.developerInfoTable.header.developerInfo': "Developer's information",
   'contribDist.developerInfoTable.githubProfile.company': 'Company',
   'contribDist.developerInfoTable.githubProfile.location': 'Location',

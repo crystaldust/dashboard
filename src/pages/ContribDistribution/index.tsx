@@ -15,6 +15,7 @@ import {
   commitsEmailDomainDistSql,
   commitsRegionDistSql,
   criticalityScoresSql,
+  developerActivitySql,
   developerContribInRepoSql,
   developerCountDomainDistInSecondaryDirSql,
   developerCountRegionDistInSecondaryDirSql,
@@ -417,27 +418,59 @@ export default class ContribDistribution extends React.Component<any, any> {
     const owner = this.owner;
     const repo = this.repo;
     const email = row.developerEmail;
+
     const ep = EventProxy.create();
-    ep.on(['githubProfileReady', 'contribTzDistReady'], (githubProfile, contribTzDist) => {
-      const developerInfoData = [
-        {
-          owner: contribTzDist.owner,
-          repo: contribTzDist.repo,
-          email: contribTzDist.email,
-          githubProfile,
-          dist: contribTzDist.dist,
-        },
-      ];
-      this.setState({
-        developerInfoData,
-      });
-    });
+    ep.on(
+      ['githubProfileReady', 'contribTzDistReady', 'developerActivityReady'],
+      (githubProfile, contribTzDist, developerActivity) => {
+        const developerInfoData = [
+          {
+            owner: contribTzDist.owner,
+            repo: contribTzDist.repo,
+            email: contribTzDist.email,
+            githubProfile,
+            dist: contribTzDist.dist,
+            activity: developerActivity,
+          },
+        ];
+        this.setState({
+          developerInfoData,
+        });
+      },
+    );
     runSql(developerGitHubProfileSql(email), true).then((result) => {
       let profile = null;
-      if (result.data.length) {
-        const profileData = result.data[0];
-        profile = parseGithubProfile(profileData);
+      if (!result.data.length) {
+        ep.emit('githubProfileReady', profile);
+        ep.emit('developerActivityReady', undefined);
+        return;
       }
+
+      const profileData = result.data[0];
+      profile = parseGithubProfile(profileData);
+
+      runSql(developerActivitySql(owner, repo, profile.login)).then((result) => {
+        if (!result.data.length) {
+          ep.emit('developerActivityReady', undefined);
+          return;
+        }
+        const activityData = [];
+        [
+          'knowledge_sharing',
+          'code_contribution',
+          'issue_coordination',
+          'progress_control',
+          'code_tweaking',
+          'issue_reporting',
+        ].forEach((key, keyIndex) => {
+          activityData.push({
+            name: key,
+            value: result.data[0][4 + keyIndex],
+          });
+        });
+        ep.emit('developerActivityReady', activityData);
+      });
+
       ep.emit('githubProfileReady', profile);
     });
     runSql(developerContribInRepoSql(owner, repo, email)).then((result) => {
@@ -469,9 +502,11 @@ export default class ContribDistribution extends React.Component<any, any> {
   onSearchInputChange(event: BaseSyntheticEvent) {
     this.setState({ commitMsgFilter: event.target.value });
   }
+
   onIncludeCheckChange(e: CheckboxChangeEvent) {
     this.commitMessageFilterInclude = e.target.checked;
   }
+
   onCaseSensitivityCheckChange(e: CheckboxChangeEvent) {
     this.commitMessageFilterCaseSensitive = e.target.checked;
   }

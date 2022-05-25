@@ -1692,6 +1692,14 @@ export function developerGitHubProfileSql(email) {
 order by search_key__updated_at desc limit 1`;
 }
 
+export function developerActivitySql(owner, repo, githubLogin) {
+  return `
+SELECT  * from activities_mapped
+WHERE owner='${owner}'
+AND repo='${repo}'
+AND github_login='${githubLogin}'`;
+}
+
 // 给定（owner，repo，email），给出该开发者在项目中的代码提交时区分布
 export function developerContribInRepoSql(owner, repo, email) {
   return `

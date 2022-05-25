@@ -31,6 +31,8 @@ export default {
   'contribDist.developerInfoTable.colname.email': '邮箱',
   'contribDist.developerInfoTable.colname.githubProfile': 'GitHub个人信息',
   'contribDist.developerInfoTable.colname.contribTzDist': '代码贡献时区分布',
+  'contribDist.developerInfoTable.colname.activityRadar': '影响力模型',
+
   'contribDist.developerInfoTable.header.developerInfo': '开发者信息',
   'contribDist.developerInfoTable.githubProfile.company': '公司',
   'contribDist.developerInfoTable.githubProfile.location': '位置',
