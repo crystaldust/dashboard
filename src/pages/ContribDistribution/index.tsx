@@ -34,7 +34,7 @@ import { CheckboxChangeEvent } from 'antd/es/checkbox';
 
 const intl = getIntl();
 const MAX_DOMAIN_LEGENDS = 10;
-const MAX_DOMAIN_TAGS = 200;
+const MAX_DOMAIN_TAGS = 50;
 export default class ContribDistribution extends React.Component<any, any> {
   owner: string;
   repo: string;

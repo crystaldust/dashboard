@@ -9,6 +9,7 @@ import {
   ownerRepoDirRegionFileTzDistSql,
 } from '@/pages/ContribDistribution/DataSQLs';
 import { runSql } from '@/services/clickhouse';
+import { Pie } from '@ant-design/plots';
 
 const intl = getIntl();
 const SECONDARY_DIR_TABLE_COLS = [
@@ -156,7 +157,7 @@ class TzDistTitle extends React.Component<any, any> {
 
 function secondaryDirTableCellRender(cellData, rowData, index) {
   const { secondaryDir } = rowData;
-  return cellData.map((info, index) => {
+  const tags = cellData.map((info, index) => {
     const { key, value, type, owner, repo, since, until } = info;
     const line = `${key}: ${value}`;
     const childKey = `${rowData.secondaryDir}-${key}-${index}`;
@@ -188,6 +189,41 @@ function secondaryDirTableCellRender(cellData, rowData, index) {
       </Tooltip>
     );
   });
+  if (
+    (cellData && cellData.length > 1 && cellData[0].type == 'file_domain_dist') ||
+    (cellData && cellData.length > 1 && cellData[0].type == 'developer_domain_dist')
+  ) {
+    return (
+      <div>
+        <Pie
+          angleField={'value'}
+          colorField={'key'}
+          data={cellData.slice(0, 10)}
+          animation={false}
+          legend={false}
+          radius={0.9}
+          theme={{
+            colors10: [
+              '#3682be',
+              '#45a776',
+              '#f05326',
+              '#a69754',
+              '#334f65',
+              '#b3974e',
+              '#38cb7d',
+              '#ddae33',
+              '#844bb3',
+              '#93c555',
+              '#5f6694',
+              '#df3881',
+            ],
+          }}
+        />
+        {tags}
+      </div>
+    );
+  }
+  return <div>{tags}</div>;
 }
 
 export default class SecondaryDirsTable extends React.Component<any, any> {
