@@ -62,7 +62,7 @@ function activityToRadarData(activity: CKData.Activity): object[] {
   });
 }
 
-export default class Charts extends React.Component<any, any> {
+export default class ActivityRadar extends React.Component<any, any> {
   constructor(props) {
     super(props);
     // this.state = { data: props.data ? props.data : [] };
@@ -76,7 +76,7 @@ export default class Charts extends React.Component<any, any> {
     return (
       <Radar
         data={radarData}
-        height={225}
+        height={this.props.height || 225}
         xField={'name'}
         yField={'value'}
         yAxis={{ max: 100, min: 0 }}

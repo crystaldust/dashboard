@@ -7,7 +7,6 @@ type RowBase = {
 type ActivityRow = RowBase & CKData.Activity;
 
 export function parseTableData(result: { columns: [][]; data: [][] }) {
-  console.log('result:', result)
   const tableColumns: object[] = result.columns.map((colInfo: string[]) => ({
     title: colInfo[0],
     dataIndex: colInfo[0],

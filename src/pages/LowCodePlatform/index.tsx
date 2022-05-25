@@ -5,11 +5,11 @@ import { Col, Collapse, Row } from 'antd';
 
 import DynamicDataTable, { parseTableData } from '@/pages/LowCodePlatform/DynamicDataTable';
 import SQLEditor from '@/pages/LowCodePlatform/SQLEditor';
-import Charts from '@/pages/LowCodePlatform/Charts';
+import ActivityRadar from '@/pages/LowCodePlatform/ActivityRadar';
 import { message } from 'antd';
 
 const { Panel } = Collapse;
-import { parseActivities } from '@/pages/LowCodePlatform/Charts';
+import { parseActivities } from '@/pages/LowCodePlatform/ActivityRadar';
 import { getIntl } from 'umi';
 
 const intl = getIntl();
@@ -103,7 +103,7 @@ export default class Index extends React.Component<any, any> {
 
           {this.state.fetchActivities && !!this.state.chartData && (
             <Col span={6}>
-              <Charts data={this.state.chartData} />
+              <ActivityRadar data={this.state.chartData} />
             </Col>
           )}
         </Row>
