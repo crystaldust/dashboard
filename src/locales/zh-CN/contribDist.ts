@@ -4,6 +4,9 @@ export default {
   'contribDist.filterCommitMessageInclude': '包含',
   'contribDist.filterCommitMessageCaseSensitivity': '大小写敏感',
 
+  'contribDist.placeholder.owner': '组织',
+  'contribDist.placeholder.repo': '代码库',
+
   'contribDist.dirTree': '目录结构',
   'contribDist.dirTree.desc': '按住Ctrl选择多个目录，按住Shift连续选择多个目录',
   'contribDist.commitsRegionDist': '区域提交数分布',

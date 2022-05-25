@@ -2,9 +2,12 @@ import React, { createRef } from 'react';
 
 import { Select } from 'antd';
 import { runSql } from '@/services/clickhouse';
+import { getIntl } from 'umi';
 
 const UNIQ_OWNER_REPO_SQL =
   'SELECT DISTINCT(search_key__owner , search_key__repo) FROM gits ORDER BY (search_key__owner , search_key__repo)';
+
+const intl = getIntl();
 
 export default class OwnerRepoSelector extends React.Component<any, any> {
   constructor(props) {
@@ -78,18 +81,18 @@ export default class OwnerRepoSelector extends React.Component<any, any> {
           showSearch
           style={{ width: '200px' }}
           options={this.state.owners}
-          placeholder={'Owner'}
+          placeholder={intl.formatMessage({ id: 'contribDist.placeholder.owner' })}
           onChange={this.onOwnerChange}
           onSelect={this.onOwnerSelect}
           filterOption={this.autoCompleteFilter}
-          value={this.state.owner}
+          value={this.state.owner || undefined}
         />
         <Select
           showSearch
           style={{ width: '200px' }}
           options={this.state.repos}
-          placeholder={'Repo'}
-          value={this.state.repo}
+          placeholder={intl.formatMessage({ id: 'contribDist.placeholder.repo' })}
+          value={this.state.repo || undefined}
           onSelect={this.onRepoSelect}
           // onChange={this.onOwnerChange}
           filterOption={this.autoCompleteFilter}

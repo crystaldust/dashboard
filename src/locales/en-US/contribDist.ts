@@ -4,6 +4,9 @@ export default {
   'contribDist.filterCommitMessageInclude': 'Include',
   'contribDist.filterCommitMessageCaseSensitivity': 'Case Sensitive',
 
+  'contribDist.placeholder.owner': 'Organization',
+  'contribDist.placeholder.repo': 'Repository',
+
   'contribDist.dirTree': 'Directory Tree',
   'contribDist.dirTree.desc':
     'Hold ctrl for multiple selection, shift for multiple continuous selection',
