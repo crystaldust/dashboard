@@ -15,7 +15,7 @@ import { getIntl } from 'umi';
 const intl = getIntl();
 
 const DEFAULT_SQL =
-  "SELECT * FROM activities WHERE owner='torvalds' AND repo='linux' ORDER BY code_contribution DESC LIMIT 100";
+  "SELECT * FROM activities_mapped WHERE owner='torvalds' AND repo='linux' ORDER BY code_contribution DESC LIMIT 100";
 // "SELECT * FROM activities WHERE owner='kubernetes' AND repo='kubernetes' ORDER BY code_contribution DESC LIMIT 2";
 
 export default class Index extends React.Component<any, any> {
@@ -41,15 +41,15 @@ export default class Index extends React.Component<any, any> {
   }
 
   runSql(sql: string) {
-    const fetchActivities: boolean = sql.toLowerCase().indexOf(' from activities ') != -1;
+    const fetchActivities: boolean = sql.toLowerCase().indexOf(' from activities_mapped ') != -1;
     this.setState({ fetchActivities, chartData: null });
 
     runSql(sql)
       .then((result) => {
         const tableResult = parseTableData(result);
-        if (fetchActivities) {
-          tableResult.tableData = parseActivities(tableResult.tableData);
-        }
+        // if (fetchActivities) {
+        //   tableResult.tableData = parseActivities(tableResult.tableData);
+        // }
         this.setState({ ...tableResult });
       })
       .catch((e) => {

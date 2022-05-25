@@ -73,6 +73,14 @@ export default class Charts extends React.Component<any, any> {
     if (this.props.data) {
       radarData = activityToRadarData(this.props.data);
     }
-    return <Radar data={radarData} height={300} xField={'name'} yField={'value'} />;
+    return (
+      <Radar
+        data={radarData}
+        height={225}
+        xField={'name'}
+        yField={'value'}
+        yAxis={{ max: 100, min: 0 }}
+      />
+    );
   }
 }

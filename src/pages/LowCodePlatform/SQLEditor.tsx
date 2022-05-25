@@ -40,7 +40,7 @@ export default class SQLEditor extends React.Component<any, any> {
         <Col span={20}>
           <Editor
             defaultLanguage="sql"
-            height="7vh"
+            height="40vh"
             defaultValue={this.props.defaultCode}
             onChange={this.handleEditorChange}
             onMount={this.handleEditorDidMount}
@@ -56,7 +56,7 @@ export default class SQLEditor extends React.Component<any, any> {
           />
         </Col>
         <Col span={4}>
-          <Button type="primary" icon={<PlaySquareOutlined />}>
+          <Button type="primary" icon={<PlaySquareOutlined />} onClick={this.sqlReady}>
             {intl.formatMessage({ id: 'lowcodePlatform.executeSQL' })}
           </Button>
         </Col>
