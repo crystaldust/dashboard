@@ -298,6 +298,8 @@ export default class ContribDistribution extends React.Component<any, any> {
             type: 'file_region_dist',
             owner: this.owner,
             repo: this.repo,
+            since: this.since,
+            until: this.until,
           };
         });
         ep.emit(`${secondaryDir}-regionFileCount-ready`, fileCountRegionDist);
@@ -317,17 +319,11 @@ export default class ContribDistribution extends React.Component<any, any> {
             type: 'developer_region_dist',
             owner: this.owner,
             repo: this.repo,
+            since: this.since,
+            until: this.until,
           };
-          // TODO This snippet is for the temp solution
-          // which fetch developer dist data from the intermediate table
-          // It should be abandoned in the future
-          if (this.since && this.until) {
-            parsedItem.key = item[1];
-            parsedItem.value = item[0];
-          } else {
-            parsedItem.key = item[3];
-            parsedItem.value = item[4];
-          }
+          parsedItem.key = item[3];
+          parsedItem.value = item[4];
           return parsedItem;
         });
         ep.emit(`${secondaryDir}-regionDeveloper-ready`, developerRegionDist);
@@ -349,6 +345,8 @@ export default class ContribDistribution extends React.Component<any, any> {
             type: 'file_domain_dist',
             owner: this.owner,
             repo: this.repo,
+            since: this.since,
+            until: this.until,
           };
         });
         ep.emit(`${secondaryDir}-domainFileCount-ready`, fileCountEmailDomainDist);
@@ -368,14 +366,11 @@ export default class ContribDistribution extends React.Component<any, any> {
             type: 'developer_domain_dist',
             owner: this.owner,
             repo: this.repo,
+            since: this.since,
+            until: this.until,
           };
-          if (this.since && this.until) {
-            parsedItem.key = item[1];
-            parsedItem.value = item[0];
-          } else {
-            parsedItem.key = item[3];
-            parsedItem.value = item[4];
-          }
+          parsedItem.key = item[3];
+          parsedItem.value = item[4];
           return parsedItem;
         });
         ep.emit(`${secondaryDir}-domainDeveloper-ready`, developerEmailDomainDist);

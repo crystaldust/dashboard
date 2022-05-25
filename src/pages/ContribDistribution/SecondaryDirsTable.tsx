@@ -47,30 +47,58 @@ REGION_MAP['日韩'] = 'JP_KR';
 REGION_MAP['印度'] = 'INDIA';
 REGION_MAP['中国'] = 'CHINA';
 
-function getTagTzDist(owner, repo, secondaryDir, type, key, callback) {
+function getTagTzDist(owner, repo, secondaryDir, type, key, since, until, callback) {
   let title = '';
   let total = 0;
 
   switch (type) {
     case 'file_region_dist':
-      runSql(ownerRepoDirRegionFileTzDistSql(owner, repo, secondaryDir, REGION_MAP[key])).then(
+      runSql(
+        ownerRepoDirRegionFileTzDistSql(owner, repo, secondaryDir, REGION_MAP[key], since, until),
+      ).then((result) => {
+        title = result.data
+          .map((item) => {
+            const tz = item[0];
+            const count = item[1];
+            total += count;
+            const tzStr = tz > 0 ? `+${tz}` : `${tz}`;
+            return `${tzStr}: ${count}`;
+          })
+          .join(', ');
+        // title += `, total: ${total}`;
+        callback(title);
+      });
+      break;
+    case 'file_domain_dist':
+      runSql(ownerRepoDirDomainFileTzDistSql(owner, repo, secondaryDir, key, since, until)).then(
         (result) => {
           title = result.data
             .map((item) => {
               const tz = item[0];
               const count = item[1];
               total += count;
+
               const tzStr = tz > 0 ? `+${tz}` : `${tz}`;
               return `${tzStr}: ${count}`;
             })
             .join(', ');
           // title += `, total: ${total}`;
+
           callback(title);
         },
       );
       break;
-    case 'file_domain_dist':
-      runSql(ownerRepoDirDomainFileTzDistSql(owner, repo, secondaryDir, key)).then((result) => {
+    case 'developer_region_dist':
+      runSql(
+        ownerRepoDirRegionDeveloperTzDistSql(
+          owner,
+          repo,
+          secondaryDir,
+          REGION_MAP[key],
+          since,
+          until,
+        ),
+      ).then((result) => {
         title = result.data
           .map((item) => {
             const tz = item[0];
@@ -86,42 +114,23 @@ function getTagTzDist(owner, repo, secondaryDir, type, key, callback) {
         callback(title);
       });
       break;
-    case 'developer_region_dist':
-      runSql(ownerRepoDirRegionDeveloperTzDistSql(owner, repo, secondaryDir, REGION_MAP[key])).then(
-        (result) => {
-          title = result.data
-            .map((item) => {
-              const tz = item[0];
-              const count = item[1];
-              total += count;
-
-              const tzStr = tz > 0 ? `+${tz}` : `${tz}`;
-              return `${tzStr}: ${count}`;
-            })
-            .join(', ');
-          // title += `, total: ${total}`;
-
-          callback(title);
-        },
-      );
-      break;
     case 'developer_domain_dist':
-      runSql(ownerRepoDirDomainDeveloperTzDistSql(owner, repo, secondaryDir, key)).then(
-        (result) => {
-          title = result.data
-            .map((item) => {
-              const tz = item[0];
-              const count = item[1];
-              total += count;
-              const tzStr = tz > 0 ? `+${tz}` : `${tz}`;
-              return `${tzStr}: ${count}`;
-            })
-            .join(', ');
-          // title += `, total: ${total}`;
+      runSql(
+        ownerRepoDirDomainDeveloperTzDistSql(owner, repo, secondaryDir, key, since, until),
+      ).then((result) => {
+        title = result.data
+          .map((item) => {
+            const tz = item[0];
+            const count = item[1];
+            total += count;
+            const tzStr = tz > 0 ? `+${tz}` : `${tz}`;
+            return `${tzStr}: ${count}`;
+          })
+          .join(', ');
+        // title += `, total: ${total}`;
 
-          callback(title);
-        },
-      );
+        callback(title);
+      });
       break;
     default:
       break;
@@ -135,8 +144,8 @@ class TzDistTitle extends React.Component<any, any> {
     this.state = {
       title: '',
     };
-    const { owner, repo, dir, type, regionKey } = this.props;
-    getTagTzDist(owner, repo, dir, type, regionKey, (title) => {
+    const { owner, repo, dir, type, regionKey, since, until } = this.props;
+    getTagTzDist(owner, repo, dir, type, regionKey, since, until, (title) => {
       this.setState({ title });
     });
   }
@@ -148,7 +157,7 @@ class TzDistTitle extends React.Component<any, any> {
 function secondaryDirTableCellRender(cellData, rowData, index) {
   const { secondaryDir } = rowData;
   return cellData.map((info, index) => {
-    const { key, value, type, owner, repo } = info;
+    const { key, value, type, owner, repo, since, until } = info;
     const line = `${key}: ${value}`;
     const childKey = `${rowData.secondaryDir}-${key}-${index}`;
     // TODO It's super weried that JS always complain 'each children in list should have uniq key'
@@ -162,7 +171,15 @@ function secondaryDirTableCellRender(cellData, rowData, index) {
         key={childKey}
         trigger="click"
         title={
-          <TzDistTitle owner={owner} repo={repo} dir={secondaryDir} type={type} regionKey={key} />
+          <TzDistTitle
+            owner={owner}
+            repo={repo}
+            dir={secondaryDir}
+            type={type}
+            regionKey={key}
+            since={since}
+            until={until}
+          />
         }
       >
         <Tag key={key} color={color}>

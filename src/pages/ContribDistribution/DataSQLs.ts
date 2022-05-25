@@ -1028,23 +1028,13 @@ export function developerCountRegionDistInSecondaryDirSql(
 ) {
   let dateRangeClause =
     since && until
-      ? `and authored_date>${dateToYearMonthInt(since)}
-    and authored_date<${dateToYearMonthInt(until)}`
+      ? `and toYYYYMM(authored_date)>${dateToYearMonthInt(since)}
+    and toYYYYMM(authored_date)<${dateToYearMonthInt(until)}`
       : '';
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
-  if (dateRangeClause) {
-    return `
-  select sum(contributer_count) as count, area from gits_dir_contributer
-  where search_key__owner='${owner}'
-  and search_key__repo='${repo}'
-  and in_dir='${dir}/'
-  ${dateRangeClause}
-  group by area
-  order by count desc
-    `;
-  } else {
-    // TODO Replace it with malin's new SQL
-    return `
+
+  // TODO Replace it with malin's new SQL
+  return `
 select * from (
 select search_key__owner,search_key__repo,in_dir,area,count() as contributor_count from (select search_key__owner ,
     search_key__repo ,
@@ -1064,6 +1054,7 @@ author_tz global in (-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12)
 and search_key__owner = '${owner}'
 and search_key__repo = '${repo}'
 and in_dir = '${dir}/'
+${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     in_dir,author_email)
@@ -1089,6 +1080,7 @@ from (
     and search_key__owner = '${owner}'
 and search_key__repo = '${repo}'
 and in_dir = '${dir}/'
+${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     in_dir,author_email)
@@ -1114,6 +1106,7 @@ from (
     and search_key__owner = '${owner}'
 and search_key__repo = '${repo}'
 and in_dir = '${dir}/'
+${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     in_dir,author_email)
@@ -1138,6 +1131,7 @@ from (
     and search_key__owner = '${owner}'
 and search_key__repo = '${repo}'
 and in_dir = '${dir}/'
+${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     in_dir,author_email)
@@ -1162,6 +1156,7 @@ from (
     and search_key__owner = '${owner}'
 and search_key__repo = '${repo}'
 and in_dir = '${dir}/'
+${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     in_dir,author_email)
@@ -1186,6 +1181,7 @@ from (
     and search_key__owner = '${owner}'
 and search_key__repo = '${repo}'
 and in_dir = '${dir}/'
+${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     in_dir,author_email)
@@ -1210,6 +1206,7 @@ from (
     and search_key__owner = '${owner}'
 and search_key__repo = '${repo}'
 and in_dir = '${dir}/'
+${dateRangeClause}
 )
 group by search_key__owner, search_key__repo,
     in_dir,author_email)
@@ -1217,7 +1214,6 @@ group by search_key__owner, search_key__repo,
     in_dir,area
 ) order by contributor_count desc
     `;
-  }
 
   //   return `
   //   select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
@@ -1546,23 +1542,12 @@ export function developerCountDomainDistInSecondaryDirSql(
 ) {
   let dateRangeClause =
     since && until
-      ? `and authored_date>${dateToYearMonthInt(since)}
-    and authored_date<${dateToYearMonthInt(until)}`
+      ? `and toYYYYMM(authored_date)>${dateToYearMonthInt(since)}
+    and toYYYYMM(authored_date)<${dateToYearMonthInt(until)}`
       : '';
   let msgFilterClause = commitMsgFilter ? `and lowerUTF8(message) like '%${commitMsgFilter}%'` : '';
-  if (dateRangeClause) {
-    return `
-  select sum(contributer_count) as count, email_domain from gits_dir_email_domain_contributer_count
-where search_key__owner='${owner}'
-and search_key__repo='${repo}'
-and in_dir='${dir}/'
-${dateRangeClause}
-group by email_domain
-order by count desc
-  `;
-  } else {
-    // TODO Replace it with malin's new SQL
-    return `
+  // TODO Replace it with malin's new SQL
+  return `
 select search_key__owner, search_key__repo,
     in_dir,email_domain,count() contributor_count from (
     select search_key__owner,search_key__repo,email,email_domain,in_dir from
@@ -1583,7 +1568,9 @@ select search_key__owner, search_key__repo,
         in_dir
     from gits_dir_label where search_key__owner = '${owner}'
 and search_key__repo = '${repo}'
-and in_dir = '${dir}/')
+and in_dir = '${dir}/'
+${dateRangeClause}
+)
     group by search_key__owner,search_key__repo,email,email_domain,in_dir
 
 )
@@ -1591,7 +1578,6 @@ group by search_key__owner, search_key__repo,
     in_dir,email_domain
 order by contributor_count desc
   `;
-  }
 
   //   return `
   //   select search_key__owner, search_key__repo,
@@ -1764,8 +1750,13 @@ const REGION_TZ_MAP = {
   AUSTRALIA: [10],
 };
 
-export function ownerRepoDirRegionFileTzDistSql(owner, repo, dir, region) {
+export function ownerRepoDirRegionFileTzDistSql(owner, repo, dir, region, since, until) {
   const tzs = REGION_TZ_MAP[region]; // Array in `${var}` will be translated to var.join(',')
+  const dateRangeClause =
+    since && until
+      ? `and toYYYYMM(authored_date) > ${dateToYearMonthInt(since)}
+         and toYYYYMM(authored_date) < ${dateToYearMonthInt(until)}`
+      : '';
   return `
   with '${owner}' as OWNER,
      '${repo}' as REPO,
@@ -1778,11 +1769,17 @@ from gits_dir_label where
                         and search_key__repo = REPO
                         and in_dir = DIR
                         and author_tz global in TZ
+                        ${dateRangeClause}
 group by author_tz order by alter_file_count desc`;
 }
 
-export function ownerRepoDirRegionDeveloperTzDistSql(owner, repo, dir, region) {
+export function ownerRepoDirRegionDeveloperTzDistSql(owner, repo, dir, region, since, until) {
   const tzs = REGION_TZ_MAP[region];
+  const dateRangeClause =
+    since && until
+      ? `and toYYYYMM(authored_date) > ${dateToYearMonthInt(since)}
+         and toYYYYMM(authored_date) < ${dateToYearMonthInt(until)}`
+      : '';
   return `
   with '${owner}' as OWNER,
      '${repo}' as REPO,
@@ -1794,10 +1791,16 @@ from gits_dir_label where
                         and search_key__repo = REPO
                         and in_dir = DIR
                         and author_tz global in TZ
+                        ${dateRangeClause}
 group by author_tz,author_email) group by author_tz order by contributor_count desc`;
 }
 
-export function ownerRepoDirDomainFileTzDistSql(owner, repo, dir, domain) {
+export function ownerRepoDirDomainFileTzDistSql(owner, repo, dir, domain, since, until) {
+  const dateRangeClause =
+    since && until
+      ? `and toYYYYMM(authored_date) > ${dateToYearMonthInt(since)}
+         and toYYYYMM(authored_date) < ${dateToYearMonthInt(until)}`
+      : '';
   return `
   with '${owner}' as OWNER,
      '${repo}' as REPO,
@@ -1817,11 +1820,18 @@ where
                         search_key__owner = OWNER
                         and search_key__repo = REPO
                         and in_dir = DIR
-                        and email_domain=EMAIL_DOMAIN)
+                        and email_domain=EMAIL_DOMAIN
+                        ${dateRangeClause}
+                        )
 group by author_tz order by alter_file_count desc`;
 }
 
-export function ownerRepoDirDomainDeveloperTzDistSql(owner, repo, dir, domain) {
+export function ownerRepoDirDomainDeveloperTzDistSql(owner, repo, dir, domain, since, until) {
+  const dateRangeClause =
+    since && until
+      ? `and toYYYYMM(authored_date) > ${dateToYearMonthInt(since)}
+         and toYYYYMM(authored_date) < ${dateToYearMonthInt(until)}`
+      : '';
   return `
 with '${owner}' as OWNER,
      '${repo}' as REPO,
@@ -1841,6 +1851,8 @@ where
                         search_key__owner = OWNER
                         and search_key__repo = REPO
                         and in_dir = DIR
-                        and email_domain=EMAIL_DOMAIN)
+                        and email_domain=EMAIL_DOMAIN
+                        ${dateRangeClause}
+                        )
 group by author_tz,author_email) group by author_tz order by contributor_count desc`;
 }
