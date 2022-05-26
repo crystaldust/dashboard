@@ -4,6 +4,9 @@ export default {
   'contribDist.filterCommitMessageInclude': '包含',
   'contribDist.filterCommitMessageCaseSensitivity': '大小写敏感',
 
+  'contribDist.fixRegion': '修正地区分布',
+  'contribDist.fixRegionTip': '当commit时区为GMT0，使用位置信息修正地区',
+
   'contribDist.placeholder.owner': '组织',
   'contribDist.placeholder.repo': '代码库',
 

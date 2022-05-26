@@ -3,6 +3,8 @@ export default {
   'contribDist.filterCommitMessage': 'Filter Commit Message: ',
   'contribDist.filterCommitMessageInclude': 'Include',
   'contribDist.filterCommitMessageCaseSensitivity': 'Case Sensitive',
+  'contribDist.fixRegion': 'Fix Region',
+  'contribDist.fixRegionTip': 'Use location info to fix region when commit is done in GMT0',
 
   'contribDist.placeholder.owner': 'Organization',
   'contribDist.placeholder.repo': 'Repository',

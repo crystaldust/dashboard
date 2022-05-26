@@ -3,7 +3,7 @@ import SecondaryDirSelector from '@/pages/ContribDistribution/SecondaryDirSelect
 import { runSql } from '@/services/clickhouse';
 import OwnerRepoSelector from '@/pages/ContribDistribution/OwnerRepoSelector';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Col, Row, Spin, Input, Space, Button, Checkbox } from 'antd';
+import { Col, Row, Spin, Input, Space, Button, Checkbox, Tooltip } from 'antd';
 import EventProxy from '@dking/event-proxy';
 import { DatePicker } from 'antd';
 
@@ -13,6 +13,7 @@ import {
   alteredFileCountDomainDistInSecondaryDirSql,
   alteredFileCountRegionDistInSecondaryDirSql,
   commitsEmailDomainDistSql,
+  commitsRegionDissSql_ByProfile,
   commitsRegionDistSql,
   criticalityScoresSql,
   developerActivitySql,
@@ -44,6 +45,7 @@ export default class ContribDistribution extends React.Component<any, any> {
   commitMessageFilter: string;
   commitMessageFilterInclude: boolean = true;
   commitMessageFilterCaseSensitive: boolean = false;
+  fixRegionByLocationInfo: boolean = false;
   ownerRepoSelectorRef: RefObject<OwnerRepoSelector>;
 
   constructor(props) {
@@ -89,6 +91,7 @@ export default class ContribDistribution extends React.Component<any, any> {
     this.onSearchInputChange = this.onSearchInputChange.bind(this);
     this.onIncludeCheckChange = this.onIncludeCheckChange.bind(this);
     this.onCaseSensitivityCheckChange = this.onCaseSensitivityCheckChange.bind(this);
+    this.onFixRegionSwitch = this.onFixRegionSwitch.bind(this);
   }
 
   componentDidMount() {
@@ -120,9 +123,30 @@ export default class ContribDistribution extends React.Component<any, any> {
       const dirTree = pathsToTree(allDirPaths);
       this.setState({ dirData: dirTree });
     });
-    runSql(
-      commitsRegionDistSql(owner, repo, since, until, commitMsgFilter, include, caseSensitive),
-    ).then((result) => {
+
+    let commitRegionDist_Sql = '';
+    if (this.fixRegionByLocationInfo) {
+      commitRegionDist_Sql = commitsRegionDissSql_ByProfile(
+        owner,
+        repo,
+        since,
+        until,
+        commitMsgFilter,
+        include,
+        caseSensitive,
+      );
+    } else {
+      commitRegionDist_Sql = commitsRegionDistSql(
+        owner,
+        repo,
+        since,
+        until,
+        commitMsgFilter,
+        include,
+        caseSensitive,
+      );
+    }
+    runSql(commitRegionDist_Sql).then((result) => {
       const regionCommitsDist = result.data
         .map((item) => ({
           region: item[2],
@@ -227,6 +251,17 @@ export default class ContribDistribution extends React.Component<any, any> {
     this.since = since;
     this.until = until;
 
+    this.updateRepoRelatedData(
+      this.owner,
+      this.repo,
+      this.since,
+      this.until,
+      this.commitMessageFilter,
+    );
+  }
+
+  onFixRegionSwitch(event) {
+    this.fixRegionByLocationInfo = event.target.checked;
     this.updateRepoRelatedData(
       this.owner,
       this.repo,
@@ -515,7 +550,7 @@ export default class ContribDistribution extends React.Component<any, any> {
     return (
       <PageContainer>
         <Row align={'middle'}>
-          <Col span={8}>
+          <Col span={6.5}>
             <OwnerRepoSelector
               ref={this.ownerRepoSelectorRef}
               onOwnerRepoSelected={this.ownerRepoSelected}
@@ -547,13 +582,13 @@ export default class ContribDistribution extends React.Component<any, any> {
                     )}
                   </Col>
 
-                  <Col span={3}>
+                  <Col span={2.5}>
                     <Checkbox defaultChecked onClick={this.onIncludeCheckChange}>
                       {intl.formatMessage({ id: 'contribDist.filterCommitMessageInclude' })}
                     </Checkbox>
                   </Col>
 
-                  <Col span={5}>
+                  <Col span={4.5}>
                     <Checkbox onChange={this.onCaseSensitivityCheckChange}>
                       {intl.formatMessage({ id: 'contribDist.filterCommitMessageCaseSensitivity' })}
                     </Checkbox>
@@ -568,6 +603,14 @@ export default class ContribDistribution extends React.Component<any, any> {
                       enterButton
                       allowClear
                     />
+                  </Col>
+
+                  <Col span={4}>
+                    <Tooltip title={intl.formatMessage({ id: 'contribDist.fixRegionTip' })}>
+                      <Checkbox onChange={this.onFixRegionSwitch}>
+                        {intl.formatMessage({ id: 'contribDist.fixRegion' })}
+                      </Checkbox>
+                    </Tooltip>
                   </Col>
                 </Row>
               </Input.Group>

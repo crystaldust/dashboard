@@ -136,7 +136,7 @@ union all
 select search_key__owner ,
     search_key__repo ,
     dir_level2 ,
-    '欧洲西部' as area,
+    '西欧' as area,
     COUNT() alter_file_count
 from (
     select search_key__owner,
@@ -168,7 +168,7 @@ union all
 select search_key__owner ,
     search_key__repo ,
     dir_level2 ,
-    '欧洲东部' as area,
+    '东欧' as area,
     COUNT() alter_file_count
 from (
     select search_key__owner,
@@ -365,7 +365,7 @@ union all
 select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
     search_key__repo ,
     dir_level2 ,
-    '欧洲西部' as area,
+    '西欧' as area,
     author_email
 --     COUNT() alter_file_count
 from (
@@ -400,7 +400,7 @@ union all
 select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
     search_key__repo ,
     dir_level2 ,
-    '欧洲东部' as area,
+    '东欧' as area,
     author_email
 --     COUNT() alter_file_count
 from (
@@ -622,7 +622,7 @@ export function commitsRegionDistSql(
                                           group by search_key__owner, search_key__repo
 
 union all
-select search_key__owner, search_key__repo,'欧洲西部' as area, COUNT() commit_count
+select search_key__owner, search_key__repo,'西欧' as area, COUNT() commit_count
                                           from gits g
                                           where if_merged = 0
                                             and search_key__owner = '${owner}'
@@ -633,7 +633,7 @@ select search_key__owner, search_key__repo,'欧洲西部' as area, COUNT() commi
                                           group by search_key__owner, search_key__repo
 
 union all
-select search_key__owner, search_key__repo,'欧洲东部' as area, COUNT() commit_count
+select search_key__owner, search_key__repo,'东欧' as area, COUNT() commit_count
                                           from gits g
                                           where if_merged = 0
                                             and search_key__owner = '${owner}'
@@ -682,6 +682,179 @@ select search_key__owner, search_key__repo,'澳洲' as area, COUNT() commit_coun
                                             ${dateRangeClause}
                                             ${msgFilterClause}
                                           group by search_key__owner, search_key__repo`;
+}
+
+export function commitsRegionDissSql_ByProfile(
+  owner,
+  repo,
+  since,
+  until,
+  commitMsgFilter,
+  include,
+  caseSensitive,
+) {
+  let gitsDateRangeClause =
+    since && until
+      ? `and authored_date>'${since}'
+    and authored_date<'${until}'`
+      : '';
+
+  let githubCommitsDateRangeClause =
+    since && until
+      ? `and commit__author__date>'${since}'
+    and commit__author__date<'${until}'`
+      : '';
+
+  let gitsMsgFilterClause = '';
+  let githubCommitsMesgFilterClause = '';
+  if (commitMsgFilter) {
+    gitsMsgFilterClause = 'and ';
+    githubCommitsMesgFilterClause = 'and ';
+
+    if (caseSensitive) {
+      gitsMsgFilterClause = `${gitsMsgFilterClause} message`;
+      githubCommitsMesgFilterClause = `${githubCommitsMesgFilterClause} commit__message`;
+    } else {
+      gitsMsgFilterClause = `${gitsMsgFilterClause} lowerUTF8(message)`;
+      githubCommitsMesgFilterClause = `${githubCommitsMesgFilterClause} lowerUTF8(commit__message)`;
+    }
+
+    if (include) {
+      gitsMsgFilterClause = `${gitsMsgFilterClause} like`;
+      githubCommitsMesgFilterClause = `${githubCommitsMesgFilterClause} like`;
+    } else {
+      gitsMsgFilterClause = `${gitsMsgFilterClause} not like`;
+      githubCommitsMesgFilterClause = `${githubCommitsMesgFilterClause} not like`;
+    }
+
+    if (caseSensitive) {
+      gitsMsgFilterClause = `${gitsMsgFilterClause} '%${commitMsgFilter}%'`;
+      githubCommitsMesgFilterClause = `${githubCommitsMesgFilterClause} '%${commitMsgFilter}%'`;
+    } else {
+      gitsMsgFilterClause = `${gitsMsgFilterClause} '%${commitMsgFilter.toLowerCase()}%'`;
+      githubCommitsMesgFilterClause = `${githubCommitsMesgFilterClause} '%${commitMsgFilter.toLowerCase()}%'`;
+    }
+  }
+
+  return `
+  select search_key__owner, search_key__repo, area, sum(commit_count) as total_commit_count
+from (select search_key__owner, search_key__repo, '北美' as area, COUNT() commit_count
+      from gits g
+      where if_merged = 0
+        and search_key__owner = '${owner}'
+        and search_key__repo = '${repo}'
+        and author_tz global in (-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12)
+        ${gitsDateRangeClause}
+        ${gitsMsgFilterClause}
+
+      group by search_key__owner, search_key__repo
+
+      union all
+      select search_key__owner, search_key__repo, '西欧' as area, COUNT() commit_count
+      from gits g
+      where if_merged = 0
+        and search_key__owner = '${owner}'
+        and search_key__repo = '${repo}'
+        and author_tz global in (1, 2)
+        ${gitsDateRangeClause}
+        ${gitsMsgFilterClause}
+
+
+      group by search_key__owner, search_key__repo
+
+      union all
+      select search_key__owner, search_key__repo, '东欧' as area, COUNT() commit_count
+      from gits g
+      where if_merged = 0
+        and search_key__owner = '${owner}'
+        and search_key__repo = '${repo}'
+        and author_tz global in (3, 4)
+        ${gitsDateRangeClause}
+        ${gitsMsgFilterClause}
+
+      group by search_key__owner, search_key__repo
+      union all
+      select search_key__owner, search_key__repo, '印度' as area, COUNT() commit_count
+      from gits g
+      where if_merged = 0
+        and search_key__owner = '${owner}'
+        and search_key__repo = '${repo}'
+        and author_tz global in (5)
+        ${gitsDateRangeClause}
+        ${gitsMsgFilterClause}
+
+      group by search_key__owner, search_key__repo
+      union all
+      select search_key__owner, search_key__repo, '中国' as area, COUNT() commit_count
+      from gits g
+      where if_merged = 0
+        and search_key__owner = '${owner}'
+        and search_key__repo = '${repo}'
+        and author_tz global in (8)
+        ${gitsDateRangeClause}
+        ${gitsMsgFilterClause}
+
+      group by search_key__owner, search_key__repo
+      union all
+      select search_key__owner, search_key__repo, '日韩' as area, COUNT() commit_count
+      from gits g
+      where if_merged = 0
+        and search_key__owner = '${owner}'
+        and search_key__repo = '${repo}'
+        and author_tz global in (9)
+        ${gitsDateRangeClause}
+        ${gitsMsgFilterClause}
+
+      group by search_key__owner, search_key__repo
+      union all
+      select search_key__owner, search_key__repo, '澳洲' as area, COUNT() commit_count
+      from gits g
+      where if_merged = 0
+        and search_key__owner = '${owner}'
+        and search_key__repo = '${repo}'
+        and author_tz global in (10)
+        ${gitsDateRangeClause}
+        ${gitsMsgFilterClause}
+
+      group by search_key__owner, search_key__repo
+
+      union all
+
+      select search_key__owner, search_key__repo, region as area, count() as commit_count
+      from (select a.*, if(b.region = '', '西欧', region) as region
+            from (select a.*, b.inferred_from_location__country
+                  from (
+                           select a.*, b.author__id
+                           from (select search_key__owner, search_key__repo, author_email
+                                 from gits g
+                                 where if_merged = 0
+                                   and search_key__owner = '${owner}'
+                                   and search_key__repo = '${repo}'
+                                   and author_tz = 0
+                                   ${gitsDateRangeClause}
+                                   ${gitsMsgFilterClause}
+                                   ) a global
+                                    left join (select distinct commit__author__email, author__id
+                                               from github_commits
+                                               where search_key__owner = '${owner}'
+                                                 and search_key__repo = '${repo}'
+                                                 and author__id != 0
+                                                 ${githubCommitsDateRangeClause}
+                                                 ${githubCommitsMesgFilterClause}
+                                                 ) b
+                                              on a.author_email = b.commit__author__email) a global
+                           left join (select id, inferred_from_location__country
+                                      from github_profile
+                                      where inferred_from_location__country != ''
+                                      group by id, inferred_from_location__country
+                                      limit 1 by id) b on a.author__id = b.id) a global
+                     left join (select * from location_region) b
+                               on a.inferred_from_location__country = b.location
+               )
+      group by search_key__owner, search_key__repo, region)
+group by search_key__owner, search_key__repo, area
+order by total_commit_count desc
+  `;
 }
 
 export function commitsEmailDomainDistSql(
@@ -815,7 +988,7 @@ order by count desc
   // select search_key__owner ,
   //     search_key__repo ,
   //     dir_level2 ,
-  //     '欧洲西部' as area,
+  //     '西欧' as area,
   //     COUNT() alter_file_count
   // from (
   //     select search_key__owner,
@@ -849,7 +1022,7 @@ order by count desc
   // select search_key__owner ,
   //     search_key__repo ,
   //     dir_level2 ,
-  //     '欧洲东部' as area,
+  //     '东欧' as area,
   //     COUNT() alter_file_count
   // from (
   //     select search_key__owner,
@@ -1066,7 +1239,7 @@ union all
 select search_key__owner,search_key__repo,in_dir,area,count() as contributor_count from (select search_key__owner ,
     search_key__repo ,
     in_dir ,
-    '欧洲西部' as area,
+    '西欧' as area,
     author_email
 --     COUNT() alter_file_count
 from (
@@ -1092,7 +1265,7 @@ union all
 select search_key__owner,search_key__repo,in_dir,area,count() as contributor_count from (select search_key__owner ,
     search_key__repo ,
     in_dir ,
-    '欧洲东部' as area,
+    '东欧' as area,
     author_email
 --     COUNT() alter_file_count
 from (
@@ -1256,7 +1429,7 @@ group by search_key__owner, search_key__repo,
   // select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
   //     search_key__repo ,
   //     dir_level2 ,
-  //     '欧洲西部' as area,
+  //     '西欧' as area,
   //     author_email
   // --     COUNT() alter_file_count
   // from (
@@ -1293,7 +1466,7 @@ group by search_key__owner, search_key__repo,
   // select search_key__owner,search_key__repo,dir_level2,area,count() as contributor_count from (select search_key__owner ,
   //     search_key__repo ,
   //     dir_level2 ,
-  //     '欧洲东部' as area,
+  //     '东欧' as area,
   //     author_email
   // --     COUNT() alter_file_count
   // from (
