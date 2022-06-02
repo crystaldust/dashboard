@@ -43,7 +43,7 @@ function generateLabelGroup(data, mappingData, keyField) {
     attrs: {
       x: 10,
       y: 8,
-      text: `${data[keyField]} ${percentStr}`,
+      text: `${data[keyField]}(${data.value}) ${percentStr}`,
       fill: mappingData.color,
     },
   });
@@ -53,14 +53,29 @@ function generateLabelGroup(data, mappingData, keyField) {
 
 export default class ProjectDistPies extends React.Component<any, any> {
   render() {
+    let totalCommitsByRegionDist = 0;
+    this.props.regionCommitsDist.forEach((item) => {
+      totalCommitsByRegionDist += item.value;
+    });
+
+    let totalCommitsByDomainDist = 0;
+    this.props.emailDomainCommitsDist.forEach((item) => {
+      totalCommitsByDomainDist += item.value;
+    });
+
     return (
-      <Row gutter={18}>
+      <Row gutter={18} align={'middle'}>
         <Col span={11}>
-          <Divider>
-            {this.props.regionCommitsDist.length
-              ? intl.formatMessage({ id: 'contribDist.commitsRegionDist' })
-              : ''}
-          </Divider>
+          {!!this.props.regionCommitsDist.length && (
+            <>
+              <Divider> {intl.formatMessage({ id: 'contribDist.commitsRegionDist' })} </Divider>
+              <div style={{ textAlign: 'center' }}>
+                {intl.formatMessage({ id: 'contribDist.commitDist.total' })}:{' '}
+                {totalCommitsByRegionDist}
+              </div>
+            </>
+          )}
+
           <Pie
             angleField={'value'}
             colorField={'region'}
@@ -86,11 +101,15 @@ export default class ProjectDistPies extends React.Component<any, any> {
           />
         </Col>
         <Col span={13}>
-          <Divider>
-            {this.props.emailDomainCommitsDist.length
-              ? intl.formatMessage({ id: 'contribDist.commitsEmailDomainDist' })
-              : ''}
-          </Divider>
+          {!!this.props.emailDomainCommitsDist.length && (
+            <>
+              <Divider>{intl.formatMessage({ id: 'contribDist.commitsEmailDomainDist' })}</Divider>
+              <div style={{ textAlign: 'center' }}>
+                {intl.formatMessage({ id: 'contribDist.commitDist.total' })}:{' '}
+                {totalCommitsByDomainDist}
+              </div>
+            </>
+          )}
           <Pie
             angleField={'value'}
             colorField={'domain'}

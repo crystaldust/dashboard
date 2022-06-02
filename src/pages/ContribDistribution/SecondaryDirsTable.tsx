@@ -218,6 +218,11 @@ function secondaryDirTableCellRender(cellData, rowData, index) {
               '#df3881',
             ],
           }}
+          label={{
+            type: 'spider',
+            // content: '{name} {percentage} {value}',
+            content: '{name} {value}',
+          }}
         />
         {tags}
       </div>

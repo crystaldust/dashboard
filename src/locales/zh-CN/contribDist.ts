@@ -14,6 +14,7 @@ export default {
   'contribDist.dirTree.desc': '按住Ctrl选择多个目录，按住Shift连续选择多个目录',
   'contribDist.commitsRegionDist': '区域提交数分布',
   'contribDist.commitsEmailDomainDist': '邮箱域名提交数分布',
+  'contribDist.commitDist.total': '总数',
 
   'contribDist.secondaryDirTable.colname.selectedDirs': '所选目录',
   'contribDist.secondaryDirTable.colname.fileRegionDist': '提交文件次数 区域分布',

@@ -14,6 +14,7 @@ export default {
     'Hold ctrl for multiple selection, shift for multiple continuous selection',
   'contribDist.commitsRegionDist': 'Commits Distribution By Region',
   'contribDist.commitsEmailDomainDist': 'Commits Distribution By Email Domain',
+  'contribDist.commitDist.total': 'Total',
 
   'contribDist.secondaryDirTable.colname.selectedDirs': 'Selected Dirs',
   'contribDist.secondaryDirTable.colname.fileRegionDist': 'Committed File Distribution by Region',
