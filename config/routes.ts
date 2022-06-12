@@ -42,6 +42,13 @@
     icon: 'rocket',
     component: './LowCodePlatform',
   },
+
+  {
+    path: '/specific_topics',
+    name: 'specific_topics',
+    icon: 'rocket',
+    component: './SpecificTopics',
+  },
   // {
   //   path: '/chart_image',
   //   name: 'charImageDownload',
