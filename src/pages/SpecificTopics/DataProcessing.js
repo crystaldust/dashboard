@@ -203,3 +203,17 @@ export function getEmailSeries(owner, repo) {
     });
   });
 }
+
+export function getRegionSeries(owner, repo) {
+  return runSql('SELECT region, date, commit_count FROM gits_region_commits_ts ORDER BY date').then(
+    (result) => {
+      return result.data.map((item) => {
+        return {
+          category: item[0],
+          date: item[1],
+          value: item[2],
+        };
+      });
+    },
+  );
+}

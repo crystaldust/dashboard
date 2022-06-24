@@ -14,6 +14,7 @@ import {
   getDomainCommitsDist,
   getDomainSeries,
   getEmailSeries,
+  getRegionSeries,
 } from '@/pages/SpecificTopics/DataProcessing';
 
 const COLORS10_ELEGENT = [
@@ -49,7 +50,6 @@ const ANNOTATIONS = [
   {
     type: 'dataMarker',
     position: (xScale, yScale) => {
-      console.log('position function:', xScale, yScale);
       return [`${xScale.scale('2014-4') * 100}%`, `${(1 - yScale.value.scale(100)) * 100}%`];
     },
     text: {
@@ -86,7 +86,6 @@ const ANNOTATIONS = [
 ];
 
 function generateLabelGroup(data, mappingData, keyField) {
-  console.log('key:', keyField);
   const group = new G.Group({});
   group.addShape({
     type: 'circle',
@@ -124,8 +123,9 @@ export default class SpecificTopics extends React.Component<any, any> {
     this.state = {
       authorCommitData: [],
       domainSeriesData: [],
-      emailSeriesData: [],
       domainDistData: [],
+      emailSeriesData: [],
+      regionSeriesData: [],
     };
     getAuthorAndCommitCount('apache', 'flink').then((result) => {
       this.setState({ authorCommitData: result });
@@ -141,6 +141,11 @@ export default class SpecificTopics extends React.Component<any, any> {
 
     getEmailSeries('apache', 'flink').then((allEmailSeries) => {
       this.setState({ emailSeriesData: allEmailSeries });
+    });
+
+    getRegionSeries('apache', 'flink').then((regionSeries) => {
+      console.log(regionSeries);
+      this.setState({ regionSeriesData: regionSeries });
     });
   }
 
@@ -212,6 +217,23 @@ export default class SpecificTopics extends React.Component<any, any> {
             <Divider>Time Series of Top 10 Author Commits</Divider>
             <Line
               data={this.state.emailSeriesData}
+              xField="date"
+              yField="value"
+              seriesField="category"
+              legend={{
+                position: 'bottom',
+                flipPage: false,
+              }}
+              annotations={ANNOTATIONS}
+            />
+          </Col>
+        </Row>
+
+        <Row>
+          <Col span={24}>
+            <Divider>Time Series of Regions</Divider>
+            <Line
+              data={this.state.regionSeriesData}
               xField="date"
               yField="value"
               seriesField="category"
