@@ -13,6 +13,7 @@ import {
   getAuthorAndCommitCount,
   getDomainCommitsDist,
   getDomainSeries,
+  getEmailSeries,
 } from '@/pages/SpecificTopics/DataProcessing';
 
 const COLORS10_ELEGENT = [
@@ -30,6 +31,59 @@ const COLORS10_ELEGENT = [
   '#df3881',
 ];
 const G = G2.getEngine('canvas');
+
+const ANNOTATIONS = [
+  // {
+  //   type: 'region',
+  //   start: ['2015-1', 'min'],
+  //   end: ['2015-2', 'max'],
+  // },
+  // {
+  //   type: 'dataRegion',
+  //   start: ['2015-1', 'min'],
+  //   end: ['2015-2', 'max'],
+  //   text: {
+  //     content: '阿里收购',
+  //   },
+  // },
+  {
+    type: 'dataMarker',
+    position: (xScale, yScale) => {
+      console.log('position function:', xScale, yScale);
+      return [`${xScale.scale('2014-4') * 100}%`, `${(1 - yScale.value.scale(100)) * 100}%`];
+    },
+    text: {
+      content: '捐赠Apache基金会，随后成立Data Artisan',
+      style: {
+        textAlign: 'left',
+      },
+    },
+  },
+  {
+    type: 'dataMarker',
+    position: (xScale, yScale) => {
+      return [`${xScale.scale('2014-12') * 100}%`, `${(1 - yScale.value.scale(100)) * 80}%`];
+    },
+    text: {
+      content: '从Apache基金会毕业并成为顶级项目',
+      style: {
+        textAlign: 'left',
+      },
+    },
+  },
+  {
+    type: 'dataMarker',
+    position: (xScale, yScale) => {
+      return [`${xScale.scale('2019-1') * 100}%`, `${(1 - yScale.value.scale(100)) * 80}%`];
+    },
+    text: {
+      content: '阿里收购',
+      style: {
+        textAlign: 'left',
+      },
+    },
+  },
+];
 
 function generateLabelGroup(data, mappingData, keyField) {
   console.log('key:', keyField);
@@ -70,6 +124,7 @@ export default class SpecificTopics extends React.Component<any, any> {
     this.state = {
       authorCommitData: [],
       domainSeriesData: [],
+      emailSeriesData: [],
       domainDistData: [],
     };
     getAuthorAndCommitCount('apache', 'flink').then((result) => {
@@ -82,6 +137,10 @@ export default class SpecificTopics extends React.Component<any, any> {
 
     getDomainCommitsDist('apache', 'flink', 10).then((domainDistData) => {
       this.setState({ domainDistData });
+    });
+
+    getEmailSeries('apache', 'flink').then((allEmailSeries) => {
+      this.setState({ emailSeriesData: allEmailSeries });
     });
   }
 
@@ -100,37 +159,7 @@ export default class SpecificTopics extends React.Component<any, any> {
               //   start: 0,
               //   end: 1,
               // }}
-              annotations={[
-                // {
-                //   type: 'region',
-                //   start: ['2015-1', 'min'],
-                //   end: ['2015-2', 'max'],
-                // },
-                // {
-                //   type: 'dataRegion',
-                //   start: ['2015-1', 'min'],
-                //   end: ['2015-2', 'max'],
-                //   text: {
-                //     content: '阿里收购',
-                //   },
-                // },
-                {
-                  type: 'dataMarker',
-                  // position: ['2015-1', '0'],
-                  position: (xScale, yScale) => {
-                    return [
-                      `${xScale.scale('2015-1') * 100}%`,
-                      `${(1 - yScale.value.scale(100)) * 100}%`,
-                    ];
-                  },
-                  text: {
-                    content: '阿里收购',
-                    style: {
-                      textAlign: 'left',
-                    },
-                  },
-                },
-              ]}
+              annotations={ANNOTATIONS}
             />
           </Col>
         </Row>
@@ -140,6 +169,7 @@ export default class SpecificTopics extends React.Component<any, any> {
             <Divider>Time Series of Domain Commits</Divider>
             <Line
               data={this.state.domainSeriesData}
+              annotations={ANNOTATIONS}
               xField="date"
               yField="value"
               seriesField="category"
@@ -151,7 +181,7 @@ export default class SpecificTopics extends React.Component<any, any> {
           </Col>
 
           <Col span={8}>
-            <Divider>Distributioni of Domain Commits</Divider>
+            <Divider>Distribution of top 10 Domain Commits</Divider>
             <Pie
               radius={0.5}
               angleField="totalCommitCount"
@@ -173,6 +203,23 @@ export default class SpecificTopics extends React.Component<any, any> {
                 colors10: COLORS10_ELEGENT,
               }}
               data={this.state.domainDistData}
+            />
+          </Col>
+        </Row>
+
+        <Row>
+          <Col span={24}>
+            <Divider>Time Series of Top 10 Author Commits</Divider>
+            <Line
+              data={this.state.emailSeriesData}
+              xField="date"
+              yField="value"
+              seriesField="category"
+              legend={{
+                position: 'bottom',
+                flipPage: false,
+              }}
+              annotations={ANNOTATIONS}
             />
           </Col>
         </Row>

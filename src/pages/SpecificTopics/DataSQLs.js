@@ -56,6 +56,19 @@ where total_commits > ${commitThreshold}
 limit ${limit}`;
 }
 
+export function topEmailsSql(owner, repo, limit, commitThreshold = null) {
+  const commitThresholdClause = commitThreshold ? `and total_commit_count>=${commitThreshold}` : '';
+  return `select email,
+       sum(commit_count) as total_commit_count
+from gits_email_commits_ts
+where owner = '${owner}'
+  and repo = '${repo}'
+  ${commitThresholdClause}
+group by email
+order by total_commit_count desc
+limit ${limit}`;
+}
+
 export function commitCountOfDomainByDate(owner, repo, domain, date) {
   const thatMonth = dateToYearMonthInt(date.toISOString());
   const nextMonth = dateToYearMonthInt(
@@ -82,6 +95,15 @@ from gits_domain_ts
 where owner = '${owner}'
   and repo = '${repo}'
 and domain='${domain}'
+order by date asc`;
+}
+
+export function emailCommitSeriesSql(owner, repo, email) {
+  return `select email, date, commit_count
+from gits_email_commits_ts
+where owner = '${owner}'
+  and repo = '${repo}'
+and email='${email}'
 order by date asc`;
 }
 

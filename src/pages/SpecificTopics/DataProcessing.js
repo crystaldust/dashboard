@@ -5,8 +5,10 @@ import {
   commitCountOfMonthSql,
   domainCommitSeriesSql,
   domainTotalCommitsDistSql,
+  emailCommitSeriesSql,
   firstCommitDateSql,
   topDomainsSql,
+  topEmailsSql,
 } from '@/pages/SpecificTopics/DataSQLs';
 
 const OWNER_REPO_DATES = {};
@@ -79,6 +81,14 @@ function getDates(owner, repo) {
 
 function getTopDomains(owner, repo, limit = 10, commitThreshold = 100) {
   return runSql(topDomainsSql(owner, repo, limit, commitThreshold)).then((result) => {
+    return result.data.map((item) => {
+      return item[0];
+    });
+  });
+}
+
+function getTopEmails(owner, repo, limit = 10, commitThreshold = null) {
+  return runSql(topEmailsSql(owner, repo, limit, commitThreshold)).then((result) => {
     return result.data.map((item) => {
       return item[0];
     });
@@ -167,6 +177,29 @@ export function getDomainCommitsDist(owner, repo) {
   return runSql(domainTotalCommitsDistSql(owner, repo, 10)).then((result) => {
     return result.data.map((item) => {
       return { domain: item[0], totalCommitCount: item[1] };
+    });
+  });
+}
+
+export function getEmailSeries(owner, repo) {
+  return getTopEmails(owner, repo, 10).then((topEamils) => {
+    const emailPromises = [];
+    topEamils.forEach((email) => {
+      emailPromises.push(runSql(emailCommitSeriesSql(owner, repo, email)));
+    });
+
+    return Promise.all(emailPromises).then((results) => {
+      const allEmailSeries = [];
+      results.forEach((result) => {
+        result.data.forEach((item) => {
+          allEmailSeries.push({
+            category: item[0],
+            date: item[1],
+            value: item[2],
+          });
+        });
+      });
+      return allEmailSeries;
     });
   });
 }
