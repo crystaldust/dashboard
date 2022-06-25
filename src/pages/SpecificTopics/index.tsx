@@ -15,6 +15,7 @@ import {
   getDomainSeries,
   getEmailSeries,
   getIssuesSeries,
+  getPullRequestsSeries,
   getRegionSeries,
 } from '@/pages/SpecificTopics/DataProcessing';
 
@@ -35,55 +36,115 @@ const COLORS10_ELEGENT = [
 const G = G2.getEngine('canvas');
 
 const ANNOTATIONS = [
+  {
+    type: 'region',
+    start: [201404, 'min'],
+    end: [201405, 'max'],
+  },
+  {
+    type: 'dataRegion',
+    start: [201404, 'min'],
+    end: [201405, 'max'],
+    // position: (xScale, yScale) => {
+    //   return [`${xScale.scale(201404) * 100}%`, `${(1 - yScale.value.scale(50)) * 100}%`];
+    // },
+    text: {
+      content: '捐赠给Apache',
+    },
+  },
+
+  {
+    type: 'region',
+    start: [201412, 'min'],
+    end: [201501, 'max'],
+  },
+  {
+    type: 'dataRegion',
+    start: [201412, 'min'],
+    end: [201501, 'max'],
+    text: {
+      content: '成为\nApache顶级项目',
+    },
+  },
+
+  {
+    type: 'region',
+    start: [201601, 'min'],
+    end: [201608, 'max'],
+  },
+  {
+    type: 'dataRegion',
+    start: [201601, 'min'],
+    end: [201608, 'max'],
+    text: {
+      content: 'Pre-A',
+    },
+  },
+
+  {
+    type: 'region',
+    start: [201801, 'min'],
+    end: [201802, 'max'],
+  },
+  {
+    type: 'dataRegion',
+    start: [201801, 'min'],
+    end: [201802, 'max'],
+    text: {
+      content: 'Round B,阿里疑似入局',
+    },
+  },
+
+  {
+    type: 'region',
+    start: [201901, 'min'],
+    end: [201902, 'max'],
+  },
+  {
+    type: 'dataRegion',
+    start: [201901, 'min'],
+    end: [201902, 'max'],
+    text: {
+      content: '阿里收购\nData Artisan更名为Ververica',
+    },
+  },
+
   // {
-  //   type: 'region',
-  //   start: ['2015-1', 'min'],
-  //   end: ['2015-2', 'max'],
-  // },
-  // {
-  //   type: 'dataRegion',
-  //   start: ['2015-1', 'min'],
-  //   end: ['2015-2', 'max'],
+  //   type: 'dataMarker',
+  //   position: (xScale, yScale) => {
+  //     return [`${xScale.scale('2014-4') * 100}%`, `${(1 - yScale.value.scale(100)) * 100}%`];
+  //   },
   //   text: {
-  //     content: '阿里收购',
+  //     content: '捐赠Apache基金会，随后成立Data Artisan',
+  //     style: {
+  //       textAlign: 'left',
+  //     },
   //   },
   // },
-  {
-    type: 'dataMarker',
-    position: (xScale, yScale) => {
-      return [`${xScale.scale('2014-4') * 100}%`, `${(1 - yScale.value.scale(100)) * 100}%`];
-    },
-    text: {
-      content: '捐赠Apache基金会，随后成立Data Artisan',
-      style: {
-        textAlign: 'left',
-      },
-    },
-  },
-  {
-    type: 'dataMarker',
-    position: (xScale, yScale) => {
-      return [`${xScale.scale('2014-12') * 100}%`, `${(1 - yScale.value.scale(100)) * 80}%`];
-    },
-    text: {
-      content: '从Apache基金会毕业并成为顶级项目',
-      style: {
-        textAlign: 'left',
-      },
-    },
-  },
-  {
-    type: 'dataMarker',
-    position: (xScale, yScale) => {
-      return [`${xScale.scale('2019-1') * 100}%`, `${(1 - yScale.value.scale(100)) * 80}%`];
-    },
-    text: {
-      content: '阿里收购',
-      style: {
-        textAlign: 'left',
-      },
-    },
-  },
+  // {
+  //   type: 'dataMarker',
+  //   position: (xScale, yScale) => {
+  //     return [`${xScale.scale('2014-12') * 100}%`, `${(1 - yScale.value.scale(100)) * 80}%`];
+  //   },
+  //   text: {
+  //     content: '从Apache基金会毕业并成为顶级项目',
+  //     style: {
+  //       textAlign: 'left',
+  //     },
+  //   },
+  // },
+  // {
+  //   type: 'dataMarker',
+  //   position: (xScale, yScale) => {
+  //     return [`${xScale.scale('2019-1') * 100}%`, `${(1 - yScale.value.scale(100)) * 80}%`];
+  //   },
+  //   text: {
+  //     content: '阿里收购',
+  //     style: {
+  //       textAlign: 'left',
+  //     },
+  //   },
+  // },
 ];
 
 function generateLabelGroup(data, mappingData, keyField) {
@@ -128,8 +189,10 @@ export default class SpecificTopics extends React.Component<any, any> {
       emailSeriesData: [],
       regionSeriesData: [],
       issuesSeriesData: [],
+      pullRequestsSeriesData: [],
     };
     getAuthorAndCommitCount('apache', 'flink').then((result) => {
+      // console.log(result);
       this.setState({ authorCommitData: result });
     });
 
@@ -150,8 +213,11 @@ export default class SpecificTopics extends React.Component<any, any> {
     });
 
     getIssuesSeries('apache', 'flink').then((issuesSeries) => {
-      console.log(issuesSeries);
       this.setState({ issuesSeriesData: issuesSeries });
+    });
+
+    getPullRequestsSeries('apache', 'flink').then((prsSeries) => {
+      this.setState({ pullRequestsSeriesData: prsSeries });
     });
   }
 
@@ -257,6 +323,23 @@ export default class SpecificTopics extends React.Component<any, any> {
             <Divider>Time Series of Issues</Divider>
             <Line
               data={this.state.issuesSeriesData}
+              xField="date"
+              yField="value"
+              seriesField="category"
+              legend={{
+                position: 'bottom',
+                flipPage: false,
+              }}
+              annotations={ANNOTATIONS}
+            />
+          </Col>
+        </Row>
+
+        <Row>
+          <Col span={24}>
+            <Divider>Time Series of Pull Requests</Divider>
+            <Line
+              data={this.state.pullRequestsSeriesData}
               xField="date"
               yField="value"
               seriesField="category"

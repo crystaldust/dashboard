@@ -1,4 +1,4 @@
-import { runSql } from '@/services/clickhouse';
+import {runSql} from '@/services/clickhouse';
 import {
   authorCountOfMonthSql,
   commitCountOfDomainByDate,
@@ -13,6 +13,38 @@ import {
 
 const OWNER_REPO_DATES = {};
 
+function getAuthorAndCommitCountSeries(owner, repo) {
+  const authorsSeriesPromise = runSql(
+    `SELECT date, count FROM gits_authors_count_ts WHERE owner='${owner}' AND repo='${repo}' ORDER BY date`,
+  );
+  const commitsSeriesPromise = runSql(
+    `SELECT date, count FROM gits_commits_count_ts WHERE owner='${owner}' AND repo='${repo}' ORDER BY date`,
+  );
+
+  return Promise.all([authorsSeriesPromise, commitsSeriesPromise]).then((results) => {
+    const authorsSeries = results[0].data;
+    const commitsSeries = results[1].data;
+    console.log(authorsSeries);
+    const allData = [];
+    for (let i in authorsSeries) {
+      const authorsCountData = authorsSeries[i];
+      const commitsCountData = commitsSeries[i];
+      allData.push({
+        category: 'author',
+        date: authorsCountData[0],
+        value: authorsCountData[1],
+      });
+      allData.push({
+        category: 'commit',
+        date: commitsCountData[0],
+        value: commitsCountData[1],
+      });
+    }
+    return allData;
+  });
+}
+
+// Replaced by getAuthorAndCommitCountSeries
 function getAuthorAndCommitCountsByDates(owner, repo, dates) {
   const authorCountPromises = [];
   const commitCountPromises = [];
@@ -43,8 +75,8 @@ function getAuthorAndCommitCountsByDates(owner, repo, dates) {
       const numAuthors = authorCounts[index];
       const numCommits = commitCounts[index];
 
-      authorCommitData.push({ date: dateStr, category: 'authorCount', value: numAuthors });
-      authorCommitData.push({ date: dateStr, category: 'commitCount', value: numCommits });
+      authorCommitData.push({date: dateStr, category: 'authorCount', value: numAuthors});
+      authorCommitData.push({date: dateStr, category: 'commitCount', value: numCommits});
     });
     return authorCommitData;
   });
@@ -96,15 +128,16 @@ function getTopEmails(owner, repo, limit = 10, commitThreshold = null) {
 }
 
 export function getAuthorAndCommitCount(owner, repo) {
-  let dates = [];
-  if (OWNER_REPO_DATES.hasOwnProperty(`${owner}_${repo}`)) {
-    dates = OWNER_REPO_DATES[`${owner}_${repo}`];
-    return getAuthorAndCommitCountsByDates(owner, repo, dates);
-  }
-
-  return getDates(owner, repo).then((dates) => {
-    return getAuthorAndCommitCountsByDates(owner, repo, dates);
-  });
+  return getAuthorAndCommitCountSeries(owner, repo);
+  // let dates = [];
+  // if (OWNER_REPO_DATES.hasOwnProperty(`${owner}_${repo}`)) {
+  //   dates = OWNER_REPO_DATES[`${owner}_${repo}`];
+  //   return getAuthorAndCommitCountsByDates(owner, repo, dates);
+  // }
+  //
+  // return getDates(owner, repo).then((dates) => {
+  //   return getAuthorAndCommitCountsByDates(owner, repo, dates);
+  // });
 }
 
 function _getDomainsSeries(owner, repo, dates) {
@@ -176,7 +209,7 @@ export function getDomainSeries(owner, repo) {
 export function getDomainCommitsDist(owner, repo) {
   return runSql(domainTotalCommitsDistSql(owner, repo, 10)).then((result) => {
     return result.data.map((item) => {
-      return { domain: item[0], totalCommitCount: item[1] };
+      return {domain: item[0], totalCommitCount: item[1]};
     });
   });
 }
@@ -243,5 +276,37 @@ export function getIssuesSeries(owner, repo) {
     }
 
     return allIssuesSeries;
+  });
+}
+
+export function getPullRequestsSeries(owner, repo) {
+  const createdPullRequestsPromise = runSql(
+    `SELECT date, count FROM created_pull_requests_ts ORDER BY date`,
+  );
+  const closedPullRequestsPromise = runSql(
+    `SELECT date, count FROM closed_pull_requests_ts ORDER BY date`,
+  );
+
+  return Promise.all([createdPullRequestsPromise, closedPullRequestsPromise]).then((results) => {
+    const createdPRsResult = results[0];
+    const closedPRsResult = results[1];
+    const allPRsSeries = [];
+    for (let i in createdPRsResult.data) {
+      const createdPR = createdPRsResult.data[i];
+      const closedPR = closedPRsResult.data[i];
+
+      allPRsSeries.push({
+        category: 'created_prs',
+        date: createdPR[0],
+        value: createdPR[1],
+      });
+      allPRsSeries.push({
+        category: 'closed_prs',
+        date: closedPR[0],
+        value: closedPR[1],
+      });
+    }
+
+    return allPRsSeries;
   });
 }
