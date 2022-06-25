@@ -217,3 +217,31 @@ export function getRegionSeries(owner, repo) {
     },
   );
 }
+
+export function getIssuesSeries(owner, repo) {
+  const createdIssuesPromise = runSql(`SELECT date, count FROM created_issues_ts ORDER BY date`);
+  const closedIssuesPromise = runSql(`SELECT date, count FROM closed_issues_ts ORDER BY date`);
+
+  return Promise.all([createdIssuesPromise, closedIssuesPromise]).then((results) => {
+    const createdIssuesResult = results[0];
+    const closedIssuesResult = results[1];
+    const allIssuesSeries = [];
+    for (let i in createdIssuesResult.data) {
+      const createdIssue = createdIssuesResult.data[i];
+      const closedIssue = closedIssuesResult.data[i];
+
+      allIssuesSeries.push({
+        category: 'created_issue',
+        date: createdIssue[0],
+        value: createdIssue[1],
+      });
+      allIssuesSeries.push({
+        category: 'closed_issue',
+        date: closedIssue[0],
+        value: closedIssue[1],
+      });
+    }
+
+    return allIssuesSeries;
+  });
+}

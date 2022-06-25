@@ -14,6 +14,7 @@ import {
   getDomainCommitsDist,
   getDomainSeries,
   getEmailSeries,
+  getIssuesSeries,
   getRegionSeries,
 } from '@/pages/SpecificTopics/DataProcessing';
 
@@ -126,6 +127,7 @@ export default class SpecificTopics extends React.Component<any, any> {
       domainDistData: [],
       emailSeriesData: [],
       regionSeriesData: [],
+      issuesSeriesData: [],
     };
     getAuthorAndCommitCount('apache', 'flink').then((result) => {
       this.setState({ authorCommitData: result });
@@ -144,8 +146,12 @@ export default class SpecificTopics extends React.Component<any, any> {
     });
 
     getRegionSeries('apache', 'flink').then((regionSeries) => {
-      console.log(regionSeries);
       this.setState({ regionSeriesData: regionSeries });
+    });
+
+    getIssuesSeries('apache', 'flink').then((issuesSeries) => {
+      console.log(issuesSeries);
+      this.setState({ issuesSeriesData: issuesSeries });
     });
   }
 
@@ -234,6 +240,23 @@ export default class SpecificTopics extends React.Component<any, any> {
             <Divider>Time Series of Regions</Divider>
             <Line
               data={this.state.regionSeriesData}
+              xField="date"
+              yField="value"
+              seriesField="category"
+              legend={{
+                position: 'bottom',
+                flipPage: false,
+              }}
+              annotations={ANNOTATIONS}
+            />
+          </Col>
+        </Row>
+
+        <Row>
+          <Col span={24}>
+            <Divider>Time Series of Issues</Divider>
+            <Line
+              data={this.state.issuesSeriesData}
               xField="date"
               yField="value"
               seriesField="category"
