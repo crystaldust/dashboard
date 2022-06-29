@@ -1,118 +1,59 @@
-import {runSql} from '@/services/clickhouse';
+import { runSql } from '@/services/clickhouse';
 import {
   authorCountOfMonthSql,
   commitCountOfDomainByDate,
   commitCountOfMonthSql,
+  domainAuthorsDistSql,
+  domainAuthorsSeriesSql,
   domainCommitSeriesSql,
   domainTotalCommitsDistSql,
   emailCommitSeriesSql,
   firstCommitDateSql,
-  topDomainsSql,
+  topDomainsByAuthorsSql,
+  topDomainsByCommitsSql,
   topEmailsSql,
 } from '@/pages/SpecificTopics/DataSQLs';
+import { dateToYearMonthInt } from '@/pages/ContribDistribution/DataProcessors';
 
 const OWNER_REPO_DATES = {};
 
 function getAuthorAndCommitCountSeries(owner, repo) {
-  const authorsSeriesPromise = runSql(
-    `SELECT date, count FROM gits_authors_count_ts WHERE owner='${owner}' AND repo='${repo}' ORDER BY date`,
-  );
-  const commitsSeriesPromise = runSql(
-    `SELECT date, count FROM gits_commits_count_ts WHERE owner='${owner}' AND repo='${repo}' ORDER BY date`,
-  );
-
-  return Promise.all([authorsSeriesPromise, commitsSeriesPromise]).then((results) => {
-    const authorsSeries = results[0].data;
-    const commitsSeries = results[1].data;
-    console.log(authorsSeries);
-    const allData = [];
-    for (let i in authorsSeries) {
-      const authorsCountData = authorsSeries[i];
-      const commitsCountData = commitsSeries[i];
-      allData.push({
+  return runSql(
+    `SELECT date, commit_count, author_count FROM gits_author_series WHERE owner='${owner}' AND repo='${repo}' ORDER BY date`,
+  ).then((result) => {
+    const allData = {
+      author: {},
+      commit: {},
+    };
+    result.data.forEach((item) => {
+      const date = item[0];
+      const commitCount = item[1];
+      const authorCount = item[2];
+      allData.author[date] = {
         category: 'author',
-        date: authorsCountData[0],
-        value: authorsCountData[1],
-      });
-      allData.push({
+        date,
+        value: authorCount,
+      };
+      allData.commit[date] = {
         category: 'commit',
-        date: commitsCountData[0],
-        value: commitsCountData[1],
-      });
-    }
+        date,
+        value: commitCount,
+      };
+    });
     return allData;
   });
 }
 
-// Replaced by getAuthorAndCommitCountSeries
-function getAuthorAndCommitCountsByDates(owner, repo, dates) {
-  const authorCountPromises = [];
-  const commitCountPromises = [];
-  const authorCommitData = [];
-
-  dates.forEach((date) => {
-    commitCountPromises.push(runSql(commitCountOfMonthSql(owner, repo, date)));
-    authorCountPromises.push(runSql(authorCountOfMonthSql(owner, repo, date)));
-  });
-
-  const allAuthorCountsPromise = Promise.all(authorCountPromises).then((result) => {
-    return result.map((item) => {
-      return item.data[0][0];
+function getTopDomainsByCommits(owner, repo, limit = 10, commitThreshold = 100) {
+  return runSql(topDomainsByCommitsSql(owner, repo, limit, commitThreshold)).then((result) => {
+    return result.data.map((item) => {
+      return item[0];
     });
-  });
-
-  const allCommitCountPromise = Promise.all(commitCountPromises).then((result) => {
-    return result.map((item) => {
-      return item.data[0][0];
-    });
-  });
-
-  return Promise.all([allAuthorCountsPromise, allCommitCountPromise]).then((values) => {
-    const authorCounts = values[0];
-    const commitCounts = values[1];
-    dates.forEach((date, index) => {
-      const dateStr = `${date.getFullYear()}-${date.getMonth() + 1}`;
-      const numAuthors = authorCounts[index];
-      const numCommits = commitCounts[index];
-
-      authorCommitData.push({date: dateStr, category: 'authorCount', value: numAuthors});
-      authorCommitData.push({date: dateStr, category: 'commitCount', value: numCommits});
-    });
-    return authorCommitData;
   });
 }
 
-function getDates(owner, repo) {
-  return runSql(firstCommitDateSql(owner, repo)).then((result) => {
-    const firstCommitDate = new Date(result.data[0]);
-    const now = new Date();
-    // Tips: JavaScript Date instance's month start from 0
-    // If hours is not specified, then day parameter might not be expected
-    let iterDate = new Date(
-      firstCommitDate.getFullYear(),
-      firstCommitDate.getMonth(),
-      firstCommitDate.getDate(),
-      firstCommitDate.getHours(),
-    );
-    let nextMonth = null;
-    const dates = [];
-    while (iterDate < now) {
-      nextMonth = new Date(
-        iterDate.getFullYear(),
-        iterDate.getMonth() + 1,
-        iterDate.getDate(),
-        iterDate.getHours(),
-      );
-      dates.push(iterDate);
-      iterDate = nextMonth;
-    }
-    OWNER_REPO_DATES[`${owner}_${repo}`] = dates;
-    return dates;
-  });
-}
-
-function getTopDomains(owner, repo, limit = 10, commitThreshold = 100) {
-  return runSql(topDomainsSql(owner, repo, limit, commitThreshold)).then((result) => {
+function getTopDomainsByAuthors(owner, repo, limit = 10) {
+  return runSql(topDomainsByAuthorsSql(owner, repo, limit)).then((result) => {
     return result.data.map((item) => {
       return item[0];
     });
@@ -127,22 +68,20 @@ function getTopEmails(owner, repo, limit = 10, commitThreshold = null) {
   });
 }
 
-export function getAuthorAndCommitCount(owner, repo) {
-  return getAuthorAndCommitCountSeries(owner, repo);
-  // let dates = [];
-  // if (OWNER_REPO_DATES.hasOwnProperty(`${owner}_${repo}`)) {
-  //   dates = OWNER_REPO_DATES[`${owner}_${repo}`];
-  //   return getAuthorAndCommitCountsByDates(owner, repo, dates);
-  // }
-  //
-  // return getDates(owner, repo).then((dates) => {
-  //   return getAuthorAndCommitCountsByDates(owner, repo, dates);
-  // });
+export function getAuthorAndCommitCount(owner, repo, startDate, endDate) {
+  return getAuthorAndCommitCountSeries(owner, repo).then((dataMaps) => {
+    const madeupMaps = {
+      author: makeupMissingDates(startDate, dataMaps.author, endDate, ['author']),
+      commit: makeupMissingDates(startDate, dataMaps.commit, endDate, ['commit']),
+    };
+
+    return madeupMaps.author.concat(madeupMaps.commit);
+  });
 }
 
 function _getDomainsSeries(owner, repo, dates) {
   const allDomainSeries = [];
-  return getTopDomains(owner, repo, 10, 100).then((topDomains) => {
+  return getTopDomainsByCommits(owner, repo, 10, 100).then((topDomains) => {
     const domainPromises = [];
     topDomains.forEach((domain) => {
       domainPromises.push(
@@ -183,11 +122,45 @@ function _getDomainSeries(owner, repo, domain) {
   });
 }
 
-export function getDomainSeries(owner, repo) {
-  return getTopDomains(owner, repo, 10, 100).then((topDomains) => {
+export function getDomainCommitsSeries(owner, repo, startDate, endDate) {
+  return getTopDomainsByCommits(owner, repo, 10, 100).then((topDomains) => {
     const domainPromises = [];
     topDomains.forEach((domain) => {
       domainPromises.push(runSql(domainCommitSeriesSql(owner, repo, domain)));
+    });
+
+    return Promise.all(domainPromises).then((results) => {
+      let allDomainSeries = [];
+
+      results.forEach((result) => {
+        // result is a single domain's data array
+        const domainDataMap = {};
+        const category = result.data[0][0];
+        result.data.forEach((item) => {
+          const category = item[0];
+          const date = item[1];
+          const value = item[2];
+          domainDataMap[date] = {
+            category,
+            date,
+            value,
+          };
+        });
+        console.log('data to made up:', Object.keys(domainDataMap).length);
+        allDomainSeries = allDomainSeries.concat(
+          makeupMissingDates(startDate, domainDataMap, endDate, [category]),
+        );
+      });
+      return allDomainSeries;
+    });
+  });
+}
+
+export function getDomainAuthorsSeries(owner, repo) {
+  return getTopDomainsByAuthors(owner, repo, 10, 100).then((topDomains) => {
+    const domainPromises = [];
+    topDomains.forEach((domain) => {
+      domainPromises.push(runSql(domainAuthorsSeriesSql(owner, repo, domain)));
     });
 
     return Promise.all(domainPromises).then((results) => {
@@ -209,7 +182,15 @@ export function getDomainSeries(owner, repo) {
 export function getDomainCommitsDist(owner, repo) {
   return runSql(domainTotalCommitsDistSql(owner, repo, 10)).then((result) => {
     return result.data.map((item) => {
-      return {domain: item[0], totalCommitCount: item[1]};
+      return { domain: item[0], totalCommitCount: item[1] };
+    });
+  });
+}
+
+export function getDomainAuthorsDist(owner, repo) {
+  return runSql(domainAuthorsDistSql(owner, repo, 10)).then((result) => {
+    return result.data.map((item) => {
+      return { domain: item[0], authorCount: item[1] };
     });
   });
 }
@@ -237,7 +218,7 @@ export function getEmailSeries(owner, repo) {
   });
 }
 
-export function getRegionSeries(owner, repo) {
+export function getRegionCommitsSeries(owner, repo) {
   return runSql('SELECT region, date, commit_count FROM gits_region_commits_ts ORDER BY date').then(
     (result) => {
       return result.data.map((item) => {
@@ -251,9 +232,27 @@ export function getRegionSeries(owner, repo) {
   );
 }
 
+export function getRegionAuthorsSeries(owner, repo) {
+  return runSql('SELECT region, date, count FROM gits_region_authors_ts ORDER BY date').then(
+    (result) => {
+      return result.data.map((item) => {
+        return {
+          category: item[0],
+          date: item[1],
+          value: item[2],
+        };
+      });
+    },
+  );
+}
+
 export function getIssuesSeries(owner, repo) {
-  const createdIssuesPromise = runSql(`SELECT date, count FROM created_issues_ts ORDER BY date`);
-  const closedIssuesPromise = runSql(`SELECT date, count FROM closed_issues_ts ORDER BY date`);
+  const createdIssuesPromise = runSql(
+    `SELECT date, count FROM created_issues_ts WHERE owner='${owner}' AND repo='${repo}' ORDER BY date `,
+  );
+  const closedIssuesPromise = runSql(
+    `SELECT date, count FROM closed_issues_ts WHERE owner='${owner}' AND repo='${repo}' ORDER BY date `,
+  );
 
   return Promise.all([createdIssuesPromise, closedIssuesPromise]).then((results) => {
     const createdIssuesResult = results[0];
@@ -308,5 +307,51 @@ export function getPullRequestsSeries(owner, repo) {
     }
 
     return allPRsSeries;
+  });
+}
+
+export function getDirSeries(owner, repo, dir) {
+  return runSql(
+    `SELECT owner, repo, dir, date, author_count, committer_count, alter_files_count
+FROM dir_counts_ts
+WHERE owner='${owner}'
+ and repo='${repo}'
+ and dir='${dir}'
+ order by date`,
+  );
+}
+
+// The function makes up the missing month's data by inserting an empty data item
+// Only support a single categorized data array, that is, all the 'category' field in the
+// data array's element should be exactly the same.
+export function makeupMissingDates(startDate, dataMap, endDate, categories = []) {
+  const madeUpArray = [];
+  let iterDate = new Date(startDate.getFullYear(), startDate.getMonth());
+
+  function fillEmptyDateItem(dateInt) {
+    categories.forEach((category) => {
+      madeUpArray.push({
+        category,
+        date: dateInt,
+        value: 0,
+      });
+    });
+  }
+
+  while (iterDate < endDate) {
+    const iterDateInt = dateToYearMonthInt(iterDate.toISOString());
+    if (dataMap.hasOwnProperty(iterDateInt)) {
+      madeUpArray.push(dataMap[iterDateInt]);
+    } else {
+      fillEmptyDateItem(iterDateInt);
+    }
+    iterDate = new Date(iterDate.getFullYear(), iterDate.getMonth() + 1);
+  }
+  return madeUpArray;
+}
+
+export function getFirstCommitDate(owner, repo) {
+  return runSql(firstCommitDateSql(owner, repo)).then((result) => {
+    return new Date(result.data[0]);
   });
 }

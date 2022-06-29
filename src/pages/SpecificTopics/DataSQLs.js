@@ -42,7 +42,7 @@ and toYYYYMM(authored_date)>=${thatMonth}
 and toYYYYMM(authored_date)<${nextMonth}`;
 }
 
-export function topDomainsSql(owner, repo, limit, commitThreshold) {
+export function topDomainsByCommitsSql(owner, repo, limit, commitThreshold) {
   return `select domain
 from (
          select domain, sum(commit_count) as total_commits
@@ -53,6 +53,18 @@ from (
          order by total_commits desc
          )
 where total_commits > ${commitThreshold}
+limit ${limit}`;
+}
+
+export function topDomainsByAuthorsSql(owner, repo, limit) {
+  return `
+select splitByChar('@', author_email)[-1] as domain, count(distinct (author_email)) author_count
+from gits
+where search_key__owner = '${owner}'
+  and search_key__repo = '${repo}'
+  and domain != ''
+group by domain
+order by author_count desc
 limit ${limit}`;
 }
 
@@ -98,6 +110,15 @@ and domain='${domain}'
 order by date asc`;
 }
 
+export function domainAuthorsSeriesSql(owner, repo, domain) {
+  return `select domain, date, count
+from gits_domain_authors_count_ts
+where owner = '${owner}'
+  and repo = '${repo}'
+and domain='${domain}'
+order by date asc`;
+}
+
 export function emailCommitSeriesSql(owner, repo, email) {
   return `select email, date, commit_count
 from gits_email_commits_ts
@@ -114,5 +135,16 @@ where owner = '${owner}'
   and repo = '${repo}'
 group by domain
 order by total_commits desc
+limit ${limit}`;
+}
+
+export function domainAuthorsDistSql(owner, repo, limit = 10) {
+  return `select splitByChar('@', author_email)[-1] as domain, count(distinct (author_email)) author_count
+from gits
+where search_key__owner = '${owner}'
+  and search_key__repo = '${repo}'
+  and domain != ''
+group by domain
+order by author_count desc
 limit ${limit}`;
 }
