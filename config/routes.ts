@@ -1,4 +1,9 @@
-﻿export default [
+﻿let SUPERSET_SERVER = 'http://192.168.8.4:8088';
+if (process.env.SUPERSET_SERVER) {
+  SUPERSET_SERVER = process.env.SUPERSET_SERVER;
+}
+
+export default [
   {
     path: '/user',
     layout: false,
@@ -41,6 +46,11 @@
     name: 'lowCodePlatform',
     icon: 'rocket',
     component: './LowCodePlatform',
+  },
+  {
+    path: SUPERSET_SERVER,
+    name: 'superset',
+    icon: 'rocket',
   },
   // {
   //   path: '/chart_image',
