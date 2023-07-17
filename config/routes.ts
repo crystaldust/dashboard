@@ -52,6 +52,12 @@
     icon: 'rocket',
     component: './LowCodePlatform',
   },
+  {
+    path: '/influences',
+    name: 'influences',
+    icon: 'rocket',
+    component: './Influences',
+  },
   // {
   //   path: '/chart_image',
   //   name: 'charImageDownload',
