@@ -4,7 +4,7 @@ import { Select } from 'antd';
 import { runSql } from '@/services/clickhouse';
 import { getIntl } from 'umi';
 
-const UNIQ_OWNER_REPO_SQL =
+export const UNIQ_OWNER_REPO_SQL =
   'SELECT DISTINCT(search_key__owner , search_key__repo) FROM gits ORDER BY (search_key__owner , search_key__repo)';
 
 const intl = getIntl();
