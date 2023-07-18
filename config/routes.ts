@@ -42,6 +42,12 @@
     icon: 'rocket',
     component: './LowCodePlatform',
   },
+  {
+    path: '/company_behavior',
+    name: 'companyBehavior',
+    icon: 'UsergroupAddOutlined',
+    component: './CompanyBehavior',
+  },
   // {
   //   path: '/chart_image',
   //   name: 'charImageDownload',
