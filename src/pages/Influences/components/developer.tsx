@@ -1,6 +1,11 @@
 import React from 'react';
-import { Avatar, Card, Col, Modal, Row } from 'antd';
+import { Avatar, Card, Col, Divider, Modal, Row } from 'antd';
 import Meta from 'antd/es/card/Meta';
+import {
+  DEMO_CORE_FEAT_DATA,
+  RecentCommitChart,
+  RecentFeatureChart,
+} from '@/pages/Influences/components/metrics/contribution';
 
 export class DeveloperCard extends React.Component<any, any> {
   developerName = 'Developer';
@@ -49,6 +54,22 @@ export class DeveloperWindow extends React.Component<any, any> {
           <div>Contribution: {this.props.developerInfo.influence.contribution}</div>
           <div>Social: {this.props.developerInfo.influence.social}</div>
           <div>Power: {this.props.developerInfo.influence.power}</div>
+          <Divider />
+          <Row gutter={24}>
+            <Col span={8}>
+              <RecentCommitChart />
+            </Col>
+            <Col span={8}>
+              <RecentFeatureChart />
+            </Col>
+            <Col span={8}>
+              <RecentFeatureChart
+                title="Recent core features"
+                color={'#de0000'}
+                data={DEMO_CORE_FEAT_DATA}
+              />
+            </Col>
+          </Row>
         </div>
       );
     }
