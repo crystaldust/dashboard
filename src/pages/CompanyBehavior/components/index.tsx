@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Select, Table } from 'antd';
 import { runSql } from '@/services/clickhouse';
-import { UNIQ_OWNER_REPO_SQL } from '@/pages/ContribDistribution/OwnerRepoSelector';
+import { UNIQ_OWNER_REPOS_SQL } from '@/pages/CompanyBehavior/sql';
 
 export interface CommitsTableProps {
   commits: object[];
@@ -27,13 +27,15 @@ export class ProjectSelector extends React.Component<any, any> {
   }
 
   async componentDidMount() {
-    const result = await runSql(UNIQ_OWNER_REPO_SQL);
+    const result = await runSql(UNIQ_OWNER_REPOS_SQL);
+    console.log(result);
     const options = result.data.map((item) => {
+      console.log('item:', item);
       return {
-        label: item[0].join('/'),
-        value: item[0].join('/'),
-        owner: item[0][0],
-        repo: item[0][1],
+        label: item.join('/'),
+        value: item.join('/'),
+        owner: item[0],
+        repo: item[1],
       };
     });
     this.setState({
@@ -85,11 +87,18 @@ export class CommitsTable<Props extends CommitsTableProps> extends React.Compone
       dataIndex: 'authoredDate',
       key: 'authoredDate',
     },
+
     {
-      title: 'Dirs',
-      dataIndex: 'dirs',
-      key: 'dirs',
+      title: 'SHA',
+      dataIndex: 'sha',
+      key: 'sha',
     },
+
+    // {
+    //   title: 'Dirs',
+    //   dataIndex: 'dirs',
+    //   key: 'dirs',
+    // },
   ];
 
   constructor(props: Props) {
