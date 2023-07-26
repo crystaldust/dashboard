@@ -79,7 +79,8 @@ export default class CompanyBehavior extends React.Component<any, any> {
             authorName: item[0],
             authorEmail: item[1],
             authoredDate: item[2],
-            dirs: item[3].join(',  '),
+            sha: item[3],
+            // dirs: item[3].join(',  '),
           };
         }),
       });
