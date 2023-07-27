@@ -1,10 +1,15 @@
 import React from 'react';
 import { Card, Select, Table } from 'antd';
 import { runSql } from '@/services/clickhouse';
-import { UNIQ_OWNER_REPOS_SQL } from '@/pages/CompanyBehavior/sql';
+import { commitsSql, contributorsSql, UNIQ_OWNER_REPOS_SQL } from '@/pages/CompanyBehavior/sql';
+import { CommitsModal, ContributorsModal } from '@/pages/CompanyBehavior/components/modals';
 
-export interface CommitsTableProps {
-  commits: object[];
+export interface CompaniesTableProps {
+  companies: object[];
+  owner: string;
+  repo: string;
+  showCommits: (company: string) => void;
+  showContributors: (company: string) => void;
 }
 
 export interface CompanyContribSummaryProps {
@@ -22,6 +27,8 @@ export class ProjectSelector extends React.Component<any, any> {
     super(props);
     this.state = {
       projectOptions: [],
+      owner: '',
+      repo: '',
     };
     this.onProjectChange = this.onProjectChange.bind(this);
   }
@@ -48,6 +55,11 @@ export class ProjectSelector extends React.Component<any, any> {
     if (this.props.hasOwnProperty('onProjectSelect')) {
       this.props.onProjectSelect(owner, repo);
     }
+
+    this.setState({
+      owner,
+      repo,
+    });
   }
 
   autoCompleteFilter(inputValue, option) {
@@ -70,46 +82,147 @@ export class ProjectSelector extends React.Component<any, any> {
   }
 }
 
-export class CommitsTable<Props extends CommitsTableProps> extends React.Component<Props, any> {
+export class CompaniesTable<Props extends CompaniesTableProps> extends React.Component<Props, any> {
   static columns = [
     {
-      title: 'Author Name',
-      dataIndex: 'authorName',
-      key: 'authorName',
+      title: 'Company',
+      dataIndex: 'company',
+      key: 'company',
     },
     {
-      title: 'Author Email',
-      dataIndex: 'authorEmail',
-      key: 'authorEmail',
+      title: 'Commits',
+      dataIndex: 'commit_count',
+      key: 'commit_count',
+      render: (numCommits: number) => <a>{numCommits}</a>,
+      modal: 'showCommits',
     },
     {
-      title: 'Authored Date',
-      dataIndex: 'authoredDate',
-      key: 'authoredDate',
+      title: 'Contributors',
+      dataIndex: 'contributor_count',
+      key: 'contributor_count',
+      render: (numContributors: number) => <a>{numContributors}</a>,
+      modal: 'showContributors',
     },
-
-    {
-      title: 'SHA',
-      dataIndex: 'sha',
-      key: 'sha',
-    },
-
-    // {
-    //   title: 'Dirs',
-    //   dataIndex: 'dirs',
-    //   key: 'dirs',
-    // },
   ];
 
   constructor(props: Props) {
     super(props);
+    // console.log('construct companies table:', props.companies);
+    // this.state = {
+    //   companies: props.companies || [],
+    // };
     this.state = {
-      commits: props.commits || [],
+      showCommits: false,
+      showContributors: false,
     };
+    this.genCols = this.genCols.bind(this);
+    this.commitsModalCb = this.commitsModalCb.bind(this);
+    this.contributorsModalCb = this.contributorsModalCb.bind(this);
+  }
+
+  commitsModalCb(data) {
+    {
+      const { owner, repo, dateRange } = this.props;
+      return {
+        onClick: () => {
+          runSql(commitsSql(owner, repo, data.company, dateRange)).then((result) => {
+            console.log(result);
+            const commits = result.data.map((item) => {
+              return {
+                authorName: item[5],
+                authorEmail: item[3],
+                authoredDate: item[4],
+                authorTZ: item[6],
+                sha: item[2],
+              };
+            });
+            this.setState({
+              showCommits: true,
+              showContributors: false,
+              company: data.company,
+              commits,
+            });
+          });
+        },
+      };
+    }
+  }
+
+  contributorsModalCb(data) {
+    {
+      const { owner, repo, dateRange } = this.props;
+      return {
+        onClick: () => {
+          runSql(contributorsSql(owner, repo, data.company, dateRange)).then((result) => {
+            const contributors = result.data.map((item) => {
+              const name_s = item[2];
+              let name = name_s;
+              const ret = {};
+
+              try {
+                name = JSON.parse(name_s.replaceAll("'", '"'))[0];
+                ret.github = true;
+              } catch (e) {
+                console.log(e, name_s);
+              }
+              ret.name = name;
+
+              return ret;
+            });
+            this.setState({
+              showCommits: false,
+              showContributors: true,
+              company: data.company,
+              contributors,
+            });
+          });
+        },
+      };
+    }
+  }
+
+  genCols() {
+    return CompaniesTable.columns.map((col) => {
+      // TODO Implement onCells for different modal
+      if (col.hasOwnProperty('modal')) {
+        if (col.modal == 'showCommits') {
+          col.onCell = this.commitsModalCb;
+        } else if (col.modal == 'showContributors') {
+          col.onCell = this.contributorsModalCb;
+        } else {
+          console.warn('Unexpected modal', col.modal);
+        }
+      }
+      return col;
+    });
   }
 
   render() {
-    return <Table dataSource={this.props.commits} columns={CommitsTable.columns} />;
+    return (
+      <div>
+        <Table dataSource={this.props.companies} columns={this.genCols()} />
+
+        <CommitsModal
+          onCancel={() => {
+            this.setState({ showCommits: false });
+          }}
+          visible={this.state.showCommits}
+          company={this.state.company}
+          project={`${this.props.owner}/${this.props.repo}`}
+          commits={this.state.commits}
+        />
+
+        <ContributorsModal
+          onCancel={() => {
+            this.setState({ showContributors: false });
+          }}
+          visible={this.state.showContributors}
+          company={this.state.company}
+          project={`${this.props.owner}/${this.props.repo}`}
+          contributors={this.state.contributors}
+        />
+      </div>
+    );
   }
 }
 

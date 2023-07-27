@@ -58,6 +58,7 @@
     "@monaco-editor/react": "^4.4.1",
     "@umijs/route-utils": "^2.0.0",
     "antd": "^4.17.0",
+    "browserslist": "<4.21.9",
     "classnames": "^2.3.0",
     "lodash": "^4.17.0",
     "moment": "^2.29.0",
