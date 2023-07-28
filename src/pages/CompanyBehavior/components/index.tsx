@@ -14,7 +14,7 @@ export interface CompaniesTableProps {
 
 export interface CompanyContribSummaryProps {
   company: string;
-  dateRange: string[2];
+  dateRange: number[2];
   numCommits: number;
   numAuthors: number;
   numAddedLoC: number;
@@ -35,9 +35,7 @@ export class ProjectSelector extends React.Component<any, any> {
 
   async componentDidMount() {
     const result = await runSql(UNIQ_OWNER_REPOS_SQL);
-    console.log(result);
     const options = result.data.map((item) => {
-      console.log('item:', item);
       return {
         label: item.join('/'),
         value: item.join('/'),
@@ -107,14 +105,12 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
 
   constructor(props: Props) {
     super(props);
-    // console.log('construct companies table:', props.companies);
-    // this.state = {
-    //   companies: props.companies || [],
-    // };
+
     this.state = {
       showCommits: false,
       showContributors: false,
     };
+
     this.genCols = this.genCols.bind(this);
     this.commitsModalCb = this.commitsModalCb.bind(this);
     this.contributorsModalCb = this.contributorsModalCb.bind(this);
@@ -126,7 +122,6 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
       return {
         onClick: () => {
           runSql(commitsSql(owner, repo, data.company, dateRange)).then((result) => {
-            console.log(result);
             const commits = result.data.map((item) => {
               return {
                 authorName: item[5],
@@ -134,6 +129,7 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
                 authoredDate: item[4],
                 authorTZ: item[6],
                 sha: item[2],
+                github_login: item[7],
               };
             });
             this.setState({

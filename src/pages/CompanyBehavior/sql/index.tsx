@@ -18,7 +18,7 @@ export function companyListSql(
      and toYYYYMM(authored_date) >= ${dateRange.from}`
     : '';
 
-  const dirClause = dir ? `and dir = ${dir}` : '';
+  const dirClause = dir ? `and dir = '${dir}'` : '';
 
   return `
 with '${owner}' as owner, '${repo}' as repo
@@ -77,18 +77,18 @@ export function commitsSql(
      and toYYYYMM(authored_date) >= ${dateRange.from}`
     : '';
 
-  const dirClause = dir ? `and dir = ${dir}` : '';
+  const dirClause = dir ? `and dir = '${dir}'` : '';
 
   return `
 with '${owner}' as owner, '${repo}' as repo, '${company}' as company
-select search_key__owner, search_key__repo, hexsha, author_email, authored_date, author_name, author_tz
+select search_key__owner, search_key__repo, hexsha, author_email, authored_date, author_name, author_tz, author__logins[1] as github_login
 from dir_label_new_test
 where search_key__owner = owner
   and search_key__repo = repo
   and author_company = company
   ${dateRangeClause}
   ${dirClause}
-group by search_key__owner, search_key__repo, hexsha, author_email, authored_date, author_name, author_tz
+group by search_key__owner, search_key__repo, hexsha, author_email, authored_date, author_name, author_tz, github_login
   `;
 }
 
@@ -103,7 +103,7 @@ export function contributorsSql(owner, repo, company, dateRange = undefined, dir
      and toYYYYMM(authored_date) >= ${dateRange.from}`
     : '';
 
-  const dirClause = dir ? `and dir = ${dir}` : '';
+  const dirClause = dir ? `and dir = '${dir}'` : '';
 
   return `
 with '${owner}' as owner, '${repo}' as repo, '${company}' as company
