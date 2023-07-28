@@ -19,6 +19,17 @@ class CommitsTable<Props extends CommitsDataProps> extends React.Component<Props
       title: 'Author Name',
       dataIndex: 'authorName',
       key: 'authorName',
+      render: (text, record) => {
+        if (!!record.github_login) {
+          return (
+            <a href={`https://github.com/${record.github_login}`} target="_blank" rel="noreferrer">
+              {text}
+            </a>
+          );
+        }
+
+        return text;
+      },
     },
     {
       title: 'Author Email',
@@ -39,6 +50,17 @@ class CommitsTable<Props extends CommitsDataProps> extends React.Component<Props
       title: 'SHA',
       dataIndex: 'sha',
       key: 'sha',
+      render: (text) => {
+        return (
+          <a
+            href={`https://github.com/pytorch/pytorch/commit/${text}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {text.slice(0, 8)}
+          </a>
+        );
+      },
     },
 
     // {
@@ -99,7 +121,7 @@ class ContributorsTable<Props extends ContributorsDataProps> extends React.Compo
       render: (text, record) => {
         if (record.github) {
           return (
-            <a href={`https://github.com/${text}`} target="_blank">
+            <a href={`https://github.com/${text}`} target="_blank" rel="noreferrer">
               {text}
             </a>
           );
@@ -126,7 +148,7 @@ export class ContributorsModal extends React.Component<ContributorsModalProps, a
     return (
       <Modal
         closable={true}
-        title={`${this.props.company} Commits on ${this.props.project}`}
+        title={`${this.props.company} Contributors on ${this.props.project}`}
         visible={this.props.visible}
         onOk={this.props.onOk}
         onCancel={this.props.onCancel}
