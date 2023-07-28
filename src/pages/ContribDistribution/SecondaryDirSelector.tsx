@@ -65,7 +65,7 @@ export default class SecondaryDirSelector extends React.Component<any, any> {
         )}
         <DirectoryTree
           height={400}
-          multiple
+          multiple={!!this.props.multiple}
           defaultExpandAll
           onSelect={this.onSelect}
           onExpand={this.onExpand}
