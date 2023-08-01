@@ -86,8 +86,8 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
   static columns = [
     {
       title: 'Company',
-      dataIndex: 'company',
-      key: 'company',
+      dataIndex: 'author_company',
+      key: 'author_company',
     },
     {
       title: 'Commits',
@@ -123,28 +123,28 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
     },
     {
       title: 'Total Insertions',
-      dataIndex: 'insertions',
-      key: 'insertions',
+      dataIndex: 'total_insertions',
+      key: 'total_insertions',
       render: (numInsertions: number) => (
         <div>{numInsertions.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</div>
       ),
-      sorter: (a, b) => a.insertions - b.insertions,
+      sorter: (a, b) => a.total_insertions - b.total_insertions,
     },
     {
       title: 'Total Deletions',
-      dataIndex: 'deletions',
-      key: 'deletions',
+      dataIndex: 'total_deletions',
+      key: 'total_deletions',
       render: (numDeletions: number) => (
         <div>{numDeletions.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</div>
       ),
-      sorter: (a, b) => a.deletions - b.deletions,
+      sorter: (a, b) => a.total_deletions - b.total_deletions,
     },
     {
       title: 'Lines of Code',
-      dataIndex: 'loc',
-      key: 'loc',
+      dataIndex: 'total_commit_lines',
+      key: 'total_commit_lines',
       render: (loc: number) => <div>{loc.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</div>,
-      sorter: (a, b) => a.loc - b.loc,
+      sorter: (a, b) => a.total_commit_lines - b.total_commit_lines,
     },
   ];
 
@@ -169,19 +169,16 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
           if (this.props.hasOwnProperty('setLoadingState')) {
             this.props.setLoadingState(true);
           }
-          runSql(commitsSql(owner, repo, data.company, dateRange, dir)).then((result) => {
+          runSql(commitsSql(owner, repo, data.author_company, dateRange, dir)).then((result) => {
             const commits = result.data.map((item) => {
-              return {
-                key: `commit__${item[2]}`,
-                authorName: item[6],
-                authorEmail: item[4],
-                authoredDate: item[5],
-                authorTZ: item[6],
-                sha: item[2],
-                message: item[3],
-                // github_login: item[7],
-              };
+              const commitInfo = {};
+              result.columns.forEach((col: string[], index: number) => {
+                commitInfo[col[0]] = item[index];
+              });
+              commitInfo.key = `commit__${commitInfo.hexsha}`;
+              return commitInfo;
             });
+
             this.setState({
               loadingCompanies: false,
               showCommits: true,
@@ -206,30 +203,32 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
           if (this.props.hasOwnProperty('setLoadingState')) {
             this.props.setLoadingState(true);
           }
-          runSql(contributorsSql(owner, repo, data.company, dateRange, dir)).then((result) => {
-            const contributors = result.data.map((item) => {
-              const contributorInfo = {};
-              result.columns.forEach((col: string[], index: number) => {
-                contributorInfo[col[0]] = item[index];
+          runSql(contributorsSql(owner, repo, data.author_company, dateRange, dir)).then(
+            (result) => {
+              const contributors = result.data.map((item) => {
+                const contributorInfo = {};
+                result.columns.forEach((col: string[], index: number) => {
+                  contributorInfo[col[0]] = item[index];
+                });
+
+                contributorInfo.name = contributorInfo.names[0] || 'Unknown';
+                contributorInfo.github_login = contributorInfo.contributor[0] || undefined;
+                contributorInfo.key = `contributor__${contributorInfo.name}__${contributorInfo.github_login}`;
+
+                return contributorInfo;
               });
 
-              contributorInfo.name = contributorInfo.names[0] || 'Unknown';
-              contributorInfo.github_login = contributorInfo.contributor[0] || undefined;
-              contributorInfo.key = `contributor__${contributorInfo.name}__${contributorInfo.github_login}`;
-
-              return contributorInfo;
-            });
-
-            this.setState({
-              showCommits: false,
-              showContributors: true,
-              company: data.company,
-              contributors,
-            });
-            if (this.props.hasOwnProperty('setLoadingState')) {
-              this.props.setLoadingState(false);
-            }
-          });
+              this.setState({
+                showCommits: false,
+                showContributors: true,
+                company: data.company,
+                contributors,
+              });
+              if (this.props.hasOwnProperty('setLoadingState')) {
+                this.props.setLoadingState(false);
+              }
+            },
+          );
         },
       };
     }
@@ -266,7 +265,9 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
           }}
           open={this.state.showCommits}
           company={this.state.company}
-          project={`${this.props.owner}/${this.props.repo}`}
+          // project={`${this.props.owner}/${this.props.repo}`}
+          owner={this.props.owner}
+          repo={this.props.repo}
           commits={this.state.commits}
         />
 
@@ -276,7 +277,9 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
           }}
           open={this.state.showContributors}
           company={this.state.company}
-          project={`${this.props.owner}/${this.props.repo}`}
+          // project={`${this.props.owner}/${this.props.repo}`}
+          owner={this.props.owner}
+          repo={this.props.repo}
           contributors={this.state.contributors}
         />
       </div>
