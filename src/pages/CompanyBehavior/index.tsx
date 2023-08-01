@@ -22,13 +22,20 @@ export default class CompanyBehavior extends React.Component<any, any> {
       // project: {},
       selectedDir: '',
       selectedDirs: [],
-      loadingCompanies: false,
+      loading: false,
     };
 
     this.onProjectSelect = this.onProjectSelect.bind(this);
     this.onDateRangeChanged = this.onDateRangeChanged.bind(this);
     this.onDirSelect = this.onDirSelect.bind(this);
     this.loadCompanies = this.loadCompanies.bind(this);
+    this.setLoadingState = this.setLoadingState.bind(this);
+  }
+
+  setLoadingState(loading: boolean = false) {
+    this.setState({
+      loading,
+    });
   }
 
   onProjectSelect(owner, repo) {
@@ -54,7 +61,7 @@ export default class CompanyBehavior extends React.Component<any, any> {
   loadCompanies(owner, repo, dateRange, dir, order = 'commit_count') {
     // TODO mark as loading
     this.setState({
-      loadingCompanies: true,
+      loading: true,
     });
     runSql(companyListSql(owner, repo, dateRange, dir, order)).then((result) => {
       const companyList = result.data.map((item) => {
@@ -71,7 +78,7 @@ export default class CompanyBehavior extends React.Component<any, any> {
       });
       this.setState({
         companies: companyList,
-        loadingCompanies: false,
+        loading: false,
       });
     });
   }
@@ -87,7 +94,6 @@ export default class CompanyBehavior extends React.Component<any, any> {
   }
 
   onDateRangeChanged(_, dateStrs: string[]) {
-    console.debug('date range changed', dateStrs);
     const { owner, repo } = this.state.project;
     const from = parseInt(dateStrs[0].replaceAll('-', ''));
     const to = parseInt(dateStrs[1].replaceAll('-', ''));
@@ -122,11 +128,6 @@ export default class CompanyBehavior extends React.Component<any, any> {
                     onChange={this.onDateRangeChanged}
                     picker="month"
                     style={{ width: '75%' }}
-                    // value={
-                    //   this.state.dateRangeSelection && this.since && this.until
-                    //     ? [moment(this.since), moment(this.until)]
-                    //     : [null, null]
-                    // }
                   />
                 )}
               </Col>
@@ -155,7 +156,8 @@ export default class CompanyBehavior extends React.Component<any, any> {
               repo={this.state.project && this.state.project.repo}
               dateRange={this.state.dateRange}
               dir={this.state.selectedDir}
-              loading={this.state.loadingCompanies}
+              loading={this.state.loading}
+              setLoadingState={this.setLoadingState}
             />
             {/*)}*/}
           </Col>

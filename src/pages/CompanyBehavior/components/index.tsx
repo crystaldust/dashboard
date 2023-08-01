@@ -9,6 +9,7 @@ export interface CompaniesTableProps {
   companies: object[];
   owner: string;
   repo: string;
+  setLoadingState: (loading: boolean) => void;
   showCommits: (company: string) => void;
   showContributors: (company: string) => void;
 }
@@ -165,6 +166,9 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
       const { owner, repo, dateRange, dir } = this.props;
       return {
         onClick: () => {
+          if (this.props.hasOwnProperty('setLoadingState')) {
+            this.props.setLoadingState(true);
+          }
           runSql(commitsSql(owner, repo, data.company, dateRange, dir)).then((result) => {
             const commits = result.data.map((item) => {
               return {
@@ -179,11 +183,15 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
               };
             });
             this.setState({
+              loadingCompanies: false,
               showCommits: true,
               showContributors: false,
               company: data.company,
               commits,
             });
+            if (this.props.hasOwnProperty('setLoadingState')) {
+              this.props.setLoadingState(false);
+            }
           });
         },
       };
@@ -195,6 +203,9 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
       const { owner, repo, dateRange, dir } = this.props;
       return {
         onClick: () => {
+          if (this.props.hasOwnProperty('setLoadingState')) {
+            this.props.setLoadingState(true);
+          }
           runSql(contributorsSql(owner, repo, data.company, dateRange, dir)).then((result) => {
             const contributors = result.data.map((item) => {
               const contributorInfo = {};
@@ -215,6 +226,9 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
               company: data.company,
               contributors,
             });
+            if (this.props.hasOwnProperty('setLoadingState')) {
+              this.props.setLoadingState(false);
+            }
           });
         },
       };
