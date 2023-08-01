@@ -18,48 +18,62 @@ export function companyListSql(
      and toYYYYMM(authored_date) >= ${dateRange.from}`
     : '';
 
-  const dirClause = dir ? `and dir = '${dir}'` : '';
+  const dirClause = dir ? `and dir = '${dir}/'` : '';
 
   return `
 with '${owner}' as owner, '${repo}' as repo
-select a.*, b.commit_count
+select a.*, b.commit_count, b.last_active_time, b.total_insertions, b.total_deletions, b.total_commit_lines
 from (
-    select search_key__owner, search_key__repo,author_company, count() as contributor_count
-      from (
-
-          select search_key__owner, search_key__repo, toString(author__id),author_company
-            from dir_label_new_test
-            where search_key__owner = owner
-              and search_key__repo = repo
-              and author__id != 0
-              ${dateRangeClause}
-              and author_company !=''
-            ${dirClause}
-            group by search_key__owner, search_key__repo, author__id,author_company
-            union all
-            select search_key__owner, search_key__repo, author_email,author_company
-            from dir_label_new_test
-            where search_key__owner = owner
-              and search_key__repo = repo
-              and author__id = 0
-              ${dateRangeClause}
-            and author_company !=''
-            ${dirClause}
-            group by search_key__owner, search_key__repo, author_email, author_company)
-      group by search_key__owner, search_key__repo,author_company) as a global
+         select search_key__owner, search_key__repo, author_company, count() as contributor_count
+         from (
+                  select search_key__owner, search_key__repo, toString(author__id), author_company
+                  from dir_label_new_test
+                  where search_key__owner = owner
+                    and search_key__repo = repo
+                    and author__id != 0
+                    ${dateRangeClause}
+                    and author_company != ''
+                    ${dirClause}
+                  group by search_key__owner, search_key__repo, author__id, author_company
+                  union all
+                  select search_key__owner, search_key__repo, author_email, author_company
+                  from dir_label_new_test
+                  where search_key__owner = owner
+                    and search_key__repo = repo
+                    and author__id = 0
+                    ${dateRangeClause}
+                    and author_company != ''
+                    ${dirClause}
+                  group by search_key__owner, search_key__repo, author_email, author_company)
+         group by search_key__owner, search_key__repo, author_company) as a global
          join (
-             select search_key__owner, search_key__repo,author_company, count() as commit_count
-               from (
-                   select search_key__owner, search_key__repo, hexsha,author_company
-                     from dir_label_new_test
-                     where search_key__owner = owner
-                       and search_key__repo = repo
-                       ${dateRangeClause}
-                       ${dirClause}
-                     and author_company !=''
-                     group by search_key__owner, search_key__repo, hexsha,author_company)
-               group by search_key__owner, search_key__repo,author_company
-    ) as b on a.search_key__owner = b.search_key__owner and a.search_key__repo = b.search_key__repo and a.author_company = b.author_company
+    select search_key__owner,
+           search_key__repo,
+           author_company,
+           max(authored_date)     as last_active_time,
+           sum(commit_insertions) as total_insertions,
+           sum(commit_deletions)  as total_deletions,
+           sum(commit_lines)      as total_commit_lines,
+           count()                as commit_count
+    from (select search_key__owner,
+                 search_key__repo,
+                 hexsha,
+                 authored_date,
+                 author_company,
+                 commit_insertions,
+                 commit_deletions,
+                 commit_lines
+          from dir_label_new_test
+          where search_key__owner = owner
+            and search_key__repo = repo
+            ${dateRangeClause}
+            and author_company != ''
+            ${dirClause}
+          group by search_key__owner, search_key__repo, hexsha, authored_date, author_company, commit_insertions,
+                   commit_deletions, commit_lines)
+    group by search_key__owner, search_key__repo, author_company) as b
+              on a.search_key__owner = b.search_key__owner and a.search_key__repo = b.search_key__repo and
+                 a.author_company = b.author_company
 order by ${order} desc
 limit ${topN}
   `;
@@ -77,18 +91,29 @@ export function commitsSql(
      and toYYYYMM(authored_date) >= ${dateRange.from}`
     : '';
 
-  const dirClause = dir ? `and dir = '${dir}'` : '';
+  const dirClause = dir ? `and dir = '${dir}/'` : '';
 
   return `
 with '${owner}' as owner, '${repo}' as repo, '${company}' as company
-select search_key__owner, search_key__repo, hexsha, author_email, authored_date, author_name, author_tz, author__logins[1] as github_login
+select search_key__owner,
+       search_key__repo,
+       hexsha,
+       message,
+       author_email,
+       authored_date,
+       author_name,
+       author_tz,
+       commit_insertions,
+       commit_deletions,
+       commit_lines
 from dir_label_new_test
 where search_key__owner = owner
   and search_key__repo = repo
   and author_company = company
   ${dateRangeClause}
   ${dirClause}
-group by search_key__owner, search_key__repo, hexsha, author_email, authored_date, author_name, author_tz, github_login
+group by search_key__owner, search_key__repo, hexsha, message, author_email, authored_date, author_name, author_tz,
+         commit_insertions, commit_deletions, commit_lines
   `;
 }
 
@@ -103,28 +128,63 @@ export function contributorsSql(owner, repo, company, dateRange = undefined, dir
      and toYYYYMM(authored_date) >= ${dateRange.from}`
     : '';
 
-  const dirClause = dir ? `and dir = '${dir}'` : '';
+  const dirClause = dir ? `and dir = '${dir}/'` : '';
 
   return `
 with '${owner}' as owner, '${repo}' as repo, '${company}' as company
-select search_key__owner, search_key__repo, toString(author__logins) as contributor
-from dir_label_new_test
-where search_key__owner = owner
-  and search_key__repo = repo
-  and author_company = company
-  ${dateRangeClause}
-  ${dirClause}
-  and author__id != 0
-group by search_key__owner, search_key__repo, author__logins
+select search_key__owner,
+       search_key__repo,
+       contributor,
+       max(authored_date)     as last_active_time,
+       sum(commit_insertions) as total_insertions,
+       sum(commit_deletions)  as total_deletions,
+       sum(commit_lines)      as total_commit_lines,
+       count()                as commit_count
+from (select search_key__owner,
+             search_key__repo,
+             toString(author__logins) as contributor,
+             hexsha,
+             authored_date,
+             commit_insertions,
+             commit_deletions,
+             commit_lines
+      from dir_label_new_test
+      where search_key__owner = owner
+        and search_key__repo = repo
+        and author_company = company
+        ${dateRangeClause}
+        ${dirClause}
+        and author__id != 0
+      group by search_key__owner, search_key__repo, author__logins, hexsha, authored_date, commit_insertions,
+               commit_deletions, commit_lines)
+group by search_key__owner, search_key__repo, contributor
 union all
-select search_key__owner, search_key__repo, author_name
-from dir_label_new_test
-where search_key__owner = owner
-  and search_key__repo = repo
-  and author_company = company
-  ${dateRangeClause}
-  ${dirClause}
-  and author__id = 0
+select search_key__owner,
+       search_key__repo,
+       author_name,
+       max(authored_date)     as last_active_time,
+       sum(commit_insertions) as total_insertions,
+       sum(commit_deletions)  as total_deletions,
+       sum(commit_lines)      as total_commit_lines,
+       count()                as commit_count
+from (
+         select search_key__owner,
+                search_key__repo,
+                author_name,
+                hexsha,
+                authored_date,
+                commit_insertions,
+                commit_deletions,
+                commit_lines
+         from dir_label_new_test
+         where search_key__owner = owner
+           and search_key__repo = repo
+           and author_company = company
+           ${dateRangeClause}
+           ${dirClause}
+           and author__id = 0
+         group by search_key__owner, search_key__repo, author_name, hexsha, authored_date, commit_insertions,
+                  commit_deletions, commit_lines)
 group by search_key__owner, search_key__repo, author_name
   `;
 }

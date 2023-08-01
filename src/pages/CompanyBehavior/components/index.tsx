@@ -3,6 +3,7 @@ import { Card, Select, Table } from 'antd';
 import { runSql } from '@/services/clickhouse';
 import { commitsSql, contributorsSql, UNIQ_OWNER_REPOS_SQL } from '@/pages/CompanyBehavior/sql';
 import { CommitsModal, ContributorsModal } from '@/pages/CompanyBehavior/components/modals';
+import moment from 'moment';
 
 export interface CompaniesTableProps {
   companies: object[];
@@ -91,15 +92,58 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
       title: 'Commits',
       dataIndex: 'commit_count',
       key: 'commit_count',
-      render: (numCommits: number) => <a>{numCommits}</a>,
+      render: (numCommits: number) => (
+        <a>{numCommits.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</a>
+      ),
       modal: 'showCommits',
+      sorter: (a, b) => {
+        return a.commit_count - b.commit_count;
+      },
     },
     {
       title: 'Contributors',
       dataIndex: 'contributor_count',
       key: 'contributor_count',
-      render: (numContributors: number) => <a>{numContributors}</a>,
+      render: (numContributors: number) => (
+        <a>{numContributors.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</a>
+      ),
       modal: 'showContributors',
+      sorter: (a, b) => {
+        return a.contributor_count - b.contributor_count;
+      },
+    },
+    {
+      title: 'Last Active',
+      dataIndex: 'last_active_time',
+      key: 'last_active_time',
+      sorter: (a, b) => {
+        return moment(a.last_active_time).unix() - moment(b.last_active_time).unix();
+      },
+    },
+    {
+      title: 'Total Insertions',
+      dataIndex: 'insertions',
+      key: 'insertions',
+      render: (numInsertions: number) => (
+        <div>{numInsertions.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</div>
+      ),
+      sorter: (a, b) => a.insertions - b.insertions,
+    },
+    {
+      title: 'Total Deletions',
+      dataIndex: 'deletions',
+      key: 'deletions',
+      render: (numDeletions: number) => (
+        <div>{numDeletions.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</div>
+      ),
+      sorter: (a, b) => a.deletions - b.deletions,
+    },
+    {
+      title: 'Lines of Code',
+      dataIndex: 'loc',
+      key: 'loc',
+      render: (loc: number) => <div>{loc.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</div>,
+      sorter: (a, b) => a.loc - b.loc,
     },
   ];
 
@@ -118,18 +162,19 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
 
   commitsModalCb(data) {
     {
-      const { owner, repo, dateRange } = this.props;
+      const { owner, repo, dateRange, dir } = this.props;
       return {
         onClick: () => {
-          runSql(commitsSql(owner, repo, data.company, dateRange)).then((result) => {
+          runSql(commitsSql(owner, repo, data.company, dateRange, dir)).then((result) => {
             const commits = result.data.map((item) => {
               return {
-                authorName: item[5],
-                authorEmail: item[3],
-                authoredDate: item[4],
+                authorName: item[6],
+                authorEmail: item[4],
+                authoredDate: item[5],
                 authorTZ: item[6],
                 sha: item[2],
-                github_login: item[7],
+                message: item[3],
+                // github_login: item[7],
               };
             });
             this.setState({
@@ -146,14 +191,20 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
 
   contributorsModalCb(data) {
     {
-      const { owner, repo, dateRange } = this.props;
+      const { owner, repo, dateRange, dir } = this.props;
       return {
         onClick: () => {
-          runSql(contributorsSql(owner, repo, data.company, dateRange)).then((result) => {
+          runSql(contributorsSql(owner, repo, data.company, dateRange, dir)).then((result) => {
             const contributors = result.data.map((item) => {
               const name_s = item[2];
               let name = name_s;
-              const ret = {};
+              const ret = {
+                last_active_time: moment(item[3]).format('YYYY-MM-DD HH:mm:ss'),
+                insertions: item[4],
+                deletions: item[5],
+                loc: item[6],
+                commit_count: item[7],
+              };
 
               try {
                 name = JSON.parse(name_s.replaceAll("'", '"'))[0];
@@ -196,13 +247,17 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
   render() {
     return (
       <div>
-        <Table dataSource={this.props.companies} columns={this.genCols()} />
+        <Table
+          dataSource={this.props.companies}
+          columns={this.genCols()}
+          loading={this.props.loading}
+        />
 
         <CommitsModal
           onCancel={() => {
             this.setState({ showCommits: false });
           }}
-          visible={this.state.showCommits}
+          open={this.state.showCommits}
           company={this.state.company}
           project={`${this.props.owner}/${this.props.repo}`}
           commits={this.state.commits}
@@ -212,7 +267,7 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
           onCancel={() => {
             this.setState({ showContributors: false });
           }}
-          visible={this.state.showContributors}
+          open={this.state.showContributors}
           company={this.state.company}
           project={`${this.props.owner}/${this.props.repo}`}
           contributors={this.state.contributors}
