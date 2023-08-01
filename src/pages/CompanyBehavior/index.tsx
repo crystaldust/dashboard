@@ -7,7 +7,11 @@ import { CompaniesTable, ProjectSelector } from '@/pages/CompanyBehavior/compone
 import { pathsToTree } from '@/pages/ContribDistribution/DataProcessors';
 import SecondaryDirSelector from '@/pages/ContribDistribution/SecondaryDirSelector';
 import { secondaryDirSql } from '@/pages/ContribDistribution/DataSQLs';
+import moment from 'moment';
 
+import { Divider, Tree } from 'antd';
+
+const { DirectoryTree } = Tree;
 const { RangePicker } = DatePicker;
 
 export default class CompanyBehavior extends React.Component<any, any> {
@@ -17,6 +21,8 @@ export default class CompanyBehavior extends React.Component<any, any> {
     this.state = {
       // project: {},
       selectedDir: '',
+      selectedDirs: [],
+      loadingCompanies: false,
     };
 
     this.onProjectSelect = this.onProjectSelect.bind(this);
@@ -31,6 +37,8 @@ export default class CompanyBehavior extends React.Component<any, any> {
         owner,
         repo,
       },
+      selectedDir: '',
+      selectedDirs: [],
     });
 
     // runSql(dirListSql(owner, repo)).then((result) => {
@@ -40,17 +48,29 @@ export default class CompanyBehavior extends React.Component<any, any> {
         dirData,
       });
     });
-    this.loadCompanies(owner, repo, undefined, '');
+    this.loadCompanies(owner, repo, this.state.dateRange, '');
   }
 
   loadCompanies(owner, repo, dateRange, dir, order = 'commit_count') {
     // TODO mark as loading
+    this.setState({
+      loadingCompanies: true,
+    });
     runSql(companyListSql(owner, repo, dateRange, dir, order)).then((result) => {
       const companyList = result.data.map((item) => {
-        return { company: item[2], contributor_count: item[3], commit_count: item[4] };
+        return {
+          company: item[2],
+          contributor_count: item[3],
+          commit_count: item[4],
+          last_active_time: moment(item[5]).format('YYYY-MM-DD HH:mm:ss'),
+          insertions: item[6],
+          deletions: item[7],
+          loc: item[8],
+        };
       });
       this.setState({
         companies: companyList,
+        loadingCompanies: false,
       });
     });
   }
@@ -59,33 +79,26 @@ export default class CompanyBehavior extends React.Component<any, any> {
     // The state update on selectedDirs is just used for dir tree display(show selection)
     this.setState({
       selectedDirs,
-      selectedDir: selectedDirs[0],
+      selectedDir: selectedDirs.length ? selectedDirs[0] : '',
     });
     const { owner, repo } = this.state.project;
     this.loadCompanies(owner, repo, this.state.dateRange, selectedDirs[0]);
   }
 
   onDateRangeChanged(_, dateStrs: string[]) {
+    console.debug('date range changed', dateStrs);
     const { owner, repo } = this.state.project;
     const from = parseInt(dateStrs[0].replaceAll('-', ''));
-    const to = parseInt(dateStrs[0].replaceAll('-', ''));
+    const to = parseInt(dateStrs[1].replaceAll('-', ''));
+    const dateRange = isNaN(from) || isNaN(to) ? null : { from, to };
 
     this.setState({
-      loadingCompanies: true,
-      // dateRange: dateStrs,
-      dateRange: {
-        from,
-        to,
-      },
+      dateRange,
       companies: [],
       company: undefined,
       from,
       to,
     });
-    const dateRange = {
-      from,
-      to,
-    };
 
     this.loadCompanies(owner, repo, dateRange, this.state.selectedDir);
   }
@@ -93,8 +106,8 @@ export default class CompanyBehavior extends React.Component<any, any> {
   render() {
     return (
       <PageContainer>
-        <Row align={'left'} gutter={4}>
-          <Col span={6}>
+        <Row align={'left'}>
+          <Col span={5}>
             <Row>
               <Col span={24}>
                 <ProjectSelector onProjectSelect={this.onProjectSelect} />
@@ -107,7 +120,7 @@ export default class CompanyBehavior extends React.Component<any, any> {
                   <RangePicker
                     onChange={this.onDateRangeChanged}
                     picker="month"
-                    style={{ width: '65%' }}
+                    style={{ width: '75%' }}
                     // value={
                     //   this.state.dateRangeSelection && this.since && this.until
                     //     ? [moment(this.since), moment(this.until)]
@@ -118,8 +131,8 @@ export default class CompanyBehavior extends React.Component<any, any> {
               </Col>
             </Row>
 
-            <Row gutter={16}>
-              <Col span={16}>
+            <Row>
+              <Col span={18}>
                 {!!this.state.project && (
                   <SecondaryDirSelector
                     multiple={false}
@@ -140,6 +153,8 @@ export default class CompanyBehavior extends React.Component<any, any> {
               owner={this.state.project && this.state.project.owner}
               repo={this.state.project && this.state.project.repo}
               dateRange={this.state.dateRange}
+              dir={this.state.selectedDir}
+              loading={this.state.loadingCompanies}
             />
             {/*)}*/}
           </Col>

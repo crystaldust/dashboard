@@ -1,5 +1,9 @@
 import React from 'react';
 import { Modal, Table } from 'antd';
+import { Switch, Typography } from 'antd';
+import moment from 'moment';
+
+const { Paragraph, Text } = Typography;
 
 export interface CommitsDataProps {
   commits: object[];
@@ -7,7 +11,7 @@ export interface CommitsDataProps {
 
 interface CommitsModalProps extends CommitsDataProps {
   onCancel: () => void;
-  visible: boolean;
+  open: boolean;
 
   company: string;
   project: string;
@@ -41,11 +45,11 @@ class CommitsTable<Props extends CommitsDataProps> extends React.Component<Props
       dataIndex: 'authoredDate',
       key: 'authoredDate',
     },
-    {
-      title: 'Timezone',
-      dataIndex: 'authorTZ',
-      key: 'authorTZ',
-    },
+    // {
+    //   title: 'Timezone',
+    //   dataIndex: 'authorTZ',
+    //   key: 'authorTZ',
+    // },
     {
       title: 'SHA',
       dataIndex: 'sha',
@@ -62,6 +66,24 @@ class CommitsTable<Props extends CommitsDataProps> extends React.Component<Props
         );
       },
     },
+    {
+      title: 'Commit Message',
+      dataIndex: 'message',
+      key: 'message',
+      render: (text) => {
+        return (
+          <Text style={{ width: 600 }} ellipsis={{ tooltip: true }}>
+            {text}
+          </Text>
+        );
+      },
+    },
+    //                 authorName: item[6],
+    //                 authorEmail: item[4],
+    //                 authoredDate: item[5],
+    //                 authorTZ: item[6],
+    //                 sha: item[2],
+    //                 message: item[3],
 
     // {
     //   title: 'Dirs',
@@ -88,7 +110,7 @@ export class CommitsModal extends React.Component<CommitsModalProps, any> {
       <Modal
         closable={true}
         title={`${this.props.company} Commits on ${this.props.project}`}
-        visible={this.props.visible}
+        open={this.props.open}
         onOk={this.props.onOk}
         onCancel={this.props.onCancel}
         width={'100%'}
@@ -106,7 +128,7 @@ export interface ContributorsDataProps {
 
 interface ContributorsModalProps extends ContributorsDataProps {
   onCancel: () => void;
-  visible: boolean;
+  open: boolean;
 
   company: string;
   project: string;
@@ -129,6 +151,38 @@ class ContributorsTable<Props extends ContributorsDataProps> extends React.Compo
         return text;
       },
     },
+    {
+      title: 'Last Active',
+      dataIndex: 'last_active_time',
+      key: 'last_active_time',
+      sorter: (a, b) => {
+        return moment(a.last_active_time).unix() - moment(b.last_active_time).unix();
+      },
+    },
+    {
+      title: 'Total Insertions',
+      dataIndex: 'insertions',
+      key: 'insertions',
+      sorter: (a, b) => a.insertions - b.insertions,
+    },
+    {
+      title: 'Total Deletions',
+      dataIndex: 'deletions',
+      key: 'deletions',
+      sorter: (a, b) => a.deletions - b.deletions,
+    },
+    {
+      title: 'Total Commits',
+      dataIndex: 'commit_count',
+      key: 'commit_count',
+      sorter: (a, b) => a.commit_count - b.commit_count,
+    },
+    {
+      title: 'Committed Lines of Code',
+      dataIndex: 'loc',
+      key: 'loc',
+      sorter: (a, b) => a.loc - b.loc,
+    },
   ];
 
   constructor(props: Props) {
@@ -149,7 +203,7 @@ export class ContributorsModal extends React.Component<ContributorsModalProps, a
       <Modal
         closable={true}
         title={`${this.props.company} Contributors on ${this.props.project}`}
-        visible={this.props.visible}
+        open={this.props.open}
         onOk={this.props.onOk}
         onCancel={this.props.onCancel}
         width={'100%'}

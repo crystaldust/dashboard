@@ -1,0 +1,6 @@
+1. contributor count in company table and contributor table are not same
+2. add 'root folder' for dir tree to display 'all dirs' data(just like the dir is not selected)
+3. company list sorted by commits or contributors
+4. top N selection
+5. latest activity/added lines/removed lines
+6. commit message
