@@ -152,6 +152,20 @@ class ContributorsTable<Props extends ContributorsDataProps> extends React.Compo
       },
     },
     {
+      title: 'GitHub Login',
+      dataIndex: 'github_login',
+      key: 'github_login',
+      render: (text) => {
+        return text ? (
+          <a href={`https://github.com/${text}`} target="_blank" rel="noreferrer">
+            {text}
+          </a>
+        ) : (
+          'Unknown'
+        );
+      },
+    },
+    {
       title: 'Last Active',
       dataIndex: 'last_active_time',
       key: 'last_active_time',
@@ -161,15 +175,15 @@ class ContributorsTable<Props extends ContributorsDataProps> extends React.Compo
     },
     {
       title: 'Total Insertions',
-      dataIndex: 'insertions',
-      key: 'insertions',
-      sorter: (a, b) => a.insertions - b.insertions,
+      dataIndex: 'total_insertions',
+      key: 'total_insertions',
+      sorter: (a, b) => a.total_insertions - b.total_insertions,
     },
     {
       title: 'Total Deletions',
-      dataIndex: 'deletions',
-      key: 'deletions',
-      sorter: (a, b) => a.deletions - b.deletions,
+      dataIndex: 'total_deletions',
+      key: 'total_deletions',
+      sorter: (a, b) => a.total_deletions - b.total_deletions,
     },
     {
       title: 'Total Commits',
@@ -179,9 +193,9 @@ class ContributorsTable<Props extends ContributorsDataProps> extends React.Compo
     },
     {
       title: 'Committed Lines of Code',
-      dataIndex: 'loc',
-      key: 'loc',
-      sorter: (a, b) => a.loc - b.loc,
+      dataIndex: 'total_commit_lines',
+      key: 'total_commit_lines',
+      sorter: (a, b) => a.total_commit_lines - b.total_commit_lines,
     },
   ];
 

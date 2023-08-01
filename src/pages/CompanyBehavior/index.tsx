@@ -59,6 +59,7 @@ export default class CompanyBehavior extends React.Component<any, any> {
     runSql(companyListSql(owner, repo, dateRange, dir, order)).then((result) => {
       const companyList = result.data.map((item) => {
         return {
+          key: `company__${item[2]}`,
           company: item[2],
           contributor_count: item[3],
           commit_count: item[4],

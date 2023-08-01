@@ -168,6 +168,7 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
           runSql(commitsSql(owner, repo, data.company, dateRange, dir)).then((result) => {
             const commits = result.data.map((item) => {
               return {
+                key: `commit__${item[2]}`,
                 authorName: item[6],
                 authorEmail: item[4],
                 authoredDate: item[5],
@@ -196,26 +197,18 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
         onClick: () => {
           runSql(contributorsSql(owner, repo, data.company, dateRange, dir)).then((result) => {
             const contributors = result.data.map((item) => {
-              const name_s = item[2];
-              let name = name_s;
-              const ret = {
-                last_active_time: moment(item[3]).format('YYYY-MM-DD HH:mm:ss'),
-                insertions: item[4],
-                deletions: item[5],
-                loc: item[6],
-                commit_count: item[7],
-              };
+              const contributorInfo = {};
+              result.columns.forEach((col: string[], index: number) => {
+                contributorInfo[col[0]] = item[index];
+              });
 
-              try {
-                name = JSON.parse(name_s.replaceAll("'", '"'))[0];
-                ret.github = true;
-              } catch (e) {
-                console.log(e, name_s);
-              }
-              ret.name = name;
+              contributorInfo.name = contributorInfo.names[0] || 'Unknown';
+              contributorInfo.github_login = contributorInfo.contributor[0] || undefined;
+              contributorInfo.key = `contributor__${contributorInfo.name}__${contributorInfo.github_login}`;
 
-              return ret;
+              return contributorInfo;
             });
+
             this.setState({
               showCommits: false,
               showContributors: true,
