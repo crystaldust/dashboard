@@ -7,11 +7,7 @@ import { CompaniesTable, ProjectSelector } from '@/pages/CompanyBehavior/compone
 import { pathsToTree } from '@/pages/ContribDistribution/DataProcessors';
 import SecondaryDirSelector from '@/pages/ContribDistribution/SecondaryDirSelector';
 import { secondaryDirSql } from '@/pages/ContribDistribution/DataSQLs';
-import moment from 'moment';
 
-import { Divider, Tree } from 'antd';
-
-const { DirectoryTree } = Tree;
 const { RangePicker } = DatePicker;
 
 export default class CompanyBehavior extends React.Component<any, any> {
@@ -65,16 +61,23 @@ export default class CompanyBehavior extends React.Component<any, any> {
     });
     runSql(companyListSql(owner, repo, dateRange, dir, order)).then((result) => {
       const companyList = result.data.map((item) => {
-        return {
-          key: `company__${item[2]}`,
-          company: item[2],
-          contributor_count: item[3],
-          commit_count: item[4],
-          last_active_time: moment(item[5]).format('YYYY-MM-DD HH:mm:ss'),
-          insertions: item[6],
-          deletions: item[7],
-          loc: item[8],
-        };
+        const companyInfo = {};
+        result.columns.forEach((col: string[], index: number) => {
+          companyInfo[col[0]] = item[index];
+        });
+        companyInfo.key = `company__${companyInfo.author_company}`;
+        return companyInfo;
+
+        // return {
+        //   key: `company__${item[2]}`,
+        //   company: item[2],
+        //   contributor_count: item[3],
+        //   commit_count: item[4],
+        //   last_active_time: moment(item[5]).format('YYYY-MM-DD HH:mm:ss'),
+        //   insertions: item[6],
+        //   deletions: item[7],
+        //   loc: item[8],
+        // };
       });
       this.setState({
         companies: companyList,

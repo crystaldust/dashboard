@@ -1,9 +1,8 @@
 import React from 'react';
-import { Modal, Table } from 'antd';
-import { Switch, Typography } from 'antd';
+import { Modal, Table, Typography } from 'antd';
 import moment from 'moment';
 
-const { Paragraph, Text } = Typography;
+const { Text } = Typography;
 
 export interface CommitsDataProps {
   commits: object[];
@@ -15,15 +14,18 @@ interface CommitsModalProps extends CommitsDataProps {
 
   company: string;
   project: string;
+  owner: string;
+  repo: string;
 }
 
 class CommitsTable<Props extends CommitsDataProps> extends React.Component<Props, any> {
   static columns = [
     {
       title: 'Author Name',
-      dataIndex: 'authorName',
-      key: 'authorName',
+      dataIndex: 'author_name',
+      key: 'author_name',
       render: (text, record) => {
+        // TODO get login from SQL
         if (!!record.github_login) {
           return (
             <a href={`https://github.com/${record.github_login}`} target="_blank" rel="noreferrer">
@@ -37,13 +39,13 @@ class CommitsTable<Props extends CommitsDataProps> extends React.Component<Props
     },
     {
       title: 'Author Email',
-      dataIndex: 'authorEmail',
-      key: 'authorEmail',
+      dataIndex: 'author_email',
+      key: 'author_email',
     },
     {
       title: 'Authored Date',
-      dataIndex: 'authoredDate',
-      key: 'authoredDate',
+      dataIndex: 'authored_date',
+      key: 'authored_date',
     },
     // {
     //   title: 'Timezone',
@@ -52,12 +54,13 @@ class CommitsTable<Props extends CommitsDataProps> extends React.Component<Props
     // },
     {
       title: 'SHA',
-      dataIndex: 'sha',
-      key: 'sha',
-      render: (text) => {
+      dataIndex: 'hexsha',
+      key: 'hexsha',
+      render: (text, record) => {
+        const { search_key__owner: owner, search_key__repo: repo } = record;
         return (
           <a
-            href={`https://github.com/pytorch/pytorch/commit/${text}`}
+            href={`https://github.com/${owner}/${repo}/commit/${text}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -78,26 +81,7 @@ class CommitsTable<Props extends CommitsDataProps> extends React.Component<Props
         );
       },
     },
-    //                 authorName: item[6],
-    //                 authorEmail: item[4],
-    //                 authoredDate: item[5],
-    //                 authorTZ: item[6],
-    //                 sha: item[2],
-    //                 message: item[3],
-
-    // {
-    //   title: 'Dirs',
-    //   dataIndex: 'dirs',
-    //   key: 'dirs',
-    // },
   ];
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      commits: props.commits || [],
-    };
-  }
 
   render() {
     return <Table dataSource={this.props.commits} columns={CommitsTable.columns} />;
@@ -109,14 +93,18 @@ export class CommitsModal extends React.Component<CommitsModalProps, any> {
     return (
       <Modal
         closable={true}
-        title={`${this.props.company} Commits on ${this.props.project}`}
+        title={`${this.props.company} Commits on ${this.props.owner}/${this.props.repo}`}
         open={this.props.open}
         onOk={this.props.onOk}
         onCancel={this.props.onCancel}
         width={'100%'}
         footer={null}
       >
-        <CommitsTable commits={this.props.commits} />
+        <CommitsTable
+          commits={this.props.commits}
+          owner={this.props.owner}
+          repo={this.props.repo}
+        />
       </Modal>
     );
   }
@@ -132,6 +120,8 @@ interface ContributorsModalProps extends ContributorsDataProps {
 
   company: string;
   project: string;
+  owner: string;
+  repo: string;
 }
 
 class ContributorsTable<Props extends ContributorsDataProps> extends React.Component<Props, any> {
@@ -216,7 +206,7 @@ export class ContributorsModal extends React.Component<ContributorsModalProps, a
     return (
       <Modal
         closable={true}
-        title={`${this.props.company} Contributors on ${this.props.project}`}
+        title={`${this.props.company} Contributors on ${this.props.owner}/${this.props.repo}`}
         open={this.props.open}
         onOk={this.props.onOk}
         onCancel={this.props.onCancel}
