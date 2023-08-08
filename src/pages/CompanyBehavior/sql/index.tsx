@@ -221,3 +221,21 @@ group by search_key__owner, search_key__repo, dir
 order by dir
   `;
 }
+
+export function commitsCountSql(owner: string, repo: string, dateRange = undefined, dir = '') {
+  const dateRangeClause = dateRange
+    ? `and toYYYYMM(authored_date) <= ${dateRange.to}
+     and toYYYYMM(authored_date) >= ${dateRange.from}`
+    : '';
+  const dirClause = dir ? `and dir = '${dir}/'` : '';
+
+  return `
+with '${owner}' as owner, '${repo}' as repo
+select count(distinct hexsha)
+from dir_label_new_test
+            where search_key__owner = owner
+              and search_key__repo = repo
+              ${dateRangeClause}
+              ${dirClause}
+  `;
+}
