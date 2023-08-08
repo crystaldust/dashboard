@@ -46,6 +46,9 @@ class CommitsTable<Props extends CommitsDataProps> extends React.Component<Props
       title: 'Authored Date',
       dataIndex: 'authored_date',
       key: 'authored_date',
+      sorter: (a, b) => {
+        return moment(a.authored_date).unix() - moment(b.authored_date).unix();
+      },
     },
     // {
     //   title: 'Timezone',

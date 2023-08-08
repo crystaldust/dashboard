@@ -183,7 +183,7 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
               loadingCompanies: false,
               showCommits: true,
               showContributors: false,
-              company: data.company,
+              company: data.author_company,
               commits,
             });
             if (this.props.hasOwnProperty('setLoadingState')) {
@@ -217,11 +217,10 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
 
                 return contributorInfo;
               });
-
               this.setState({
                 showCommits: false,
                 showContributors: true,
-                company: data.company,
+                company: data.author_company,
                 contributors,
               });
               if (this.props.hasOwnProperty('setLoadingState')) {
