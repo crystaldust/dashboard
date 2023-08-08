@@ -2,7 +2,7 @@ import { Col, DatePicker, Row } from 'antd';
 import React from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import { runSql } from '@/services/clickhouse';
-import { companyListSql } from './sql';
+import { commitsCountSql, companyListSql } from './sql';
 import { CompaniesTable, ProjectSelector } from '@/pages/CompanyBehavior/components';
 import { pathsToTree } from '@/pages/ContribDistribution/DataProcessors';
 import SecondaryDirSelector from '@/pages/ContribDistribution/SecondaryDirSelector';
@@ -59,29 +59,52 @@ export default class CompanyBehavior extends React.Component<any, any> {
     this.setState({
       loading: true,
     });
-    runSql(companyListSql(owner, repo, dateRange, dir, order)).then((result) => {
-      const companyList = result.data.map((item) => {
-        const companyInfo = {};
-        result.columns.forEach((col: string[], index: number) => {
-          companyInfo[col[0]] = item[index];
-        });
-        companyInfo.key = `company__${companyInfo.author_company}`;
-        return companyInfo;
 
-        // return {
-        //   key: `company__${item[2]}`,
-        //   company: item[2],
-        //   contributor_count: item[3],
-        //   commit_count: item[4],
-        //   last_active_time: moment(item[5]).format('YYYY-MM-DD HH:mm:ss'),
-        //   insertions: item[6],
-        //   deletions: item[7],
-        //   loc: item[8],
-        // };
+    function companyListPromise() {
+      return runSql(companyListSql(owner, repo, dateRange, dir, order)).then((result) => {
+        const companyList = result.data.map((item) => {
+          const companyInfo = {};
+          result.columns.forEach((col: string[], index: number) => {
+            companyInfo[col[0]] = item[index];
+          });
+          companyInfo.key = `company__${companyInfo.author_company}`;
+          return companyInfo;
+        });
+
+        return companyList;
       });
+    }
+
+    function commitCountPromise() {
+      return runSql(commitsCountSql(owner, repo, dateRange, dir)).then((result) => {
+        return result.data[0][0];
+      });
+    }
+
+    Promise.all([companyListPromise(), commitCountPromise()]).then((result) => {
+      const companyList = result[0];
+      const commitsCount = result[1];
+      const totalCount = companyList.reduce((result, concurrent) => {
+        return result + concurrent.commit_count;
+      }, 0);
+
+      let coverage = ((totalCount / commitsCount) * 100).toFixed(2);
+      let coverageIntro = `The statistics is computed by ${coverage}% of total commits(${totalCount}/${commitsCount})`;
+      if (dir) {
+        coverageIntro += `on ${dir}/`;
+      }
+      if (dateRange) {
+        coverageIntro += `, from ${dateRange.from} to ${dateRange.to}`;
+      }
+
+      if (!commitsCount || !totalCount) {
+        coverageIntro = ''; // If there are no commits, the intro text is not displayed either
+      }
+
       this.setState({
         companies: companyList,
         loading: false,
+        coverageIntro,
       });
     });
   }
@@ -152,6 +175,7 @@ export default class CompanyBehavior extends React.Component<any, any> {
           </Col>
 
           <Col span={18}>
+            {this.state.coverageIntro}
             {/*{!!this.state.companies && (*/}
             <CompaniesTable
               companies={this.state.companies}
