@@ -5,13 +5,16 @@ import { commitsSql, contributorsSql, UNIQ_OWNER_REPOS_SQL } from '@/pages/Compa
 import { CommitsModal, ContributorsModal } from '@/pages/CompanyBehavior/components/modals';
 import moment from 'moment';
 
-export interface CompaniesTableProps {
-  companies: object[];
+export interface ContribTableProps {
   owner: string;
   repo: string;
   setLoadingState: (loading: boolean) => void;
   showCommits: (company: string) => void;
   showContributors: (company: string) => void;
+}
+
+export interface CompaniesTableProps extends ContribTableProps {
+  companies: object[];
 }
 
 export interface CompanyContribSummaryProps {
@@ -82,13 +85,8 @@ export class ProjectSelector extends React.Component<any, any> {
   }
 }
 
-export class CompaniesTable<Props extends CompaniesTableProps> extends React.Component<Props, any> {
+export class ContribTable<Props extends ContribTableProps> extends React.Component<Props, any> {
   static columns = [
-    {
-      title: 'Company',
-      dataIndex: 'author_company',
-      key: 'author_company',
-    },
     {
       title: 'Commits',
       dataIndex: 'commit_count',
@@ -161,78 +159,101 @@ export class CompaniesTable<Props extends CompaniesTableProps> extends React.Com
     this.contributorsModalCb = this.contributorsModalCb.bind(this);
   }
 
-  commitsModalCb(data) {
-    {
-      const { owner, repo, dateRange, dir } = this.props;
-      return {
-        onClick: () => {
-          if (this.props.hasOwnProperty('setLoadingState')) {
-            this.props.setLoadingState(true);
-          }
-          runSql(commitsSql(owner, repo, data.author_company, dateRange, dir)).then((result) => {
-            const commits = result.data.map((item) => {
-              const commitInfo = {};
-              result.columns.forEach((col: string[], index: number) => {
-                commitInfo[col[0]] = item[index];
-              });
-              commitInfo.key = `commit__${commitInfo.hexsha}`;
-              return commitInfo;
-            });
+  getCommits(owner, repo, author_company, dateRange, dir): Promise<any>;
 
-            this.setState({
-              loadingCompanies: false,
-              showCommits: true,
-              showContributors: false,
-              company: data.author_company,
-              commits,
+  commitsModalCb(data) {
+    const { owner, repo, dateRange, dir } = this.props;
+    return {
+      onClick: () => {
+        if (this.props.hasOwnProperty('setLoadingState')) {
+          this.props.setLoadingState(true);
+        }
+
+        this.getCommits(owner, repo, data.author_company, dateRange, dir).then((result) => {
+          const commits = result.data.map((item) => {
+            const commitInfo = {};
+            result.columns.forEach((col: string[], index: number) => {
+              commitInfo[col[0]] = item[index];
             });
-            if (this.props.hasOwnProperty('setLoadingState')) {
-              this.props.setLoadingState(false);
-            }
+            commitInfo.key = `commit__${commitInfo.hexsha}`;
+            return commitInfo;
           });
-        },
-      };
-    }
+
+          this.setState({
+            loadingCompanies: false,
+            showCommits: true,
+            showContributors: false,
+            company: data.author_company,
+            commits,
+          });
+          if (this.props.hasOwnProperty('setLoadingState')) {
+            this.props.setLoadingState(false);
+          }
+        });
+      },
+    };
   }
+
+  // getCommits(owner, repo, author_company, dateRange, dir): Promise<any>;
+  getContributors(owner, repo, author_company, dateRange, dir): Promise<any>;
 
   contributorsModalCb(data) {
-    {
-      const { owner, repo, dateRange, dir } = this.props;
-      return {
-        onClick: () => {
+    const { owner, repo, dateRange, dir } = this.props;
+    return {
+      onClick: () => {
+        if (this.props.hasOwnProperty('setLoadingState')) {
+          this.props.setLoadingState(true);
+        }
+        this.getContributors(owner, repo, data.author_company, dateRange, dir).then((result) => {
+          const contributors = result.data.map((item) => {
+            const contributorInfo = {};
+            result.columns.forEach((col: string[], index: number) => {
+              contributorInfo[col[0]] = item[index];
+            });
+
+            contributorInfo.name = contributorInfo.names[0] || 'Unknown';
+            contributorInfo.github_login = contributorInfo.contributor[0] || undefined;
+            contributorInfo.key = `contributor__${contributorInfo.name}__${contributorInfo.github_login}`;
+
+            return contributorInfo;
+          });
+          this.setState({
+            showCommits: false,
+            showContributors: true,
+            company: data.author_company,
+            contributors,
+          });
           if (this.props.hasOwnProperty('setLoadingState')) {
-            this.props.setLoadingState(true);
+            this.props.setLoadingState(false);
           }
-          runSql(contributorsSql(owner, repo, data.author_company, dateRange, dir)).then(
-            (result) => {
-              const contributors = result.data.map((item) => {
-                const contributorInfo = {};
-                result.columns.forEach((col: string[], index: number) => {
-                  contributorInfo[col[0]] = item[index];
-                });
-
-                contributorInfo.name = contributorInfo.names[0] || 'Unknown';
-                contributorInfo.github_login = contributorInfo.contributor[0] || undefined;
-                contributorInfo.key = `contributor__${contributorInfo.name}__${contributorInfo.github_login}`;
-
-                return contributorInfo;
-              });
-              this.setState({
-                showCommits: false,
-                showContributors: true,
-                company: data.author_company,
-                contributors,
-              });
-              if (this.props.hasOwnProperty('setLoadingState')) {
-                this.props.setLoadingState(false);
-              }
-            },
-          );
-        },
-      };
-    }
+        });
+      },
+    };
   }
 
+  genCols(): void {}
+}
+
+export class CompaniesTable<Props extends CompaniesTableProps> extends ContribTable<Props, any> {
+  static columns = [
+    {
+      title: 'Company',
+      dataIndex: 'author_company',
+      key: 'author_company',
+    },
+  ].concat(ContribTable.columns);
+
+  getCommits(owner, repo, author_company, dateRange, dir): Promise<any> {
+    return runSql(commitsSql(owner, repo, author_company, dateRange, dir));
+  }
+
+  getContributors(owner, repo, author_company, dateRange, dir): Promise<any> {
+    return runSql(contributorsSql(owner, repo, data.author_company, dateRange, dir));
+  }
+
+  // TODO Currently the genCols method relies on explicit class static 'columns'
+  //  If TypeScript provide a way to access "current instance's class type" and refer its static
+  //  properties, then genCols can be purely abstracted into the ContribTable class
   genCols() {
     return CompaniesTable.columns.map((col) => {
       // TODO Implement onCells for different modal
