@@ -1,20 +1,18 @@
-import {Table} from "antd";
-import React,{useState,useEffect} from 'react';
-import {request} from "@@/plugin-request/request";
-
+import { Table } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { request } from '@@/plugin-request/request';
+import { getCentrialityScore } from '@/services/influence_metrics/contribution';
 
 const Index = (props) => {
   // row['repo'], row['page_rank'], row['betweenness_centrality'], row['closeness_centrality'], row['total_score']
-  const {api_path} = props
+  const { api_path } = props;
 
-  const [dataSource,setData] = useState([]);
-  useEffect(()=>{
-    request('http://127.0.0.1:5000'+'/metric/get_centrality_score').then(
-      (json)=>{
-        setData(json)
-      }
-    )
-  },[])
+  const [dataSource, setData] = useState([]);
+  useEffect(() => {
+    getCentrialityScore().then((json) => {
+      setData(json);
+    });
+  }, []);
   const columns = [
     {
       title: 'repo',
@@ -51,6 +49,3 @@ const Index = (props) => {
 };
 
 export default Index;
-
-
-

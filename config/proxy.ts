@@ -13,6 +13,12 @@ if (process.env.DEV_SERVER) {
   DEV_SERVER = process.env.DEV_SERVER;
 }
 
+let INFLUNECE_METRIC_SERVER = 'http://127.0.0.1:5000';
+// Keep in mind that the proxy's url should take IP but not 'localhost'
+if (process.env.INFLUNECE_METRIC_SERVER) {
+  INFLUNECE_METRIC_SERVER = process.env.INFLUNECE_METRIC_SERVER;
+}
+
 console.log('DEV_SERVER:', DEV_SERVER);
 
 export default {
@@ -29,6 +35,11 @@ export default {
       target: DEV_SERVER,
       changeOrign: true,
       pathRewrite: { '^/api': '' },
+    },
+    '/influence_metric': {
+      target: INFLUNECE_METRIC_SERVER,
+      changeOrign: true,
+      pathRewrite: { '^/influence_metric': '/api' },
     },
   },
   test: {

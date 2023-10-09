@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import G6 from '@antv/g6';
+import { getNetworkBaseGraph } from '@/services/influence_metrics/contribution';
+
 const Index = () => {
-  const containerRef = useRef()
+  const containerRef = useRef();
 
-
-
-  useEffect(()=>{
-    const container = containerRef.current
+  useEffect(() => {
+    const container = containerRef.current;
     const width = container.scrollWidth;
     const height = container.scrollHeight || 500;
     const graph = new G6.Graph({
@@ -43,7 +43,8 @@ const Index = () => {
       },
     });
 
-    fetch('http://127.0.0.1:5000/metric/get_basic_graph')
+    // fetch('http://127.0.0.1:5000/metric/get_basic_graph')
+    getNetworkBaseGraph()
       .then((res) => res.json())
       .then((data) => {
         const nodes = data.nodes;
@@ -72,15 +73,13 @@ const Index = () => {
           e.item.get('model').fy = null;
         });
       });
-  },[])
-
-
+  }, []);
 
   window.onresize = () => {
     if (!graph || graph.get('destroyed')) return;
     if (!container || !container.scrollWidth || !container.scrollHeight) return;
     graph.changeSize(container.scrollWidth, container.scrollHeight);
-  }
+  };
 
   function refreshDragedNodePosition(e) {
     const model = e.item.get('model');
@@ -88,9 +87,7 @@ const Index = () => {
     model.fy = e.y;
   }
 
-  return (
-    <div ref={containerRef} style={{width:'100%',height:'1000px'}} />
-  );
+  return <div ref={containerRef} style={{ width: '100%', height: '1000px' }} />;
 };
 
 export default Index;

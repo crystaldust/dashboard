@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Bar } from '@ant-design/plots';
-import {request} from "@@/plugin-request/request";
+import { request } from '@@/plugin-request/request';
+import { getTotalFixIntensity } from '@/services/influence_metrics/contribution';
 
 const DemoBar = (props) => {
   const [data, setData] = useState([]);
-  function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
 
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 
   useEffect(() => {
     asyncFetch();
   }, []);
-  const {api,metrics} = props
+  const { api, metrics } = props;
 
   const asyncFetch = () => {
-       request('http://127.0.0.1:5000'+'/metric/get_total_fix_intensity')
+    getTotalFixIntensity()
       .then((json) => setData(json))
       .catch((error) => {
         console.log('fetch data failed', error);
@@ -26,7 +27,7 @@ const DemoBar = (props) => {
     data,
     yField: 'email',
     xField: metrics,
-    width:50,
+    width: 50,
     yAxis: {
       label: {
         autoRotate: false,
@@ -41,4 +42,4 @@ const DemoBar = (props) => {
 };
 
 // ReactDOM.render(<DemoBar />, document.getElementById('container'));
-export default DemoBar
+export default DemoBar;
