@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import G6 from '@antv/g6';
 import { getNetworkBaseGraph } from '@/services/influence_metrics/contribution';
 
-const Index = () => {
+const BaseGraph = () => {
   const containerRef = useRef();
 
   useEffect(() => {
@@ -44,42 +44,40 @@ const Index = () => {
     });
 
     // fetch('http://127.0.0.1:5000/metric/get_basic_graph')
-    getNetworkBaseGraph()
-      .then((res) => res.json())
-      .then((data) => {
-        const nodes = data.nodes;
-        // randomize the node size
-        // nodes.forEach((node) => {
-        //   node.size = Math.random() * 30 + 5;
-        // });
-        graph.data({
-          nodes,
-          edges: data.edges.map(function (edge, i) {
-            edge.id = 'edge' + i;
-            return Object.assign({}, edge);
-          }),
-        });
-        graph.render();
-
-        graph.on('node:dragstart', function (e) {
-          graph.layout();
-          refreshDragedNodePosition(e);
-        });
-        graph.on('node:drag', function (e) {
-          refreshDragedNodePosition(e);
-        });
-        graph.on('node:dragend', function (e) {
-          e.item.get('model').fx = null;
-          e.item.get('model').fy = null;
-        });
+    getNetworkBaseGraph().then((data) => {
+      const nodes = data.nodes;
+      // randomize the node size
+      // nodes.forEach((node) => {
+      //   node.size = Math.random() * 30 + 5;
+      // });
+      graph.data({
+        nodes,
+        edges: data.edges.map(function (edge, i) {
+          edge.id = 'edge' + i;
+          return Object.assign({}, edge);
+        }),
       });
+      graph.render();
+
+      graph.on('node:dragstart', function (e) {
+        graph.layout();
+        refreshDragedNodePosition(e);
+      });
+      graph.on('node:drag', function (e) {
+        refreshDragedNodePosition(e);
+      });
+      graph.on('node:dragend', function (e) {
+        e.item.get('model').fx = null;
+        e.item.get('model').fy = null;
+      });
+    });
   }, []);
 
-  window.onresize = () => {
-    if (!graph || graph.get('destroyed')) return;
-    if (!container || !container.scrollWidth || !container.scrollHeight) return;
-    graph.changeSize(container.scrollWidth, container.scrollHeight);
-  };
+  // window.onresize = () => {
+  //   if (!graph || graph.get('destroyed')) return;
+  //   if (!container || !container.scrollWidth || !container.scrollHeight) return;
+  //   graph.changeSize(container.scrollWidth, container.scrollHeight);
+  // };
 
   function refreshDragedNodePosition(e) {
     const model = e.item.get('model');
@@ -90,4 +88,4 @@ const Index = () => {
   return <div ref={containerRef} style={{ width: '100%', height: '1000px' }} />;
 };
 
-export default Index;
+export default BaseGraph;

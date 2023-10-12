@@ -27,7 +27,6 @@ const Index = (props) => {
 
     // fetch('http://127.0.0.1:5000'+'/metric/get_basic_graph')
     getNetworkBaseGraph()
-      .then((res) => res.json())
       .then((data) => {
         const nodes = data.nodes;
         // randomize the node size

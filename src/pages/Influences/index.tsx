@@ -1,6 +1,11 @@
 import React from 'react';
 import { Col, Row } from 'antd';
-import { CommunityCard, CommunityWindow } from './components';
+import { CommunityCard } from './components';
+import DemoBar from '@/components/Metrics/BarScollerBar';
+import BaseGraph from '@/components/NetworkGraph/BaseGraph';
+import BetweennessCentality from "@/components/NetworkGraph/BetweennessCentality";
+import CentralityScore from "@/components/Tables/CentralityScore";
+import MaximumIntensity from "@/components/Tables/MaximumIntensity";
 
 // TODO Delete the data simulation code here:
 const getCommunitys = () => {
@@ -71,16 +76,31 @@ export default class Influences extends React.Component<any, any> {
 
   render() {
     return (
-      <>
-        <Row gutter={18}>{this.communityCards}</Row>
-        <CommunityWindow
-          communityInfo={this.state.communityInfo}
-          visible={this.state.communityModalOpen}
-          onCancel={this.communityCardClose}
-        >
-          <p>some contents...</p>
-        </CommunityWindow>
-      </>
+      <Col>
+        <Row>
+          <MaximumIntensity/>
+        </Row>
+        {/*<BetweennessCentality />*/}
+        {/*<Row>*/}
+        {/*  <DemoBar />;*/}
+        {/*</Row>*/}
+        {/*<Row>*/}
+        {/*  <BaseGraph />*/}
+        {/*</Row>*/}
+      </Col>
     );
+
+    // return (
+    //   <>
+    //     <Row gutter={18}>{this.communityCards}</Row>
+    //     <CommunityWindow
+    //       communityInfo={this.state.communityInfo}
+    //       visible={this.state.communityModalOpen}
+    //       onCancel={this.communityCardClose}
+    //     >
+    //       <p>some contents...</p>
+    //     </CommunityWindow>
+    //   </>
+    // );
   }
 }

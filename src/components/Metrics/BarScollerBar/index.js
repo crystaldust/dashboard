@@ -18,7 +18,10 @@ const DemoBar = (props) => {
 
   const asyncFetch = () => {
     getTotalFixIntensity()
-      .then((json) => setData(json))
+      .then((json) => {
+        setData(json);
+        console.log(json);
+      })
       .catch((error) => {
         console.log('fetch data failed', error);
       });

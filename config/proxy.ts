@@ -13,13 +13,14 @@ if (process.env.DEV_SERVER) {
   DEV_SERVER = process.env.DEV_SERVER;
 }
 
-let INFLUNECE_METRIC_SERVER = 'http://127.0.0.1:5000';
+let INFLUENCE_METRIC_SERVER = 'http://127.0.0.1:5000';
 // Keep in mind that the proxy's url should take IP but not 'localhost'
-if (process.env.INFLUNECE_METRIC_SERVER) {
-  INFLUNECE_METRIC_SERVER = process.env.INFLUNECE_METRIC_SERVER;
+if (process.env.INFLUENCE_METRIC_SERVER) {
+  INFLUENCE_METRIC_SERVER = process.env.INFLUENCE_METRIC_SERVER;
 }
 
 console.log('DEV_SERVER:', DEV_SERVER);
+console.log('INFLUNECE_METRIC_SERVER:', INFLUENCE_METRIC_SERVER);
 
 export default {
   dev: {
@@ -31,15 +32,17 @@ export default {
     //   // 依赖 origin 的功能可能需要这个，比如 cookie
     //   changeOrigin: true,
     // },
+
+    '/influence_metric': {
+      target: INFLUENCE_METRIC_SERVER,
+      changeOrign: true,
+      pathRewrite: { '^/influence_metric': '/api' },
+    },
+
     '/api': {
       target: DEV_SERVER,
       changeOrign: true,
       pathRewrite: { '^/api': '' },
-    },
-    '/influence_metric': {
-      target: INFLUNECE_METRIC_SERVER,
-      changeOrign: true,
-      pathRewrite: { '^/influence_metric': '/api' },
     },
   },
   test: {
