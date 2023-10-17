@@ -1,11 +1,10 @@
 import React from 'react';
 import { Col, Row } from 'antd';
 import { CommunityCard } from './components';
-import DemoBar from '@/components/Metrics/BarScollerBar';
-import BaseGraph from '@/components/NetworkGraph/BaseGraph';
-import BetweennessCentality from "@/components/NetworkGraph/BetweennessCentality";
-import CentralityScore from "@/components/Tables/CentralityScore";
-import MaximumIntensity from "@/components/Tables/MaximumIntensity";
+import {
+  CentralityScoreTable,
+  MaximumIntensityTable,
+} from '@/components/InfluenceMetrics/Contribution';
 
 // TODO Delete the data simulation code here:
 const getCommunitys = () => {
@@ -78,8 +77,15 @@ export default class Influences extends React.Component<any, any> {
     return (
       <Col>
         <Row>
-          <MaximumIntensity/>
+          {/*<TotalFixIntensityBar />*/}
+          {/*<BasicContributionGraph />*/}
+          {/*<BetweennessCentrality />*/}
+          {/*<PageRank />*/}
+
+          {/*<CentralityScoreTable />*/}
+          <MaximumIntensityTable />
         </Row>
+        
         {/*<BetweennessCentality />*/}
         {/*<Row>*/}
         {/*  <DemoBar />;*/}
