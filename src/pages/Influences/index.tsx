@@ -2,8 +2,12 @@ import React from 'react';
 import { Col, Row } from 'antd';
 import { CommunityCard } from './components';
 import {
+  BasicContributionGraph,
+  BetweennessCentrality,
   CentralityScoreTable,
   MaximumIntensityTable,
+  PageRank,
+  TotalFixIntensityBar,
 } from '@/components/InfluenceMetrics/Contribution';
 
 // TODO Delete the data simulation code here:
@@ -74,25 +78,40 @@ export default class Influences extends React.Component<any, any> {
   }
 
   render() {
+    // All contribution influence metric components for now
+
+    // <TotalFixIntensityBar />  /*works*/
+    // <BasicContributionGraph /> /*works*/
+    // <BetweennessCentrality /> /*works*/
+    // <PageRank /> /*works*/
+    //
+    // <CentralityScoreTable /> /*not working*/
+    // <MaximumIntensityTable /> /*works*/
+
+    // <ClosenessCentrality /> /*missing*/
+
     return (
       <Col>
-        <Row>
-          {/*<TotalFixIntensityBar />*/}
-          {/*<BasicContributionGraph />*/}
-          {/*<BetweennessCentrality />*/}
-          {/*<PageRank />*/}
+        <Row gutter={18}>
+          <Col span={10}>
+            <BasicContributionGraph />
+          </Col>
+          <Col span={10}>
+            <BetweennessCentrality />
+          </Col>
+        </Row>
+        <Row gutter={18}>
+          <Col span={8}>
+            <TotalFixIntensityBar />
+          </Col>
+          <Col span={16}>
+            <PageRank />
+          </Col>
+        </Row>
 
-          {/*<CentralityScoreTable />*/}
+        <Row>
           <MaximumIntensityTable />
         </Row>
-        
-        {/*<BetweennessCentality />*/}
-        {/*<Row>*/}
-        {/*  <DemoBar />;*/}
-        {/*</Row>*/}
-        {/*<Row>*/}
-        {/*  <BaseGraph />*/}
-        {/*</Row>*/}
       </Col>
     );
 
