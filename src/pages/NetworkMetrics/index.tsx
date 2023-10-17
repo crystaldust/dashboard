@@ -3,7 +3,8 @@ import { Col, Row, Table, Select, Space, Statistic, Divider } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Link } from 'umi';
 import { runSql } from '@/services/clickhouse';
-import { runmySql } from '@/pages/NetworkMetrics/Mysql';
+import { getPRNetworkMetrics } from '@/services/influence_metrics/pr_network';
+// import { runmySql } from '@/pages/NetworkMetrics/Mysql';
 
 const UNIQ_OWNER_REPO_SQL =
   'SELECT DISTINCT(search_key__owner,search_key__repo) FROM github_issues_timeline ORDER BY (search_key__owner,search_key__repo)';
@@ -94,6 +95,7 @@ export default class Metrics extends React.Component<any, any> {
     this.onOwnerSelect = this.onOwnerSelect.bind(this);
     this.onRepoSelect = this.onRepoSelect.bind(this);
   }
+
   async componentDidMount() {
     const result = await runSql(UNIQ_OWNER_REPO_SQL);
     const ownerRepoMap: object = {};
@@ -110,12 +112,15 @@ export default class Metrics extends React.Component<any, any> {
 
     this.setState({ ownerRepoMap, owners });
   }
+
   ownerRepoSelected(owner, repo) {
     if (this.props.onOwnerRepoSelected) {
       this.props.onOwnerRepoSelected(owner, repo);
     }
   }
+
   onOwnerChange() {}
+
   onOwnerSelect(owner: string /*, option: object*/) {
     const repos = this.state.ownerRepoMap[owner].map((repo) => ({ value: repo }));
     this.setState({ repos, owner: owner });
@@ -125,22 +130,25 @@ export default class Metrics extends React.Component<any, any> {
       this.ownerRepoSelected(owner, defaultRepo);
     }
   }
+
   autoCompleteFilter(inputValue, option) {
     return option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1;
   }
+
   onRepoSelect(repo: string /*, option: object*/) {
     this.setState({ repo: repo });
     // Notify the parent component with parent's callback
     this.ownerRepoSelected(this.state.owner, repo);
-    runmySql('num_nodes', this.state.owner, repo).then((result) => {
+    getPRNetworkMetrics('num_nodes', this.state.owner, repo).then((result) => {
       const num_nodes = result.data;
       this.setState({ num_nodes });
     });
-    runmySql('num_edges', this.state.owner, repo).then((result) => {
+    getPRNetworkMetrics('num_edges', this.state.owner, repo).then((result) => {
       const num_edges = result.data;
       this.setState({ num_edges });
     });
   }
+
   componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<any>) {
     if (prevState.repo != this.state.repo) {
       this.setState({
@@ -171,6 +179,7 @@ export default class Metrics extends React.Component<any, any> {
       });
     }
   }
+
   render() {
     return (
       <PageContainer>

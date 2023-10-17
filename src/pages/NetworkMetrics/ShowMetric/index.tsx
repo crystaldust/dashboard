@@ -2,12 +2,13 @@ import React from 'react';
 import { Col, DatePicker, Divider, Row, Statistic } from 'antd';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Line } from '@ant-design/plots';
-import { runmySql } from '@/pages/NetworkMetrics/Mysql';
 import { RangePickerProps } from 'antd/lib/date-picker';
 import { runSql } from '@/services/clickhouse';
+import { getPRNetworkMetrics } from '@/services/influence_metrics/pr_network';
 
 export default class MetricPage extends React.Component<any, any> {
   chartRef = React.createRef();
+
   constructor(props) {
     super(props);
     const { match } = this.props;
@@ -24,16 +25,17 @@ export default class MetricPage extends React.Component<any, any> {
       metricName: metricName,
       selectedYear: '',
     };
-
-    runmySql(metricName, owner, repo).then((result) => {
+    console.log('LANCE DEBUG', metricName, owner, repo);
+    getPRNetworkMetrics(metricName, owner, repo).then((result) => {
       const metric_overall = result.data;
       this.setState({ metric_overall });
     });
-    runmySql('num_nodes', owner, repo).then((result) => {
+    getPRNetworkMetrics('num_nodes', owner, repo).then((result) => {
       const num_nodes = result.data;
       this.setState({ num_nodes });
     });
   }
+
   onDateChange(val) {
     const promises = [];
 
@@ -42,10 +44,12 @@ export default class MetricPage extends React.Component<any, any> {
       console.log(time);
 
       promises.push(
-        runmySql(this.state.metricName, this.state.owner, this.state.repo, time).then((result) => {
-          // console.log(result.data);
-          return { month: i.toString(), value: result.data };
-        }),
+        getPRNetworkMetrics(this.state.metricName, this.state.owner, this.state.repo, time).then(
+          (result) => {
+            // console.log(result.data);
+            return { month: i.toString(), value: result.data };
+          },
+        ),
       );
     }
 

@@ -1,15 +1,17 @@
 import { request } from 'umi';
 
-export async function runmySql(
+export async function getPRNetworkMetrics(
   metricName: string,
   owner: string,
   repo: string,
   time: string = 'ALL_TIME',
-  jsonObjects = false,
+  // jsonObjects = false,
 ) {
-  // let result_list = [];
+  console.log(
+    ` requesting influence_metric/pr_network_metrics/${metricName}/${owner}/${repo}/${time}`,
+  );
   const result = await request(
-    `http://127.0.0.1:5000/network_metrics/metric/${metricName}/${owner}/${repo}/${time}`,
+    `/influence_metric/pr_network_metrics/${metricName}/${owner}/${repo}/${time}`,
     {
       method: 'GET',
     },
@@ -17,8 +19,7 @@ export async function runmySql(
     console.error('fetcherror: ' + error);
   });
   if (result.length === 0) {
-    return 0;
+    return [];
   }
-  // console.log(result);
   return { data: result[0][metricName] };
 }
