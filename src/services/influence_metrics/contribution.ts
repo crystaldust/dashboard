@@ -1,4 +1,4 @@
-import {request} from '@@/plugin-request/request';
+import { request } from '@@/plugin-request/request';
 
 export async function getTotalFixIntensity() {
   return await request('/influence_metric/centrality_score/total_fix_intensity', {
@@ -22,7 +22,7 @@ export async function getPageRanking(topN = 10) {
 }
 
 export async function getCentrialityScore() {
-  return await request('/influence_metric/get_centrality_score', {
+  return await request('/influence_metric/centrality_score', {
     method: 'GET',
   });
 }
